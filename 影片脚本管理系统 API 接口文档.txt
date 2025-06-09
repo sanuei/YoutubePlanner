@@ -1,0 +1,328 @@
+### 接口文档：视频脚本管理系统
+
+---
+
+#### **1. 认证模块**
+##### 1.1 用户注册
+- **URL**  
+  `/api/auth/register`
+- **Method**  
+  `POST`
+- **Request Body**  
+  ```json
+  {
+    "username": "用户名（必填，唯一）",
+    "password": "密码（必填，6-20位）",
+    "email": "邮箱（可选，唯一）"
+  }
+  ```
+- **Success Response**  
+  `201 Created`
+  ```json
+  {
+    "user_id": 123,
+    "message": "User registered successfully"
+  }
+  ```
+- **Error Cases**  
+  - `400`：用户名已存在/邮箱已存在/密码格式错误  
+  - `500`：服务器内部错误
+
+---
+
+##### 1.2 用户登录
+- **URL**  
+  `/api/auth/login`
+- **Method**  
+  `POST`
+- **Request Body**  
+  ```json
+  {
+    "username": "用户名",
+    "password": "密码"
+  }
+  ```
+- **Success Response**  
+  `200 OK`
+  ```json
+  {
+    "access_token": "JWT令牌",
+    "expires_in": 3600
+  }
+  ```
+- **Error Cases**  
+  - `401`：用户名或密码错误  
+  - `400`：参数缺失
+
+---
+
+##### 1.3 修改密码
+- **URL**  
+  `/api/auth/change-password`
+- **Method**  
+  `PUT`
+- **Headers**  
+  `Authorization: Bearer <JWT>`
+- **Request Body**  
+  ```json
+  {
+    "old_password": "原密码",
+    "new_password": "新密码"
+  }
+  ```
+- **Success Response**  
+  `200 OK`
+  ```json
+  {"message": "Password updated"}
+  ```
+- **Error Cases**  
+  - `401`：原密码错误/JWT无效  
+  - `400`：新密码格式错误
+
+---
+
+#### **2. 频道管理模块**
+##### 2.1 创建频道
+- **URL**  
+  `/api/channels`
+- **Method**  
+  `POST`
+- **Headers**  
+  `Authorization: Bearer <JWT>`
+- **Request Body**  
+  ```json
+  {
+    "channel_name": "频道名称（必填）"
+  }
+  ```
+- **Success Response**  
+  `201 Created`
+  ```json
+  {
+    "channel_id": 456,
+    "channel_name": "新频道",
+    "user_id": 123
+  }
+  ```
+- **Error Cases**  
+  - `409`：同一用户下频道名重复  
+  - `400`：频道名为空
+
+---
+
+##### 2.2 获取频道列表
+- **URL**  
+  `/api/channels`
+- **Method**  
+  `GET`
+- **Headers**  
+  `Authorization: Bearer <JWT>`
+- **Success Response**  
+  `200 OK`
+  ```json
+  [
+    {
+      "channel_id": 456,
+      "channel_name": "科技频道",
+      "created_at": "2025-06-01T12:00:00Z"
+    }
+  ]
+  ```
+
+---
+
+##### 2.3 删除频道
+- **URL**  
+  `/api/channels/{channel_id}`
+- **Method**  
+  `DELETE`
+- **Headers**  
+  `Authorization: Bearer <JWT>`
+- **Success Response**  
+  `204 No Content`
+- **Error Cases**  
+  - `404`：频道不存在  
+  - `403`：非频道所有者
+
+---
+
+#### **3. 分类管理模块**
+##### 3.1 创建分类
+- **URL**  
+  `/api/categories`
+- **Method**  
+  `POST`
+- **Headers**  
+  `Authorization: Bearer <JWT>`
+- **Request Body**  
+  ```json
+  {
+    "category_name": "分类名称（必填）"
+  }
+  ```
+- **Success Response**  
+  `201 Created`
+  ```json
+  {
+    "category_id": 789,
+    "category_name": "教程类"
+  }
+  ```
+- **Error Cases**  
+  - `409`：同一用户下分类名重复
+
+---
+
+##### 3.2 获取分类列表
+- **URL**  
+  `/api/categories`
+- **Method**  
+  `GET`
+- **Headers**  
+  `Authorization: Bearer <JWT>`
+- **Success Response**  
+  `200 OK`
+  ```json
+  [
+    {
+      "category_id": 789,
+      "category_name": "教程类"
+    }
+  ]
+  ```
+
+---
+
+#### **4. 脚本管理模块**
+##### 4.1 创建脚本
+- **URL**  
+  `/api/scripts`
+- **Method**  
+  `POST`
+- **Headers**  
+  `Authorization: Bearer <JWT>`
+- **Request Body**  
+  ```json
+  {
+    "title": "主标题（必填）",
+    "alternative_title1": "副标题",
+    "description": "脚本描述",
+    "content_chapter1": "第一章内容",
+    "difficulty": 3,
+    "status": "Draft",
+    "channel_id": 456,
+    "category_id": 789
+  }
+  ```
+- **Success Response**  
+  `201 Created`
+  ```json
+  {
+    "script_id": 101,
+    "updated_at": "2025-06-06T14:30:00Z"
+  }
+  ```
+
+---
+
+##### 4.2 获取脚本详情
+- **URL**  
+  `/api/scripts/{script_id}`
+- **Method**  
+  `GET`
+- **Headers**  
+  `Authorization: Bearer <JWT>`
+- **Success Response**  
+  `200 OK`
+  ```json
+  {
+    "script_id": 101,
+    "title": "AI入门指南",
+    "content_chapter1": "...",
+    "difficulty": 3,
+    "status": "Published",
+    "channel": {"id":456, "name":"科技频道"},
+    "category": {"id":789, "name":"教程类"},
+    "updated_at": "2025-06-06T14:30:00Z"
+  }
+  ```
+
+---
+
+##### 4.3 更新脚本
+- **URL**  
+  `/api/scripts/{script_id}`
+- **Method**  
+  `PUT`
+- **Headers**  
+  `Authorization: Bearer <JWT>`
+- **Request Body**  
+  ```json
+  {
+    "status": "Published",
+    "release_date": "2025-07-01"
+  }
+  ```
+- **Success Response**  
+  `200 OK`
+  ```json
+  {
+    "updated_at": "2025-06-06T15:00:00Z" // 自动更新
+  }
+  ```
+
+---
+
+##### 4.4 脚本搜索
+- **URL**  
+  `/api/scripts?status=Published&channel_id=456`
+- **Method**  
+  `GET`
+- **Headers**  
+  `Authorization: Bearer <JWT>`
+- **Success Response**  
+  `200 OK`
+  ```json
+  [
+    {
+      "script_id": 101,
+      "title": "AI入门指南",
+      "status": "Published"
+    }
+  ]
+  ```
+
+---
+
+#### **5. 安全设计**
+1. **密码存储**  
+   - 使用 `bcrypt` 存储哈希密码（加盐处理）
+2. **JWT 配置**  
+   - 有效期：1小时
+   - 签名算法：HS256
+   - 敏感操作（如删除）需二次验证
+3. **权限验证**  
+   - 所有资源操作验证 `user_id` 匹配
+   - 错误示例：
+     ```json
+     {"error": "Forbidden: You don't own this resource"}
+     ```
+
+---
+
+#### **6. 错误码规范**
+| 状态码 | 含义                  | 示例场景                          |
+|--------|-----------------------|-----------------------------------|
+| 400    | 请求参数错误          | 密码格式错误                      |
+| 401    | 未授权/Token失效      | JWT过期                           |
+| 403    | 禁止访问              | 修改他人资源                      |
+| 404    | 资源不存在            | 脚本ID不存在                      |
+| 409    | 资源冲突              | 重复的频道名                      |
+| 500    | 服务器内部错误        | 数据库连接失败                    |
+
+---
+
+> **数据库约束说明**  
+> - 频道/分类名称：同一用户下唯一 (`uq_user_channel_name`)  
+> - 脚本更新：自动更新 `updated_at` (通过触发器)  
+> - 级联删除：用户删除时自动清理频道/分类/脚本
