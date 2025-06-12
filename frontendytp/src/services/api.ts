@@ -18,13 +18,18 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  console.log('API Request:', config.method?.toUpperCase(), config.url, config.params || config.data);
   return config;
 });
 
 // 响应拦截器
 api.interceptors.response.use(
-  (response) => response.data,
+  (response) => {
+    console.log('API Response:', response.config.url, response.data);
+    return response.data;
+  },
   (error) => {
+    console.error('API Error:', error.config?.url, error.response?.data || error.message);
     if (error.response?.data?.message) {
       throw new Error(error.response.data.message);
     }
