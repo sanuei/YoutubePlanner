@@ -1,1 +1,13 @@
+/Users/yangshangwei/Desktop/YoutubePlanner/BackendYTP/src/main/java/com/youtubeplanner/backend/common/ApiResponse.java
+/Users/yangshangwei/Desktop/YoutubePlanner/BackendYTP/src/main/java/com/youtubeplanner/backend/channel/dto/UpdateChannelRequest.java
+/Users/yangshangwei/Desktop/YoutubePlanner/BackendYTP/src/main/java/com/youtubeplanner/backend/channel/dto/CreateChannelRequest.java
+/Users/yangshangwei/Desktop/YoutubePlanner/BackendYTP/src/main/java/com/youtubeplanner/backend/channel/ChannelRepository.java
+/Users/yangshangwei/Desktop/YoutubePlanner/BackendYTP/src/main/java/com/youtubeplanner/backend/channel/ChannelService.java
+/Users/yangshangwei/Desktop/YoutubePlanner/BackendYTP/src/main/java/com/youtubeplanner/backend/channel/Channel.java
+/Users/yangshangwei/Desktop/YoutubePlanner/BackendYTP/src/main/java/com/youtubeplanner/backend/common/PaginationInfo.java
+/Users/yangshangwei/Desktop/YoutubePlanner/BackendYTP/src/main/java/com/youtubeplanner/backend/common/PageResponse.java
 /Users/yangshangwei/Desktop/YoutubePlanner/BackendYTP/src/main/java/com/youtubeplanner/backend/BackendApplication.java
+/Users/yangshangwei/Desktop/YoutubePlanner/BackendYTP/src/main/java/com/youtubeplanner/backend/channel/dto/ChannelDetailResponse.java
+/Users/yangshangwei/Desktop/YoutubePlanner/BackendYTP/src/main/java/com/youtubeplanner/backend/config/WebConfig.java
+/Users/yangshangwei/Desktop/YoutubePlanner/BackendYTP/src/main/java/com/youtubeplanner/backend/channel/dto/GetChannelsRequest.java
+/Users/yangshangwei/Desktop/YoutubePlanner/BackendYTP/src/main/java/com/youtubeplanner/backend/channel/ChannelController.java
