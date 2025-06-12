@@ -8,7 +8,7 @@
  * - 2024-03-21 Yann 创建初始版本
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -28,6 +28,21 @@ import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
 import { scriptsApi, Chapter } from '../services/api';
 
+// 添加字数统计函数
+const calculateWordCount = (chapters: Chapter[]): number => {
+  let count = 0;
+  if (chapters) {
+    chapters.forEach(chapter => {
+      if (chapter.content) {
+        // 移除HTML标签和特殊字符，只保留中英文
+        const text = chapter.content.replace(/<[^>]+>/g, '').replace(/[^\u4e00-\u9fa5a-zA-Z0-9]/g, '');
+        count += text.length;
+      }
+    });
+  }
+  return count;
+};
+
 const ScriptCreate: React.FC = () => {
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
@@ -37,6 +52,14 @@ const ScriptCreate: React.FC = () => {
     description: '',
     chapters: [{ chapter_number: 1, title: '', content: '' }] as Chapter[],
   });
+
+  // 添加字数统计状态
+  const [wordCount, setWordCount] = useState(0);
+
+  // 更新字数统计
+  useEffect(() => {
+    setWordCount(calculateWordCount(formData.chapters));
+  }, [formData.chapters]);
 
   const handleSubmit = async () => {
     try {
@@ -92,6 +115,7 @@ const ScriptCreate: React.FC = () => {
               label="标题"
               value={formData.title}
               onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+              sx={{ mb: 3 }}
             />
           </Grid>
           <Grid item xs={12}>
@@ -100,6 +124,7 @@ const ScriptCreate: React.FC = () => {
               label="备选标题"
               value={formData.alternative_title1}
               onChange={(e) => setFormData(prev => ({ ...prev, alternative_title1: e.target.value }))}
+              sx={{ mb: 3 }}
             />
           </Grid>
           <Grid item xs={12}>
@@ -110,6 +135,7 @@ const ScriptCreate: React.FC = () => {
               label="描述"
               value={formData.description}
               onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+              sx={{ mb: 3 }}
             />
           </Grid>
 
@@ -125,7 +151,7 @@ const ScriptCreate: React.FC = () => {
               </Button>
             </Box>
             {formData.chapters.map((chapter, index) => (
-              <Paper key={index} sx={{ p: 3, mb: 3, backgroundColor: 'background.default' }}>
+              <Box key={index} sx={{ mb: 4 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                   <Typography variant="h6">第 {chapter.chapter_number} 章</Typography>
                   {formData.chapters.length > 1 && (
@@ -152,7 +178,7 @@ const ScriptCreate: React.FC = () => {
                   required
                   fullWidth
                   multiline
-                  rows={6}
+                  rows={8}
                   label="章节内容"
                   value={chapter.content}
                   onChange={(e) => {
@@ -161,25 +187,38 @@ const ScriptCreate: React.FC = () => {
                     setFormData(prev => ({ ...prev, chapters: newChapters }));
                   }}
                 />
-              </Paper>
+              </Box>
             ))}
           </Grid>
 
           <Grid item xs={12}>
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
-              <Button
-                variant="outlined"
-                onClick={() => navigate('/scripts')}
-              >
-                取消
-              </Button>
-              <Button
-                variant="contained"
-                onClick={handleSubmit}
-                disabled={!formData.title || formData.chapters.some(chapter => !chapter.content)}
-              >
-                创建脚本
-              </Button>
+            <Box sx={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center', 
+              mt: 2,
+              pt: 2,
+              borderTop: '1px solid',
+              borderColor: 'divider'
+            }}>
+              <Typography variant="body2" color="text.secondary">
+                总字数：{wordCount}
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 2 }}>
+                <Button
+                  variant="outlined"
+                  onClick={() => navigate('/scripts')}
+                >
+                  取消
+                </Button>
+                <Button
+                  variant="contained"
+                  onClick={handleSubmit}
+                  disabled={!formData.title || formData.chapters.some(chapter => !chapter.content)}
+                >
+                  创建脚本
+                </Button>
+              </Box>
             </Box>
           </Grid>
         </Grid>

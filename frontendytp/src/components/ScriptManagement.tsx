@@ -31,6 +31,13 @@ import {
   TextField,
   Pagination,
   InputAdornment,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Checkbox,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -38,6 +45,8 @@ import {
   Delete as DeleteIcon,
   Search as SearchIcon,
   Sort as SortIcon,
+  Star as StarIcon,
+  StarBorder as StarBorderIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
@@ -78,6 +87,7 @@ const ScriptManagement: React.FC = () => {
   });
   const [sortBy, setSortBy] = useState('created_at');
   const [order, setOrder] = useState<'asc' | 'desc'>('desc');
+  const [selectedScripts, setSelectedScripts] = useState<number[]>([]);
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -200,6 +210,63 @@ const ScriptManagement: React.FC = () => {
     setPagination(prev => ({ ...prev, page: 1 })); // 重置页码
   };
 
+  // 计算字数的函数
+  const calculateWordCount = (script: Script): number => {
+    let count = 0;
+    if (script.chapters && Array.isArray(script.chapters)) {
+      script.chapters.forEach(chapter => {
+        if (chapter.content) {
+          // 移除HTML标签和特殊字符，只保留中英文
+          const text = chapter.content.replace(/<[^>]+>/g, '').replace(/[^\u4e00-\u9fa5a-zA-Z0-9]/g, '');
+          count += text.length;
+        }
+      });
+    }
+    return count;
+  };
+
+  // 渲染星级
+  const renderStars = (difficulty: number) => {
+    return (
+      <Stack direction="row" spacing={0.5}>
+        {[1, 2, 3, 4, 5].map((star) => (
+          <StarIcon
+            key={star}
+            sx={{
+              color: star <= difficulty ? 'warning.main' : 'action.disabled',
+              fontSize: '1.2rem',
+            }}
+          />
+        ))}
+      </Stack>
+    );
+  };
+
+  // 处理行选择
+  const handleRowSelect = (scriptId: number) => {
+    setSelectedScripts(prev => {
+      if (prev.includes(scriptId)) {
+        return prev.filter(id => id !== scriptId);
+      }
+      return [...prev, scriptId];
+    });
+  };
+
+  // 处理批量删除
+  const handleBatchDelete = async () => {
+    if (!window.confirm(`确定要删除选中的 ${selectedScripts.length} 个脚本吗？`)) return;
+
+    try {
+      const deletePromises = selectedScripts.map(id => scriptsApi.delete(id));
+      await Promise.all(deletePromises);
+      enqueueSnackbar('批量删除成功', { variant: 'success' });
+      setSelectedScripts([]);
+      fetchScripts();
+    } catch (error: any) {
+      enqueueSnackbar(error.message || '批量删除失败', { variant: 'error' });
+    }
+  };
+
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
@@ -226,7 +293,7 @@ const ScriptManagement: React.FC = () => {
       {/* 筛选和搜索区域 */}
       <Paper sx={{ p: 2, mb: 3 }}>
         <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid item xs={12} sm={6} md={2}>
             <TextField
               fullWidth
               size="small"
@@ -242,7 +309,7 @@ const ScriptManagement: React.FC = () => {
               }}
             />
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid item xs={12} sm={6} md={2}>
             <FormControl fullWidth size="small">
               <InputLabel>频道</InputLabel>
               <Select
@@ -259,7 +326,7 @@ const ScriptManagement: React.FC = () => {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid item xs={12} sm={6} md={2}>
             <FormControl fullWidth size="small">
               <InputLabel>分类</InputLabel>
               <Select
@@ -276,7 +343,7 @@ const ScriptManagement: React.FC = () => {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid item xs={12} sm={6} md={2}>
             <FormControl fullWidth size="small">
               <InputLabel>状态</InputLabel>
               <Select
@@ -291,124 +358,129 @@ const ScriptManagement: React.FC = () => {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
+          <Grid item xs={12} sm={6} md={2}>
             <FormControl fullWidth size="small">
-              <InputLabel>难度</InputLabel>
+              <InputLabel>星级</InputLabel>
               <Select
                 value={filters.difficulty}
-                label="难度"
+                label="星级"
                 onChange={(e) => handleFilterChange('difficulty', e.target.value)}
               >
                 <MenuItem value="">全部</MenuItem>
-                <MenuItem value="1">简单</MenuItem>
-                <MenuItem value="2">较简单</MenuItem>
-                <MenuItem value="3">中等</MenuItem>
-                <MenuItem value="4">较难</MenuItem>
-                <MenuItem value="5">困难</MenuItem>
+                {[1, 2, 3, 4, 5].map((value) => (
+                  <MenuItem key={value} value={value}>
+                    {renderStars(value)}
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <TextField
-              fullWidth
-              size="small"
-              type="date"
-              label="开始日期"
-              value={filters.date_from}
-              onChange={(e) => handleFilterChange('date_from', e.target.value)}
-              InputLabelProps={{ shrink: true }}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <TextField
-              fullWidth
-              size="small"
-              type="date"
-              label="结束日期"
-              value={filters.date_to}
-              onChange={(e) => handleFilterChange('date_to', e.target.value)}
-              InputLabelProps={{ shrink: true }}
-            />
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <FormControl fullWidth size="small">
-              <InputLabel>排序</InputLabel>
-              <Select
-                value={sortBy}
-                label="排序"
-                onChange={(e) => setSortBy(e.target.value)}
-              >
-                <MenuItem value="created_at">创建时间</MenuItem>
-                <MenuItem value="updated_at">更新时间</MenuItem>
-                <MenuItem value="release_date">发布日期</MenuItem>
-                <MenuItem value="title">标题</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <IconButton onClick={() => setOrder(order === 'asc' ? 'desc' : 'asc')}>
-              <SortIcon sx={{ transform: order === 'desc' ? 'rotate(180deg)' : '' }} />
-            </IconButton>
-          </Grid>
-        </Grid>
-      </Paper>
-
-      {/* 脚本列表 */}
-      <Grid container spacing={3}>
-        {scripts.map((script) => (
-          <Grid item xs={12} md={6} lg={4} key={script.script_id}>
-            <Paper sx={{ p: 2 }}>
-              <Typography variant="h6" gutterBottom>
-                {script.title}
-              </Typography>
-              {script.alternative_title1 && (
-                <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                  备选标题: {script.alternative_title1}
-                </Typography>
-              )}
-              <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
-                <Chip
-                  label={`难度: ${script.difficulty || '未设置'}`}
-                  size="small"
-                  color="primary"
-                  variant="outlined"
-                />
-                <Chip
-                  label={`状态: ${script.status || '未设置'}`}
-                  size="small"
-                  color="secondary"
-                  variant="outlined"
-                />
-              </Stack>
-              <Typography variant="body2" color="text.secondary" gutterBottom>
-                章节数: {script.chapters?.length || 0}
-              </Typography>
-              {script.release_date && (
-                <Typography variant="body2" color="text.secondary" gutterBottom>
-                  发布日期: {format(new Date(script.release_date), 'yyyy-MM-dd')}
-                </Typography>
-              )}
-              <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
-                <Button
-                  size="small"
-                  startIcon={<EditIcon />}
-                  onClick={() => handleEdit(script)}
+          <Grid item xs={12} sm={6} md={2}>
+            <Stack direction="row" spacing={1} alignItems="center">
+              <FormControl size="small">
+                <InputLabel>排序</InputLabel>
+                <Select
+                  value={sortBy}
+                  label="排序"
+                  onChange={(e) => setSortBy(e.target.value)}
+                  sx={{ minWidth: 120 }}
                 >
-                  编辑
-                </Button>
+                  <MenuItem value="created_at">创建时间</MenuItem>
+                  <MenuItem value="updated_at">最后修改</MenuItem>
+                  <MenuItem value="title">标题</MenuItem>
+                </Select>
+              </FormControl>
+              <IconButton onClick={() => setOrder(order === 'asc' ? 'desc' : 'asc')}>
+                <SortIcon sx={{ transform: order === 'desc' ? 'rotate(180deg)' : '' }} />
+              </IconButton>
+            </Stack>
+          </Grid>
+          {selectedScripts.length > 0 && (
+            <Grid item xs={12} sm={6} md={2}>
+              <Stack direction="row" spacing={1} alignItems="center">
+                <Typography variant="body2" color="text.secondary">
+                  已选择 {selectedScripts.length} 项
+                </Typography>
                 <Button
                   size="small"
                   color="error"
                   startIcon={<DeleteIcon />}
-                  onClick={() => handleDelete(script.script_id)}
+                  onClick={handleBatchDelete}
                 >
                   删除
                 </Button>
-              </Box>
-            </Paper>
-          </Grid>
-        ))}
-      </Grid>
+              </Stack>
+            </Grid>
+          )}
+        </Grid>
+      </Paper>
+
+      {/* 脚本列表 */}
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell padding="checkbox">
+                <Checkbox
+                  checked={selectedScripts.length === scripts.length}
+                  indeterminate={selectedScripts.length > 0 && selectedScripts.length < scripts.length}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setSelectedScripts(scripts.map(s => s.script_id));
+                    } else {
+                      setSelectedScripts([]);
+                    }
+                  }}
+                />
+              </TableCell>
+              <TableCell>标题</TableCell>
+              <TableCell>星级</TableCell>
+              <TableCell>状态</TableCell>
+              <TableCell>分类</TableCell>
+              <TableCell>最后修改</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {scripts.map((script) => (
+              <TableRow
+                key={script.script_id}
+                hover
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  navigate(`/scripts/${script.script_id}/edit`);
+                }}
+                sx={{ cursor: 'pointer' }}
+              >
+                <TableCell padding="checkbox" onClick={(e) => e.stopPropagation()}>
+                  <Checkbox
+                    checked={selectedScripts.includes(script.script_id)}
+                    onChange={() => handleRowSelect(script.script_id)}
+                  />
+                </TableCell>
+                <TableCell>{script.title}</TableCell>
+                <TableCell>{renderStars(script.difficulty || 0)}</TableCell>
+                <TableCell>
+                  <Chip
+                    label={script.status || '未设置'}
+                    size="small"
+                    color="secondary"
+                    variant="outlined"
+                  />
+                </TableCell>
+                <TableCell>
+                  {categories.find(c => c.category_id === script.category_id)?.category_name || '-'}
+                </TableCell>
+                <TableCell>
+                  {script.updated_at
+                    ? format(new Date(script.updated_at), 'yyyy-MM-dd HH:mm')
+                    : '-'}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
 
       {/* 分页 */}
       {pagination.pages > 1 && (
