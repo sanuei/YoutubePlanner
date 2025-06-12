@@ -32,5 +32,6 @@ public interface ChannelRepository extends JpaRepository<Channel, Long> {
             @Param("search") String search,
             Pageable pageable);
 
-    Optional<Channel> findByChannelIdAndUserId(Long channelId, Long userId);
+    @Query("SELECT c FROM Channel c WHERE c.channelId = :channelId AND c.userId = :userId")
+    Optional<Channel> findByChannelIdAndUserId(@Param("channelId") Long channelId, @Param("userId") Long userId);
 } 

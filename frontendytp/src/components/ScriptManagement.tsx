@@ -47,10 +47,11 @@ import {
   Sort as SortIcon,
   Star as StarIcon,
   StarBorder as StarBorderIcon,
+  Visibility as VisibilityIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
-import { scriptsApi, channelsApi, categoriesApi, Script, Channel, Category } from '../services/api';
+import { scriptsApi, channelsApi, categoriesApi, Script, Channel, Category, ScriptListParams } from '../services/api';
 import { format } from 'date-fns';
 
 const ScriptManagement: React.FC = () => {
@@ -94,16 +95,45 @@ const ScriptManagement: React.FC = () => {
   const fetchScripts = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await scriptsApi.getList({
+      const params: ScriptListParams = {
         page: pagination.page,
         limit: pagination.limit,
-        ...filters,
+        search: filters.search,
         sort_by: sortBy,
         order,
-      });
+        include: 'category'
+      };
+
+      // 只有当值不为空字符串时才添加筛选参数
+      if (filters.channel_id) {
+        params.channel_id = filters.channel_id;
+      }
+      if (filters.category_id && filters.category_id !== '') {
+        params.category_id = filters.category_id;
+      }
+      if (filters.status) {
+        params.status = filters.status;
+      }
+      if (filters.difficulty) {
+        params.difficulty = filters.difficulty;
+      }
+
+      console.log('Fetching scripts with params:', params);
+
+      const response = await scriptsApi.getList(params);
       
       if (response.success) {
-        setScripts(response.data.items);
+        console.log('Scripts response:', response.data);
+        // 在前端进行额外的筛选，以防后端筛选不生效
+        const filteredItems = response.data.items.filter(script => {
+          if (filters.category_id && filters.category_id !== '') {
+            return script.category?.category_id.toString() === filters.category_id;
+          }
+          return true;
+        });
+        
+        setScripts(filteredItems);
+        // 保持使用后端返回的分页信息
         setPagination(prev => ({
           ...prev,
           total: response.data.pagination.total,
@@ -113,6 +143,7 @@ const ScriptManagement: React.FC = () => {
         enqueueSnackbar(response.message || '获取脚本列表失败', { variant: 'error' });
       }
     } catch (error: any) {
+      console.error('Error fetching scripts:', error);
       enqueueSnackbar(error.message || '获取脚本列表失败', { variant: 'error' });
     } finally {
       setLoading(false);
@@ -121,7 +152,7 @@ const ScriptManagement: React.FC = () => {
 
   useEffect(() => {
     fetchScripts();
-  }, [fetchScripts]);
+  }, [filters, fetchScripts]);
 
   const fetchChannels = async () => {
     try {
@@ -136,11 +167,21 @@ const ScriptManagement: React.FC = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await categoriesApi.getList({});
+      const response = await categoriesApi.getList({
+        limit: 100,
+        sort_by: 'category_name',
+        order: 'asc'
+      });
+      
       if (response.success) {
+        console.log('Categories loaded:', response.data.items);
         setCategories(response.data.items);
+      } else {
+        console.error('Failed to load categories:', response.message);
+        enqueueSnackbar(response.message || '获取分类列表失败', { variant: 'error' });
       }
     } catch (error: any) {
+      console.error('Error fetching categories:', error);
       enqueueSnackbar(error.message || '获取分类列表失败', { variant: 'error' });
     }
   };
@@ -157,7 +198,7 @@ const ScriptManagement: React.FC = () => {
       status: script.status || 'Scripting',
       release_date: script.release_date || '',
       channel_id: script.channel_id?.toString() || '',
-      category_id: script.category_id?.toString() || '',
+      category_id: script.category?.category_id?.toString() || '',
     });
     setOpenEditDialog(true);
   };
@@ -206,7 +247,12 @@ const ScriptManagement: React.FC = () => {
   };
 
   const handleFilterChange = (field: string, value: string) => {
-    setFilters(prev => ({ ...prev, [field]: value }));
+    console.log('Filter changed:', field, value);
+    setFilters(prev => {
+      const newFilters = { ...prev, [field]: value };
+      console.log('New filters:', newFilters);
+      return newFilters;
+    });
     setPagination(prev => ({ ...prev, page: 1 })); // 重置页码
   };
 
@@ -265,6 +311,23 @@ const ScriptManagement: React.FC = () => {
     } catch (error: any) {
       enqueueSnackbar(error.message || '批量删除失败', { variant: 'error' });
     }
+  };
+
+  // 获取分类名称的辅助函数
+  const getCategoryName = (script: Script): string => {
+    if (script.category) {
+      return script.category.category_name || '未知分类';
+    }
+    
+    // 如果category对象不存在，但有category_id，尝试从categories列表中查找
+    if (script.category_id) {
+      const category = categories.find(c => c.category_id === script.category_id);
+      if (category) {
+        return category.category_name;
+      }
+    }
+    
+    return '-';
   };
 
   if (loading) {
@@ -332,11 +395,14 @@ const ScriptManagement: React.FC = () => {
               <Select
                 value={filters.category_id}
                 label="分类"
-                onChange={(e) => handleFilterChange('category_id', e.target.value)}
+                onChange={(e) => {
+                  console.log('Category select changed:', e.target.value);
+                  handleFilterChange('category_id', e.target.value);
+                }}
               >
                 <MenuItem value="">全部</MenuItem>
                 {categories.map((category) => (
-                  <MenuItem key={category.category_id} value={category.category_id}>
+                  <MenuItem key={category.category_id} value={category.category_id.toString()}>
                     {category.category_name}
                   </MenuItem>
                 ))}
@@ -438,6 +504,7 @@ const ScriptManagement: React.FC = () => {
               <TableCell>状态</TableCell>
               <TableCell>分类</TableCell>
               <TableCell>最后修改</TableCell>
+              <TableCell align="right">操作</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -469,12 +536,29 @@ const ScriptManagement: React.FC = () => {
                   />
                 </TableCell>
                 <TableCell>
-                  {categories.find(c => c.category_id === script.category_id)?.category_name || '-'}
+                  <Chip
+                    label={getCategoryName(script)}
+                    size="small"
+                    color="primary"
+                    variant="outlined"
+                  />
                 </TableCell>
                 <TableCell>
                   {script.updated_at
                     ? format(new Date(script.updated_at), 'yyyy-MM-dd HH:mm')
                     : '-'}
+                </TableCell>
+                <TableCell align="right" onClick={(e) => e.stopPropagation()}>
+                  <IconButton
+                    size="small"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/scripts/${script.script_id}/preview`);
+                    }}
+                    sx={{ mr: 1 }}
+                  >
+                    <VisibilityIcon fontSize="small" />
+                  </IconButton>
                 </TableCell>
               </TableRow>
             ))}

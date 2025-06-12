@@ -18,6 +18,10 @@ import {
   IconButton,
   Grid,
   Stack,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material';
 import {
   AddCircle as AddCircleIcon,
@@ -26,7 +30,7 @@ import {
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
-import { scriptsApi, Chapter } from '../services/api';
+import { scriptsApi, Chapter, categoriesApi, Category } from '../services/api';
 
 // 添加字数统计函数
 const calculateWordCount = (chapters: Chapter[]): number => {
@@ -46,15 +50,37 @@ const calculateWordCount = (chapters: Chapter[]): number => {
 const ScriptCreate: React.FC = () => {
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
+  const [categories, setCategories] = useState<Category[]>([]);
   const [formData, setFormData] = useState({
     title: '',
     alternative_title1: '',
     description: '',
+    category_id: undefined as number | undefined,
     chapters: [{ chapter_number: 1, title: '', content: '' }] as Chapter[],
   });
 
   // 添加字数统计状态
   const [wordCount, setWordCount] = useState(0);
+
+  // 获取分类列表
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await categoriesApi.getList({
+          limit: 100,
+          sort_by: 'category_name',
+          order: 'asc'
+        });
+        if (response.success) {
+          setCategories(response.data.items);
+        }
+      } catch (error: any) {
+        console.error('Error fetching categories:', error);
+        enqueueSnackbar('获取分类列表失败', { variant: 'error' });
+      }
+    };
+    fetchCategories();
+  }, [enqueueSnackbar]);
 
   // 更新字数统计
   useEffect(() => {
@@ -63,10 +89,20 @@ const ScriptCreate: React.FC = () => {
 
   const handleSubmit = async () => {
     try {
-      await scriptsApi.create(formData);
-      enqueueSnackbar('脚本创建成功', { variant: 'success' });
-      navigate('/scripts');
+      const submitData = {
+        ...formData,
+        category_id: formData.category_id || undefined,
+      };
+      console.log('Submitting script data:', submitData);
+      const response = await scriptsApi.create(submitData);
+      if (response.success) {
+        enqueueSnackbar('脚本创建成功', { variant: 'success' });
+        navigate('/scripts');
+      } else {
+        enqueueSnackbar(response.message || '创建脚本失败', { variant: 'error' });
+      }
     } catch (error: any) {
+      console.error('Error creating script:', error);
       enqueueSnackbar(error.message || '创建脚本失败', { variant: 'error' });
     }
   };
@@ -137,6 +173,23 @@ const ScriptCreate: React.FC = () => {
               onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
               sx={{ mb: 3 }}
             />
+          </Grid>
+
+          <Grid item xs={12} sm={6}>
+            <FormControl fullWidth>
+              <InputLabel>分类</InputLabel>
+              <Select
+                value={formData.category_id || ''}
+                label="分类"
+                onChange={(e) => setFormData(prev => ({ ...prev, category_id: Number(e.target.value) }))}
+              >
+                {categories.map((category) => (
+                  <MenuItem key={category.category_id} value={category.category_id}>
+                    {category.category_name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           </Grid>
 
           <Grid item xs={12}>

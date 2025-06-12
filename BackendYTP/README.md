@@ -596,6 +596,175 @@ mvn spring-boot:run
 **删除策略**：
 - 硬删除，级联删除关联的章节
 
+### 分类管理
+
+#### 创建分类
+- **POST** `/api/v1/categories`
+- **请求头**：
+  - `X-User-ID`：用户ID（Long）
+  - `Content-Type`：application/json
+
+**请求体**：
+```json
+{
+  "category_name": "教程"
+}
+```
+
+**字段验证**：
+- `category_name`：必填，1-100字符，同一用户下唯一
+
+**成功响应** (201)：
+```json
+{
+  "success": true,
+  "code": 201,
+  "message": "分类创建成功",
+  "data": {
+    "category_id": 1,
+    "category_name": "教程",
+    "user_id": 1,
+    "created_at": "2025-06-06T10:00:00Z"
+  },
+  "timestamp": "2025-06-06T10:00:00Z",
+  "request_id": "uuid-string"
+}
+```
+
+**错误响应**：
+- 400：参数验证失败
+- 409：分类名称已存在
+
+#### 获取分类列表
+- **GET** `/api/v1/categories`
+- **请求头**：
+  - `X-User-ID`：用户ID（Long）
+
+**查询参数**：
+- `page`：页码，默认1
+- `limit`：每页数量，默认10，最大100
+- `search`：搜索关键词
+- `sort_by`：排序字段（category_name, created_at），默认created_at
+- `order`：排序方向（asc, desc），默认desc
+
+**成功响应** (200)：
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "获取分类列表成功",
+  "data": {
+    "items": [
+      {
+        "category_id": 1,
+        "category_name": "教程",
+        "user_id": 1,
+        "created_at": "2025-06-06T10:00:00Z"
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 10,
+      "total": 1,
+      "pages": 1,
+      "has_next": false,
+      "has_prev": false
+    }
+  },
+  "timestamp": "2025-06-06T10:00:00Z",
+  "request_id": "uuid-string"
+}
+```
+
+#### 获取分类详情
+- **GET** `/api/v1/categories/{category_id}`
+- **请求头**：
+  - `X-User-ID`：用户ID（Long）
+
+**路径参数**：
+- `category_id`：必填，分类ID（Long）
+
+**成功响应** (200)：
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "获取分类详情成功",
+  "data": {
+    "category_id": 1,
+    "category_name": "教程",
+    "user_id": 1,
+    "created_at": "2025-06-06T10:00:00Z"
+  },
+  "timestamp": "2025-06-06T10:00:00Z",
+  "request_id": "uuid-string"
+}
+```
+
+**错误响应**：
+- 403：无权限访问该分类
+- 404：分类不存在
+
+#### 更新分类
+- **PUT** `/api/v1/categories/{category_id}`
+- **请求头**：
+  - `X-User-ID`：用户ID（Long）
+  - `Content-Type`：application/json
+
+**路径参数**：
+- `category_id`：必填，分类ID（Long）
+
+**请求体**：
+```json
+{
+  "category_name": "更新后的分类名称"
+}
+```
+
+**字段验证**：
+- `category_name`：必填，1-100字符，同一用户下唯一
+
+**成功响应** (200)：
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "更新成功",
+  "data": {
+    "category_id": 1,
+    "category_name": "更新后的分类名称",
+    "user_id": 1,
+    "created_at": "2025-06-06T10:00:00Z"
+  },
+  "timestamp": "2025-06-06T10:00:00Z",
+  "request_id": "uuid-string"
+}
+```
+
+**错误响应**：
+- 400：参数验证失败
+- 403：无权限访问该分类
+- 404：分类不存在
+- 409：分类名称已存在
+
+#### 删除分类
+- **DELETE** `/api/v1/categories/{category_id}`
+- **请求头**：
+  - `X-User-ID`：用户ID（Long）
+
+**路径参数**：
+- `category_id`：必填，分类ID（Long）
+
+**成功响应** (204)：
+无响应体
+
+**错误响应**：
+- 403：无权限删除该分类
+- 404：分类不存在
+
+**删除策略**：
+- 硬删除，如果分类下有脚本，会触发外键约束错误
+
 ## 数据库设计
 
 ### Channels 表
