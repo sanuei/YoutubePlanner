@@ -41,6 +41,28 @@ export interface Channel {
   scripts_count?: number;
 }
 
+// 脚本相关接口
+export interface Chapter {
+  chapter_number: number;
+  title: string;
+  content: string;
+}
+
+export interface Script {
+  script_id: number;
+  title: string;
+  alternative_title1?: string;
+  description?: string;
+  difficulty?: number;
+  status?: string;
+  release_date?: string;
+  channel_id?: number;
+  category_id?: number;
+  chapters: Chapter[];
+  created_at: string;
+  updated_at: string;
+}
+
 export interface ApiResponse<T> {
   success: boolean;
   code: number;
@@ -62,6 +84,13 @@ export interface PaginationData {
 export interface PaginatedData<T> {
   items: T[];
   pagination: PaginationData;
+}
+
+export interface Category {
+  category_id: number;
+  category_name: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export const channelsApi = {
@@ -89,6 +118,62 @@ export const channelsApi = {
 
   delete: (channelId: number): Promise<ApiResponse<void>> => {
     return api.delete(`/channels/${channelId}`);
+  },
+};
+
+export const scriptsApi = {
+  create: (script: Omit<Script, 'script_id' | 'created_at' | 'updated_at'>): Promise<ApiResponse<Script>> => {
+    return api.post('/scripts', script);
+  },
+
+  getList: (params: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    sort_by?: string;
+    order?: 'asc' | 'desc';
+  }): Promise<ApiResponse<PaginatedData<Script>>> => {
+    return api.get('/scripts', { params });
+  },
+
+  getDetail: (scriptId: number): Promise<ApiResponse<Script>> => {
+    return api.get(`/scripts/${scriptId}`);
+  },
+
+  update: (scriptId: number, script: Partial<Script>): Promise<ApiResponse<Script>> => {
+    return api.put(`/scripts/${scriptId}`, script);
+  },
+
+  delete: (scriptId: number): Promise<ApiResponse<void>> => {
+    return api.delete(`/scripts/${scriptId}`);
+  },
+};
+
+export const categoriesApi = {
+  getList: (params: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    sort_by?: string;
+    order?: 'asc' | 'desc';
+  }): Promise<ApiResponse<PaginatedData<Category>>> => {
+    return api.get('/categories', { params });
+  },
+
+  getDetail: (id: number): Promise<ApiResponse<Category>> => {
+    return api.get(`/categories/${id}`);
+  },
+
+  create: (data: Omit<Category, 'category_id' | 'created_at' | 'updated_at'>): Promise<ApiResponse<Category>> => {
+    return api.post('/categories', data);
+  },
+
+  update: (id: number, data: Partial<Omit<Category, 'category_id' | 'created_at' | 'updated_at'>>): Promise<ApiResponse<Category>> => {
+    return api.put(`/categories/${id}`, data);
+  },
+
+  delete: (id: number): Promise<ApiResponse<void>> => {
+    return api.delete(`/categories/${id}`);
   },
 };
 
