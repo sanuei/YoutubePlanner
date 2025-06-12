@@ -1,52 +1,60 @@
-# Youtube Planner Backend
+# YouTube 规划器后端服务
 
-This is the backend service for the Youtube Planner application, built with Spring Boot.
+这是一个基于 Spring Boot 构建的 YouTube 规划器应用后端服务。
 
-## Prerequisites
+## 技术栈
 
-- Java 17 or higher
-- Maven 3.6.x or higher
-- PostgreSQL Database
+- Spring Boot 3.2.3
+- Spring Data JPA
+- PostgreSQL 数据库
+- Project Lombok
+- Spring Boot DevTools
 
-## Getting Started
+## 系统要求
 
-1. Clone the repository:
+- Java 17 或更高版本
+- Maven 3.6.x 或更高版本
+- PostgreSQL 数据库
+
+## 快速开始
+
+1. 克隆仓库：
 ```bash
 git clone [repository-url]
 cd BackendYTP
 ```
 
-2. Configure the database:
-The application uses PostgreSQL database hosted on Supabase. The connection details are already configured in `application.properties`.
+2. 配置数据库：
+应用使用 Supabase 托管的 PostgreSQL 数据库。连接信息已在 `application.properties` 中配置。
 
-3. Build the project:
+3. 构建项目：
 ```bash
 mvn clean install
 ```
 
-4. Run the application:
+4. 运行应用：
 ```bash
 mvn spring-boot:run
 ```
 
-The application will start on `http://localhost:8080`
+应用将在 `http://localhost:8080` 启动
 
-## Features
+## 项目特性
 
-- RESTful API endpoints
-- PostgreSQL database integration with soft delete support
-- JPA/Hibernate for data persistence
-- Spring Boot DevTools for development
-- Lombok for reducing boilerplate code
+- RESTful API 接口
+- PostgreSQL 数据库集成（支持软删除）
+- JPA/Hibernate 数据持久化
+- Spring Boot DevTools 开发工具
+- Lombok 减少样板代码
 
-## API Documentation
+## API 文档
 
-### Base URL
-- Base URL: `http://localhost:8080/api/v1`
-- API Version: v1
-- Authentication: Bearer Token (JWT)
-- Data Format: JSON
-- Character Encoding: UTF-8
+### 基础信息
+- 基础 URL：`http://localhost:8080/api/v1`
+- API 版本：v1
+- 认证方式：Bearer Token (JWT)
+- 数据格式：JSON
+- 字符编码：UTF-8
 
 ### 统一响应格式
 ```json
@@ -77,27 +85,27 @@ The application will start on `http://localhost:8080`
 }
 ```
 
-### Endpoints
+## API 端点
 
-#### Channel Management
+### 频道管理
 
-##### Create Channel
+#### 创建频道
 - **POST** `/channels`
-- **Headers Required**: 
-  - `X-User-ID`: User ID (Long)
-  - `Content-Type`: application/json
+- **请求头**：
+  - `X-User-ID`：用户ID（Long）
+  - `Content-Type`：application/json
 
-**Request Body**:
+**请求体**：
 ```json
 {
   "channel_name": "我的第一个频道"
 }
 ```
 
-**Field Validation**:
-- `channel_name`: Required, 1-100 characters, unique per user
+**字段验证**：
+- `channel_name`：必填，1-100字符，每个用户唯一
 
-**Success Response** (201):
+**成功响应** (201)：
 ```json
 {
   "success": true,
@@ -114,23 +122,23 @@ The application will start on `http://localhost:8080`
 }
 ```
 
-**Error Responses**:
-- 400: Parameter validation failed
-- 409: Channel name already exists
+**错误响应**：
+- 400：参数验证失败
+- 409：频道名称已存在
 
-##### Get Channel List
+#### 获取频道列表
 - **GET** `/channels`
-- **Headers Required**: 
-  - `X-User-ID`: User ID (Long)
+- **请求头**：
+  - `X-User-ID`：用户ID（Long）
 
-**Query Parameters**:
-- `page`: Page number, default 1
-- `limit`: Items per page, default 10, max 100
-- `search`: Search keyword
-- `sort_by`: Sort field (channel_name, created_at), default created_at
-- `order`: Sort direction (asc, desc), default desc
+**查询参数**：
+- `page`：页码，默认1
+- `limit`：每页数量，默认10，最大100
+- `search`：搜索关键词
+- `sort_by`：排序字段（channel_name, created_at），默认created_at
+- `order`：排序方向（asc, desc），默认desc
 
-**Success Response** (200):
+**成功响应** (200)：
 ```json
 {
   "success": true,
@@ -159,15 +167,15 @@ The application will start on `http://localhost:8080`
 }
 ```
 
-##### Get Channel Detail
+#### 获取频道详情
 - **GET** `/channels/{channel_id}`
-- **Headers Required**: 
-  - `X-User-ID`: User ID (Long)
+- **请求头**：
+  - `X-User-ID`：用户ID（Long）
 
-**Path Parameters**:
-- `channel_id`: Required, Channel ID (Long)
+**路径参数**：
+- `channel_id`：必填，频道ID（Long）
 
-**Success Response** (200):
+**成功响应** (200)：
 ```json
 {
   "success": true,
@@ -185,29 +193,29 @@ The application will start on `http://localhost:8080`
 }
 ```
 
-**Error Responses**:
-- 404: Channel not found
+**错误响应**：
+- 404：频道不存在
 
-##### Update Channel
+#### 更新频道
 - **PUT** `/channels/{channel_id}`
-- **Headers Required**: 
-  - `X-User-ID`: User ID (Long)
-  - `Content-Type`: application/json
+- **请求头**：
+  - `X-User-ID`：用户ID（Long）
+  - `Content-Type`：application/json
 
-**Path Parameters**:
-- `channel_id`: Required, Channel ID (Long)
+**路径参数**：
+- `channel_id`：必填，频道ID（Long）
 
-**Request Body**:
+**请求体**：
 ```json
 {
   "channel_name": "更新后的频道名称"
 }
 ```
 
-**Field Validation**:
-- `channel_name`: Required, 1-100 characters, unique per user
+**字段验证**：
+- `channel_name`：必填，1-100字符，每个用户唯一
 
-**Success Response** (200):
+**成功响应** (200)：
 ```json
 {
   "success": true,
@@ -224,40 +232,31 @@ The application will start on `http://localhost:8080`
 }
 ```
 
-**Error Responses**:
-- 404: Channel not found
-- 409: Channel name already exists
+**错误响应**：
+- 404：频道不存在
+- 409：频道名称已存在
 
-##### Delete Channel
+#### 删除频道
 - **DELETE** `/channels/{channel_id}`
-- **Headers Required**: 
-  - `X-User-ID`: User ID (Long)
+- **请求头**：
+  - `X-User-ID`：用户ID（Long）
 
-**Path Parameters**:
-- `channel_id`: Required, Channel ID (Long)
+**路径参数**：
+- `channel_id`：必填，频道ID（Long）
 
-**Success Response** (204):
+**成功响应** (204)：
 无响应体
 
-**Error Responses**:
-- 404: Channel not found
+**错误响应**：
+- 404：频道不存在
 
-**删除策略**: 
+**删除策略**：
 - 采用软删除，保留数据但标记为已删除
 - 关联的脚本不会被删除，但会解除与频道的关联
 
-## Development
+## 数据库设计
 
-The project uses the following technologies:
-- Spring Boot 3.2.3
-- Spring Data JPA
-- PostgreSQL Database
-- Project Lombok
-- Spring Boot DevTools
-
-## Database Schema
-
-### Channels Table
+### Channels 表
 ```sql
 CREATE TABLE Channels (
     channel_id SERIAL PRIMARY KEY,
