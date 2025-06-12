@@ -1,6 +1,7 @@
 package com.youtubeplanner.backend.script;
 
 import com.youtubeplanner.backend.channel.ChannelService;
+import com.youtubeplanner.backend.category.CategoryService;
 import com.youtubeplanner.backend.common.ApiResponse;
 import com.youtubeplanner.backend.common.PageResponse;
 import com.youtubeplanner.backend.script.dto.CreateScriptRequest;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 public class ScriptService {
     private final ScriptRepository scriptRepository;
     private final ChannelService channelService;
+    private final CategoryService categoryService;
 
     @Transactional
     public ApiResponse<ScriptResponse> createScript(CreateScriptRequest request, Long userId) {
@@ -75,30 +77,20 @@ public class ScriptService {
 
     @Transactional(readOnly = true)
     public ApiResponse<PageResponse<ScriptListItemResponse>> getScripts(GetScriptsRequest request, Long userId) {
-        // 转换难度值为整数
-        Integer difficultyValue = null;
-        if (request.getDifficulty() != null) {
-            difficultyValue = switch (request.getDifficulty()) {
-                case "EASY" -> 1;
-                case "MEDIUM" -> 2;
-                case "HARD" -> 3;
-                default -> null;
-            };
-        }
-
         Page<Script> scriptPage = scriptRepository.findByUserIdAndFilters(
                 userId,
                 request.getChannelId(),
                 request.getCategoryId(),
                 request.getStatus(),
-                difficultyValue,
+                request.getDifficulty(),
                 request.getDateFrom(),
                 request.getDateTo(),
                 request.getSearch(),
                 request.toPageRequest()
         );
 
-        Page<ScriptListItemResponse> responsePage = scriptPage.map(this::convertToListItemResponse);
+        Page<ScriptListItemResponse> responsePage = scriptPage.map(script -> 
+            convertToListItemResponse(script, userId, request.getIncludeFields()));
         return ApiResponse.success(PageResponse.of(responsePage));
     }
 
@@ -234,8 +226,8 @@ public class ScriptService {
         return response;
     }
 
-    private ScriptListItemResponse convertToListItemResponse(Script script) {
-        return new ScriptListItemResponse()
+    private ScriptListItemResponse convertToListItemResponse(Script script, Long userId, Set<String> includeFields) {
+        ScriptListItemResponse response = new ScriptListItemResponse()
                 .setScriptId(script.getScriptId())
                 .setTitle(script.getTitle())
                 .setDescription(script.getDescription())
@@ -245,5 +237,29 @@ public class ScriptService {
                 .setChaptersCount(script.getChapters() != null ? script.getChapters().size() : 0)
                 .setCreatedAt(script.getCreatedAt())
                 .setUpdatedAt(script.getUpdatedAt());
+
+        // 添加频道信息
+        if (script.getChannelId() != null) {
+            var channelResponse = channelService.getChannelDetail(script.getChannelId(), userId);
+            if (channelResponse.isSuccess()) {
+                var channelData = channelResponse.getData();
+                response.setChannel(new ScriptListItemResponse.ChannelInfo()
+                        .setChannelId(channelData.getChannelId())
+                        .setChannelName(channelData.getChannelName()));
+            }
+        }
+
+        // 添加分类信息
+        if (script.getCategoryId() != null && (includeFields.isEmpty() || includeFields.contains("category"))) {
+            var categoryResponse = categoryService.getCategoryDetail(script.getCategoryId(), userId);
+            if (categoryResponse.isSuccess()) {
+                var categoryData = categoryResponse.getData();
+                response.setCategory(new ScriptListItemResponse.CategoryInfo()
+                        .setCategoryId(categoryData.getCategoryId())
+                        .setCategoryName(categoryData.getCategoryName()));
+            }
+        }
+
+        return response;
     }
 } 

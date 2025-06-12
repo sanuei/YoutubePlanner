@@ -11,24 +11,17 @@ import {
   DialogContent,
   DialogActions,
   IconButton,
-  Pagination,
-  InputAdornment,
-  Select,
-  FormControl,
-  InputLabel,
   CircularProgress,
   Stack,
   Paper,
-  MenuItem,
-  Divider,
+  Checkbox,
+  InputAdornment,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import {
   Add as AddIcon,
   Search as SearchIcon,
-  Edit as EditIcon,
   Delete as DeleteIcon,
-  Sort as SortIcon,
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { useSnackbar } from 'notistack';
@@ -44,31 +37,25 @@ const StyledCard = styled(motion(Card))(({ theme }) => ({
     transform: 'translateY(-2px)',
     boxShadow: theme.shadows[4],
   },
+  cursor: 'pointer',
 }));
 
 const ChannelList: React.FC = () => {
   const [channels, setChannels] = useState<Channel[]>([]);
   const [loading, setLoading] = useState(false);
-  const [pagination, setPagination] = useState({
-    page: 1,
-    limit: 12,
-    total: 0,
-    pages: 1,
-  });
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState('created_at');
   const [order, setOrder] = useState<'asc' | 'desc'>('desc');
   const [openDialog, setOpenDialog] = useState(false);
   const [editChannel, setEditChannel] = useState<Channel | null>(null);
   const [channelName, setChannelName] = useState('');
+  const [selectedChannels, setSelectedChannels] = useState<number[]>([]);
   const { enqueueSnackbar } = useSnackbar();
 
   const fetchChannels = useCallback(async () => {
     try {
       setLoading(true);
       const response = await channelsApi.getList({
-        page: pagination.page,
-        limit: pagination.limit,
         search,
         sort_by: sortBy,
         order,
@@ -76,25 +63,18 @@ const ChannelList: React.FC = () => {
       
       if (response.success) {
         setChannels(response.data.items);
-        setPagination(prev => ({
-          ...prev,
-          total: response.data.pagination.total,
-          pages: response.data.pagination.pages,
-        }));
       } else {
         enqueueSnackbar(response.message || '获取频道列表失败', { variant: 'error' });
         setChannels([]);
-        setPagination(prev => ({ ...prev, total: 0, pages: 1 }));
       }
     } catch (error) {
       console.error('获取频道列表失败:', error);
       enqueueSnackbar('获取频道列表失败', { variant: 'error' });
       setChannels([]);
-      setPagination(prev => ({ ...prev, total: 0, pages: 1 }));
     } finally {
       setLoading(false);
     }
-  }, [pagination.page, pagination.limit, search, sortBy, order, enqueueSnackbar]);
+  }, [search, sortBy, order, enqueueSnackbar]);
 
   useEffect(() => {
     fetchChannels();
@@ -137,12 +117,13 @@ const ChannelList: React.FC = () => {
     }
   };
 
-  const handleDeleteChannel = async (channelId: number) => {
-    if (!window.confirm('确定要删除这个频道吗？')) return;
+  const handleDeleteChannels = async () => {
+    if (!window.confirm('确定要删除选中的频道吗？')) return;
     
     try {
-      await channelsApi.delete(channelId);
+      await Promise.all(selectedChannels.map(id => channelsApi.delete(id)));
       enqueueSnackbar('删除频道成功', { variant: 'success' });
+      setSelectedChannels([]);
       fetchChannels();
     } catch (error) {
       console.error('删除频道失败:', error);
@@ -161,8 +142,12 @@ const ChannelList: React.FC = () => {
     setOpenDialog(true);
   };
 
-  const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
-    setPagination(prev => ({ ...prev, page: value }));
+  const handleChannelSelect = (channelId: number) => {
+    setSelectedChannels(prev => 
+      prev.includes(channelId) 
+        ? prev.filter(id => id !== channelId)
+        : [...prev, channelId]
+    );
   };
 
   if (loading) {
@@ -205,23 +190,17 @@ const ChannelList: React.FC = () => {
             }}
             sx={{ width: 300 }}
           />
-          <FormControl size="small" sx={{ minWidth: 150 }}>
-            <InputLabel>排序字段</InputLabel>
-            <Select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              label="排序字段"
+          {selectedChannels.length > 0 && (
+            <Button
+              variant="contained"
+              color="error"
+              startIcon={<DeleteIcon />}
+              onClick={handleDeleteChannels}
+              sx={{ textTransform: 'none' }}
             >
-              <MenuItem value="created_at">创建时间</MenuItem>
-              <MenuItem value="channel_name">频道名称</MenuItem>
-            </Select>
-          </FormControl>
-          <IconButton 
-            onClick={() => setOrder(order === 'asc' ? 'desc' : 'asc')}
-            sx={{ color: 'text.secondary' }}
-          >
-            <SortIcon sx={{ transform: order === 'desc' ? 'rotate(180deg)' : '' }} />
-          </IconButton>
+              删除选中 ({selectedChannels.length})
+            </Button>
+          )}
         </Stack>
       </Paper>
 
@@ -243,54 +222,38 @@ const ChannelList: React.FC = () => {
           gap: 3,
         }}>
           {channels.map((channel) => (
-            <StyledCard key={channel.channel_id} elevation={1}>
+            <StyledCard 
+              key={channel.channel_id} 
+              elevation={1}
+              onClick={() => handleOpenDialog(channel)}
+            >
               <CardContent sx={{ flexGrow: 1, pb: 2 }}>
-                <Typography variant="h6" gutterBottom noWrap>
-                  {channel.channel_name}
-                </Typography>
-                <Typography variant="body2" color="text.secondary" gutterBottom>
-                  创建时间：{new Date(channel.created_at).toLocaleDateString()}
-                </Typography>
-                {channel.scripts_count !== undefined && (
-                  <Typography variant="body2" color="text.secondary">
-                    脚本数量：{channel.scripts_count}
-                  </Typography>
-                )}
+                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                  <Checkbox
+                    checked={selectedChannels.includes(channel.channel_id)}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      handleChannelSelect(channel.channel_id);
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="h6" gutterBottom noWrap>
+                      {channel.channel_name}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" gutterBottom>
+                      创建时间：{new Date(channel.created_at).toLocaleDateString()}
+                    </Typography>
+                    {channel.scripts_count !== undefined && (
+                      <Typography variant="body2" color="text.secondary">
+                        脚本数量：{channel.scripts_count}
+                      </Typography>
+                    )}
+                  </Box>
+                </Box>
               </CardContent>
-              <Divider />
-              <Box sx={{ p: 1, display: 'flex', gap: 1, justifyContent: 'flex-end' }}>
-                <Button
-                  size="small"
-                  startIcon={<EditIcon />}
-                  onClick={() => handleOpenDialog(channel)}
-                  sx={{ textTransform: 'none' }}
-                >
-                  编辑
-                </Button>
-                <Button
-                  size="small"
-                  color="error"
-                  startIcon={<DeleteIcon />}
-                  onClick={() => handleDeleteChannel(channel.channel_id)}
-                  sx={{ textTransform: 'none' }}
-                >
-                  删除
-                </Button>
-              </Box>
             </StyledCard>
           ))}
-        </Box>
-      )}
-
-      {channels.length > 0 && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4, mb: 2 }}>
-          <Pagination
-            count={pagination.pages}
-            page={pagination.page}
-            onChange={handlePageChange}
-            color="primary"
-            shape="rounded"
-          />
         </Box>
       )}
 

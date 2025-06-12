@@ -63,9 +63,12 @@ export interface Script {
   release_date?: string;
   channel_id?: number;
   category_id?: number;
+  channel?: Channel | null;
+  category?: Category | null;
   chapters: Chapter[];
   created_at: string;
   updated_at: string;
+  chapters_count?: number;
 }
 
 export interface ApiResponse<T> {
@@ -94,8 +97,21 @@ export interface PaginatedData<T> {
 export interface Category {
   category_id: number;
   category_name: string;
+  user_id: number;
   created_at: string;
-  updated_at: string;
+}
+
+export interface ScriptListParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  sort_by?: string;
+  order?: 'asc' | 'desc';
+  channel_id?: string;
+  category_id?: string;
+  status?: string;
+  difficulty?: string;
+  include?: string;
 }
 
 export const channelsApi = {
@@ -131,14 +147,18 @@ export const scriptsApi = {
     return api.post('/scripts', script);
   },
 
-  getList: (params: {
-    page?: number;
-    limit?: number;
-    search?: string;
-    sort_by?: string;
-    order?: 'asc' | 'desc';
-  }): Promise<ApiResponse<PaginatedData<Script>>> => {
-    return api.get('/scripts', { params });
+  getList: (params: ScriptListParams): Promise<ApiResponse<PaginatedData<Script>>> => {
+    const queryParams = {
+      ...params,
+      page: params.page?.toString(),
+      limit: params.limit?.toString(),
+      channel_id: params.channel_id?.toString(),
+      category_id: params.category_id?.toString(),
+      difficulty: params.difficulty?.toString(),
+    };
+
+    console.log('API Request params:', queryParams);
+    return api.get('/scripts', { params: queryParams });
   },
 
   getDetail: (scriptId: number): Promise<ApiResponse<Script>> => {
@@ -169,11 +189,11 @@ export const categoriesApi = {
     return api.get(`/categories/${id}`);
   },
 
-  create: (data: Omit<Category, 'category_id' | 'created_at' | 'updated_at'>): Promise<ApiResponse<Category>> => {
+  create: (data: { category_name: string; user_id?: number }): Promise<ApiResponse<Category>> => {
     return api.post('/categories', data);
   },
 
-  update: (id: number, data: Partial<Omit<Category, 'category_id' | 'created_at' | 'updated_at'>>): Promise<ApiResponse<Category>> => {
+  update: (id: number, data: { category_name: string; user_id?: number }): Promise<ApiResponse<Category>> => {
     return api.put(`/categories/${id}`, data);
   },
 

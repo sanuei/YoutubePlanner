@@ -54,6 +54,7 @@ const ScriptEdit: React.FC = () => {
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [channels, setChannels] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [formData, setFormData] = useState<Partial<Script>>({
@@ -72,22 +73,18 @@ const ScriptEdit: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      console.log('ScriptEdit mounted with scriptId:', scriptId);
-      
       if (!scriptId) {
-        console.error('No scriptId provided');
-        enqueueSnackbar('脚本ID无效', { variant: 'error' });
-        navigate('/scripts');
+        setError('脚本ID无效');
+        setLoading(false);
         return;
       }
 
       try {
         setLoading(true);
-        console.log('Fetching script data for ID:', scriptId);
+        setError(null);
         
         // 先获取脚本详情
         const scriptResponse = await scriptsApi.getDetail(Number(scriptId));
-        console.log('Script response:', scriptResponse);
         
         if (!scriptResponse.success) {
           throw new Error(scriptResponse.message || '获取脚本详情失败');
@@ -128,12 +125,11 @@ const ScriptEdit: React.FC = () => {
         }
       } catch (error: any) {
         console.error('Error in ScriptEdit:', error);
+        setError(error.message || '获取脚本数据失败');
         enqueueSnackbar(error.message || '获取脚本数据失败', { 
           variant: 'error',
           autoHideDuration: 5000,
         });
-        // 只在获取脚本详情失败时跳转回管理页面
-        navigate('/scripts');
       } finally {
         setLoading(false);
       }
@@ -154,14 +150,19 @@ const ScriptEdit: React.FC = () => {
         ...formData,
         difficulty: formData.difficulty || 3,
         status: formData.status || 'Scripting',
+        category_id: formData.category_id || undefined,
       };
+      console.log('Submitting script data:', submitData);
       
       const response = await scriptsApi.update(Number(scriptId), submitData);
       if (response.success) {
         enqueueSnackbar('脚本更新成功', { variant: 'success' });
         navigate('/scripts');
+      } else {
+        enqueueSnackbar(response.message || '更新脚本失败', { variant: 'error' });
       }
     } catch (error: any) {
+      console.error('Error updating script:', error);
       enqueueSnackbar(error.message || '更新脚本失败', { variant: 'error' });
     }
   };
@@ -194,6 +195,33 @@ const ScriptEdit: React.FC = () => {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
         <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box sx={{ maxWidth: 1200, mx: 'auto', p: 3 }}>
+        <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 4 }}>
+          <IconButton onClick={() => navigate('/scripts')} size="large">
+            <ArrowBackIcon />
+          </IconButton>
+          <Typography variant="h4" component="h1">
+            编辑脚本
+          </Typography>
+        </Stack>
+        <Paper sx={{ p: 4, textAlign: 'center' }}>
+          <Typography color="error" gutterBottom>
+            {error}
+          </Typography>
+          <Button
+            variant="contained"
+            onClick={() => navigate('/scripts')}
+            sx={{ mt: 2 }}
+          >
+            返回脚本列表
+          </Button>
+        </Paper>
       </Box>
     );
   }

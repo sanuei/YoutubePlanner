@@ -9,15 +9,17 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 public class GetScriptsRequest {
-    @Min(value = 1, message = "页码最小为1")
-    private Integer page = 1;
+    @Min(1)
+    private int page = 1;
 
-    @Min(value = 1, message = "每页数量最小为1")
-    @Max(value = 100, message = "每页数量最大为100")
-    private Integer limit = 10;
+    @Min(1)
+    private int size = 10;
 
     @JsonProperty("channel_id")
     private Long channelId;
@@ -27,8 +29,9 @@ public class GetScriptsRequest {
 
     private String status;
 
-    @Pattern(regexp = "^(EASY|MEDIUM|HARD)?$", message = "难度必须是 EASY、MEDIUM 或 HARD")
-    private String difficulty;
+    @Min(value = 1, message = "难度最小为1")
+    @Max(value = 5, message = "难度最大为5")
+    private Integer difficulty;
 
     private String search;
 
@@ -44,6 +47,15 @@ public class GetScriptsRequest {
 
     @Pattern(regexp = "^(asc|desc)?$", message = "排序方向必须是 asc 或 desc")
     private String order = "desc";
+
+    private Set<String> includeFields = new HashSet<>();
+
+    public Set<String> getIncludeFields() {
+        if (includeFields.isEmpty()) {
+            return new HashSet<>();
+        }
+        return includeFields;
+    }
 
     public PageRequest toPageRequest() {
         // 将页码转换为从0开始
@@ -64,6 +76,6 @@ public class GetScriptsRequest {
             sortField
         );
 
-        return PageRequest.of(pageIndex, limit, sort);
+        return PageRequest.of(pageIndex, size, sort);
     }
 } 

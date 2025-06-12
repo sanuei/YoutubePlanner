@@ -191,3 +191,133 @@ npm run build
 ## 许可证
 
 [MIT](https://opensource.org/licenses/MIT)
+
+# YouTube Planner API 文档
+
+## 脚本管理 API
+
+### 获取脚本列表
+
+获取脚本列表，支持分页、搜索、排序和筛选。
+
+**请求**
+
+```http
+GET /api/v1/scripts
+```
+
+**查询参数**
+
+| 参数名 | 类型 | 必填 | 描述 |
+|--------|------|------|------|
+| page | number | 否 | 页码，默认 1 |
+| limit | number | 否 | 每页数量，默认 10 |
+| search | string | 否 | 搜索关键词，用于搜索脚本标题 |
+| sort_by | string | 否 | 排序字段，可选值：created_at, updated_at, title |
+| order | string | 否 | 排序方向，可选值：asc, desc |
+| channel_id | string | 否 | 频道ID，用于筛选特定频道的脚本 |
+| category_id | string | 否 | 分类ID，用于筛选特定分类的脚本 |
+| status | string | 否 | 脚本状态，用于筛选特定状态的脚本 |
+| difficulty | string | 否 | 难度等级，用于筛选特定难度的脚本 |
+| include | string | 否 | 包含关联数据，例如：category |
+
+**响应**
+
+```json
+{
+  "success": true,
+  "code": 200,
+  "message": "操作成功",
+  "data": {
+    "items": [
+      {
+        "script_id": 26,
+        "title": "脚本标题",
+        "description": "脚本描述",
+        "status": "Scripting",
+        "difficulty": 3,
+        "channel": {
+          "channel_id": 19,
+          "channel_name": "频道名称"
+        },
+        "category": {
+          "category_id": 2,
+          "category_name": "分类名称"
+        },
+        "release_date": "2024-06-12",
+        "chapters_count": 1,
+        "created_at": "2024-06-12T12:49:35.453023Z",
+        "updated_at": "2024-06-12T12:49:35.453055Z"
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 10,
+      "total": 18,
+      "pages": 2,
+      "has_next": true,
+      "has_prev": false
+    }
+  },
+  "timestamp": "2024-06-12T13:29:36.062627Z",
+  "request_id": "a3a24126-132c-45f1-bf1b-e31e29536f5f"
+}
+```
+
+**响应字段说明**
+
+| 字段 | 类型 | 描述 |
+|------|------|------|
+| success | boolean | 请求是否成功 |
+| code | number | HTTP 状态码 |
+| message | string | 响应消息 |
+| data.items | array | 脚本列表 |
+| data.pagination | object | 分页信息 |
+| timestamp | string | 响应时间戳 |
+| request_id | string | 请求ID |
+
+**脚本对象字段说明**
+
+| 字段 | 类型 | 描述 |
+|------|------|------|
+| script_id | number | 脚本ID |
+| title | string | 脚本标题 |
+| description | string | 脚本描述 |
+| status | string | 脚本状态 |
+| difficulty | number | 难度等级 |
+| channel | object | 关联的频道信息 |
+| category | object | 关联的分类信息 |
+| release_date | string | 发布日期 |
+| chapters_count | number | 章节数量 |
+| created_at | string | 创建时间 |
+| updated_at | string | 更新时间 |
+
+**分页信息字段说明**
+
+| 字段 | 类型 | 描述 |
+|------|------|------|
+| page | number | 当前页码 |
+| limit | number | 每页数量 |
+| total | number | 总记录数 |
+| pages | number | 总页数 |
+| has_next | boolean | 是否有下一页 |
+| has_prev | boolean | 是否有上一页 |
+
+**示例请求**
+
+```bash
+# 获取第一页脚本列表
+curl -X GET "http://localhost:8080/api/v1/scripts?page=1&limit=10"
+
+# 搜索特定标题的脚本
+curl -X GET "http://localhost:8080/api/v1/scripts?search=Python"
+
+# 按创建时间降序排序
+curl -X GET "http://localhost:8080/api/v1/scripts?sort_by=created_at&order=desc"
+
+# 筛选特定分类的脚本
+curl -X GET "http://localhost:8080/api/v1/scripts?category_id=2"
+
+# 包含分类信息
+curl -X GET "http://localhost:8080/api/v1/scripts?include=category"
+```
