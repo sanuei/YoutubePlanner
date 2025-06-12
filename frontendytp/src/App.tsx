@@ -10,6 +10,7 @@ import ChannelList from './components/ChannelList';
 import UserManagement from './components/UserManagement';
 import CategoryManagement from './components/CategoryManagement';
 import ScriptManagement from './components/ScriptManagement';
+import ScriptCreate from './components/ScriptCreate';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthContext';
 
@@ -32,6 +33,7 @@ function App() {
                         <Route path="/channels" element={<ChannelList />} />
                         <Route path="/categories" element={<CategoryManagement />} />
                         <Route path="/scripts" element={<ScriptManagement />} />
+                        <Route path="/scripts/create" element={<ScriptCreate />} />
                         <Route path="/" element={<Navigate to="/channels" replace />} />
                       </Routes>
                     </Layout>
