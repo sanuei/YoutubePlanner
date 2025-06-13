@@ -1,9 +1,25 @@
+/*
+ * 文件名：CategoryController.java
+ * 创建日期：2024年3月19日
+ * 作者：[你的名字]
+ * 
+ * 文件描述：
+ * 分类控制器，处理分类相关的HTTP请求。
+ * 包括创建、查询、更新和删除分类的功能。
+ * 
+ * 修改历史：
+ * 2024年3月19日 - 初始版本
+ * 
+ * 版权所有 (c) 2024 YoutubePlanner
+ */
+
 package com.youtubeplanner.backend.category;
 
 import com.youtubeplanner.backend.category.dto.CreateCategoryRequest;
 import com.youtubeplanner.backend.category.dto.CategoryResponse;
 import com.youtubeplanner.backend.common.ApiResponse;
 import com.youtubeplanner.backend.common.PageResponse;
+import com.youtubeplanner.backend.user.entity.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -59,6 +75,7 @@ public class CategoryController {
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new RuntimeException("用户未认证");
         }
-        return Long.parseLong(authentication.getName());
+        com.youtubeplanner.backend.user.entity.User user = (com.youtubeplanner.backend.user.entity.User) authentication.getPrincipal();
+        return user.getUserId();
     }
 } 

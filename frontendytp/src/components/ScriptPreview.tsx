@@ -128,6 +128,47 @@ const ScriptPreview: React.FC = () => {
     };
   }, []);
 
+  // 添加样式组件
+  const StatusLabel = ({ label }: { label: string }) => (
+    <Box
+      sx={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        height: 24,
+        padding: '0 8px',
+        borderRadius: '16px',
+        backgroundColor: 'transparent',
+        border: '1px solid',
+        borderColor: 'secondary.main',
+        color: 'secondary.main',
+        fontSize: '0.75rem',
+        fontWeight: 500,
+      }}
+    >
+      {label}
+    </Box>
+  );
+
+  const InfoLabel = ({ label }: { label: string }) => (
+    <Box
+      sx={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        height: 24,
+        padding: '0 8px',
+        borderRadius: '16px',
+        backgroundColor: 'transparent',
+        border: '1px solid',
+        borderColor: 'primary.main',
+        color: 'primary.main',
+        fontSize: '0.75rem',
+        fontWeight: 500,
+      }}
+    >
+      {label}
+    </Box>
+  );
+
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
@@ -306,27 +347,12 @@ const ScriptPreview: React.FC = () => {
             )}
 
             <Stack direction="row" spacing={2} alignItems="center" sx={{ mt: 2 }}>
-              <Chip
-                label={script.status || '未设置'}
-                color="secondary"
-                variant="outlined"
-                clickable={false}
-              />
+              <StatusLabel label={script.status || '未设置'} />
               {script.category && (
-                <Chip
-                  label={script.category.category_name}
-                  color="primary"
-                  variant="outlined"
-                  clickable={false}
-                />
+                <InfoLabel label={script.category.category_name} />
               )}
               {script.channel && (
-                <Chip
-                  label={script.channel.channel_name}
-                  color="info"
-                  variant="outlined"
-                  clickable={false}
-                />
+                <InfoLabel label={script.channel.channel_name} />
               )}
               {script.difficulty && renderStars(script.difficulty)}
             </Stack>
