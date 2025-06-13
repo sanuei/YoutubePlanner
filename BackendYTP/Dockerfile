@@ -12,7 +12,7 @@ COPY src ./src
 RUN apk add --no-cache maven
 
 # 构建项目
-RUN mvn clean package -DskipTests
+RUN mvn clean package -DskipTests -Ddockerfile.skip=true
 
 # 使用新的基础镜像
 FROM amazoncorretto:17-alpine
@@ -32,8 +32,8 @@ RUN mkdir -p /app/logs && \
     chown -R spring:spring /app/logs && \
     chmod 755 /app/logs
 
-# 从构建阶段复制JAR文件
-COPY --from=builder /build/target/backend-0.0.1-SNAPSHOT.jar app.jar
+# 复制JAR文件
+COPY target/backend-0.0.1-SNAPSHOT.jar app.jar
 
 # 验证JAR文件
 RUN ls -l app.jar && \
