@@ -67,4 +67,24 @@ application-*.yml
 
 # Logs
 logs/
-*.log.* 
+*.log.*
+
+# Environment
+.env
+*.properties
+!src/main/resources/application.properties
+
+# Docker
+.docker/
+docker-compose.override.yml
+
+# Build
+build/
+out/
+dist/
+
+# Temporary files
+*.tmp
+*.temp
+tmp/
+temp/ 
