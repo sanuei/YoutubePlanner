@@ -16,24 +16,14 @@ RUN mkdir -p /app/logs && \
     chown -R spring:spring /app/logs && \
     chmod 755 /app/logs
 
-# 复制Maven构建文件
-COPY pom.xml .
-COPY src ./src
-
-# 安装Maven
-RUN apk add --no-cache maven
-
-# 构建应用
-RUN mvn clean package -DskipTests
+# 复制构建参数
+ARG JAR_FILE
+COPY ${JAR_FILE} app.jar
 
 # 验证JAR文件
-RUN ls -l target/*.jar && \
-    echo "JAR file size: $(stat -f %z target/*.jar || stat -c %s target/*.jar) bytes" && \
-    jar tf target/*.jar || echo "JAR file validation failed"
-
-# 复制构建好的JAR文件
-RUN cp target/*.jar app.jar && \
-    chown spring:spring app.jar
+RUN ls -l app.jar && \
+    echo "JAR file size: $(stat -f %z app.jar || stat -c %s app.jar) bytes" && \
+    jar tf app.jar || echo "JAR file validation failed"
 
 # 切换到非root用户
 USER spring:spring
@@ -45,4 +35,4 @@ EXPOSE 8080
 ENV JAVA_OPTS="-Xms512m -Xmx1024m -Djava.security.egd=file:/dev/./urandom"
 
 # 启动命令
-CMD ["sh", "-c", "java $JAVA_OPTS -jar app.jar --spring.profiles.active=${SPRING_PROFILES_ACTIVE:-dev}"] 
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"] 
