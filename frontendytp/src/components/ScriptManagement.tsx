@@ -273,6 +273,9 @@ const ScriptManagement: React.FC = () => {
 
   // 渲染星级
   const renderStars = (difficulty: number) => {
+    if (!difficulty) {
+      return <Typography variant="body2" color="text.secondary">未设置</Typography>;
+    }
     return (
       <Stack direction="row" spacing={0.5}>
         {[1, 2, 3, 4, 5].map((star) => (
@@ -328,6 +331,23 @@ const ScriptManagement: React.FC = () => {
     }
     
     return '-';
+  };
+
+  // 获取频道名称的辅助函数
+  const getChannelName = (script: Script): string => {
+    if (script.channel) {
+      return script.channel.channel_name || '未知频道';
+    }
+    
+    // 如果channel对象不存在，但有channel_id，尝试从channels列表中查找
+    if (script.channel_id) {
+      const channel = channels.find(c => c.channel_id === script.channel_id);
+      if (channel) {
+        return channel.channel_name;
+      }
+    }
+    
+    return '未设置';
   };
 
   if (loading) {
@@ -502,6 +522,7 @@ const ScriptManagement: React.FC = () => {
               <TableCell>标题</TableCell>
               <TableCell>星级</TableCell>
               <TableCell>状态</TableCell>
+              <TableCell>频道</TableCell>
               <TableCell>分类</TableCell>
               <TableCell>最后修改</TableCell>
               <TableCell align="right">操作</TableCell>
@@ -532,6 +553,14 @@ const ScriptManagement: React.FC = () => {
                     label={script.status || '未设置'}
                     size="small"
                     color="secondary"
+                    variant="outlined"
+                  />
+                </TableCell>
+                <TableCell>
+                  <Chip
+                    label={getChannelName(script)}
+                    size="small"
+                    color="primary"
                     variant="outlined"
                   />
                 </TableCell>

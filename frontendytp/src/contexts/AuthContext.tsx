@@ -1,13 +1,43 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import api from '../services/api';
+
+interface User {
+  id: number;
+  userId?: number;
+  username: string;
+  email: string;
+}
+
+interface LoginResponse {
+  accessToken: string;
+  refreshToken: string;
+  tokenType: string;
+  expiresIn: number;
+  user: {
+    userId: number;
+    username: string;
+  };
+}
+
+interface ApiResponse<T> {
+  success: boolean;
+  code: number;
+  message: string;
+  data: T;
+  timestamp: string;
+  requestId: string;
+}
 
 interface AuthContextType {
-  isAuthenticated: boolean;
-  login: (username: string, password: string) => Promise<void>;
+  user: User | null;
+  loading: boolean;
+  login: (username: string, password: string) => Promise<{ success: boolean; message?: string }>;
+  register: (username: string, password: string, email: string) => Promise<{ success: boolean; message?: string }>;
   logout: () => void;
 }
 
-const AuthContext = createContext<AuthContextType | null>(null);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -18,33 +48,138 @@ export const useAuth = () => {
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('token'));
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  const login = useCallback(async (username: string, password: string) => {
-    try {
-      // TODO: 实现实际的登录API调用
-      // 模拟API调用
-      await new Promise(resolve => setTimeout(resolve, 1000));
+  useEffect(() => {
+    const initAuth = async () => {
+      const token = localStorage.getItem('accessToken');
+      console.log('Initial token check:', token);
       
-      // 模拟成功登录
-      localStorage.setItem('token', 'dummy-token');
-      setIsAuthenticated(true);
-      navigate('/channels');
-    } catch (error) {
-      console.error('Login failed:', error);
-      throw error;
+      if (token) {
+        try {
+          // 验证token有效性
+          const response = await api.get<ApiResponse<User>>('/auth/verify');
+          console.log('Token verification response:', response);
+          
+          if (response.data.success) {
+            setUser(response.data.data);
+            api.defaults.headers.common.Authorization = `Bearer ${token}`;
+          } else {
+            // token无效，清除存储
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            delete api.defaults.headers.common.Authorization;
+          }
+        } catch (error) {
+          console.error('Token verification failed:', error);
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          delete api.defaults.headers.common.Authorization;
+        }
+      }
+      setLoading(false);
+    };
+
+    initAuth();
+  }, []);
+
+  const login = async (username: string, password: string) => {
+    try {
+      console.log('Attempting login for user:', username);
+      const response = await api.post<LoginResponse>('/auth/login', { username, password });
+      console.log('Login response:', response);
+      console.log('Response data:', response.data);
+
+      const { accessToken, refreshToken, user } = response.data;
+      console.log('Extracted tokens and user:', { accessToken, refreshToken, user });
+      
+      if (accessToken && refreshToken && user) {
+        localStorage.setItem('accessToken', accessToken);
+        localStorage.setItem('refreshToken', refreshToken);
+        api.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
+        
+        const userData = {
+          id: user.userId || 0,
+          username: user.username,
+          email: ''
+        };
+        console.log('Setting user data:', userData);
+        setUser(userData);
+        
+        console.log('Navigating to /channels after successful login');
+        navigate('/channels');
+        return { success: true, message: '登录成功' };
+      }
+      
+      console.error('Login failed - Missing required data:', response.data);
+      return { success: false, message: '登录失败：缺少必要的数据' };
+    } catch (error: any) {
+      console.error('Login error:', error);
+      return { 
+        success: false, 
+        message: error.response?.data?.message || error.message || '登录失败，请重试' 
+      };
+    }
+  };
+
+  const register = useCallback(async (username: string, password: string, email: string) => {
+    try {
+      console.log('Attempting registration with:', { username, email });
+      const response = await api.post<ApiResponse<{ userId: number; username: string }>>('/auth/register', {
+        username,
+        password,
+        email
+      });
+      
+      console.log('Registration response:', response);
+      console.log('Response data:', response.data);
+      
+      // 检查响应状态码和成功标志
+      if (response.data?.success && response.data?.code === 201) {
+        console.log('Registration successful, preparing to navigate');
+        // 使用 Promise 来确保导航完成
+        return new Promise<{ success: boolean; message: string }>((resolve) => {
+          // 先返回成功状态
+          resolve({ 
+            success: true, 
+            message: response.data.message || '注册成功' 
+          });
+          
+          // 然后执行导航
+          setTimeout(() => {
+            console.log('Navigating to login page');
+            navigate('/login', { replace: true });
+          }, 1000);
+        });
+      }
+      
+      console.error('Registration failed - Invalid response:', response);
+      return { 
+        success: false, 
+        message: response.data.message || '注册失败' 
+      };
+    } catch (error: any) {
+      console.error('Registration error:', error);
+      return { 
+        success: false, 
+        message: error.response?.data?.message || error.message || '注册失败，请重试' 
+      };
     }
   }, [navigate]);
 
   const logout = useCallback(() => {
-    localStorage.removeItem('token');
-    setIsAuthenticated(false);
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    delete api.defaults.headers.common.Authorization;
+    console.log('Cleared Authorization header after logout');
+    setUser(null);
     navigate('/login');
   }, [navigate]);
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   );
