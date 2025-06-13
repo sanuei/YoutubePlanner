@@ -44,10 +44,10 @@ RUN ls -l app.jar && \
 USER spring:spring
 
 # 暴露端口
-EXPOSE 10000
+EXPOSE ${PORT:-8080}
 
 # 设置JVM参数
 ENV JAVA_OPTS="-Xms512m -Xmx1024m -Djava.security.egd=file:/dev/./urandom"
 
 # 启动命令
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"] 
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar --server.address=0.0.0.0"] 
