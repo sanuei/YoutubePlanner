@@ -1,4 +1,20 @@
 # 使用支持多架构的OpenJDK 17基础镜像
+FROM amazoncorretto:17-alpine as builder
+
+# 设置工作目录
+WORKDIR /build
+
+# 复制Maven配置文件
+COPY pom.xml .
+COPY src ./src
+
+# 安装Maven
+RUN apk add --no-cache maven
+
+# 构建项目
+RUN mvn clean package -DskipTests
+
+# 使用新的基础镜像
 FROM amazoncorretto:17-alpine
 
 # 设置工作目录
@@ -16,9 +32,8 @@ RUN mkdir -p /app/logs && \
     chown -R spring:spring /app/logs && \
     chmod 755 /app/logs
 
-# 复制构建参数
-ARG JAR_FILE
-COPY ${JAR_FILE} app.jar
+# 从构建阶段复制JAR文件
+COPY --from=builder /build/target/backend-0.0.1-SNAPSHOT.jar app.jar
 
 # 验证JAR文件
 RUN ls -l app.jar && \
