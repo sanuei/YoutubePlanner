@@ -3,50 +3,26 @@ server:
   address: 0.0.0.0
 
 spring:
-  profiles:
-    active: ${SPRING_PROFILES_ACTIVE:dev}
-  datasource:
-    driver-class-name: org.postgresql.Driver
-  jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
-  h2:
-    console:
-      enabled: false
+  main:
+    web-application-type: servlet
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
 
-mybatis:
-  mapper-locations: classpath:mapper/*.xml
-  type-aliases-package: com.youtubeplanner.backend.script.entity
-  configuration:
-    map-underscore-to-camel-case: true
-
-jwt:
-  secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
-  access-token:
-    expiration: ${JWT_ACCESS_TOKEN_EXPIRATION:3600}  # 1小时
-  refresh-token:
-    expiration: ${JWT_REFRESH_TOKEN_EXPIRATION:604800}  # 7天
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
 
 logging:
   level:
     root: INFO
     com.youtubeplanner.backend: DEBUG
-    com.youtubeplanner.backend.script: DEBUG
-    org.springframework: INFO
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
   pattern:
-    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
-    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
-  file:
-    name: /app/logs/application.log
-    max-size: 10MB
-    max-history: 30
-  logback:
-    rollingpolicy:
-      max-file-size: 10MB
-      max-history: 30
-      total-size-cap: 1GB
-
-api:
-  version: v1
-  base-path: /api/v1 
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n" 

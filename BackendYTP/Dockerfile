@@ -1,5 +1,5 @@
 # 使用支持多架构的OpenJDK 17基础镜像
-FROM amazoncorretto:17-alpine as builder
+FROM amazoncorretto:17-alpine AS builder
 
 # 设置工作目录
 WORKDIR /build
@@ -16,6 +16,9 @@ RUN mvn clean package -DskipTests -Ddockerfile.skip=true
 
 # 使用新的基础镜像
 FROM amazoncorretto:17-alpine
+
+# 安装网络工具用于调试
+RUN apk add --no-cache curl net-tools
 
 # 设置工作目录
 WORKDIR /app
@@ -49,5 +52,9 @@ EXPOSE 10000
 # 设置JVM参数
 ENV JAVA_OPTS="-Xms512m -Xmx1024m -Djava.security.egd=file:/dev/./urandom"
 
-# 启动命令
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar --server.address=0.0.0.0 --server.port=${PORT:-10000}"] 
+# 健康检查
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+  CMD curl -f http://0.0.0.0:${PORT:-10000}/health || exit 1
+
+# 启动命令 - 使用jar文件
+ENTRYPOINT ["sh", "-c", "echo '=== 启动应用程序 ===' && echo 'PORT环境变量: '${PORT:-10000} && echo '绑定地址: 0.0.0.0' && java $JAVA_OPTS -jar app.jar --server.port=${PORT:-10000} --server.address=0.0.0.0"] 
