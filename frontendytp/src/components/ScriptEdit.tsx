@@ -273,10 +273,11 @@ const ScriptEdit: React.FC = () => {
             <FormControl fullWidth>
               <InputLabel>难度</InputLabel>
               <Select
-                value={formData.difficulty}
+                value={formData.difficulty || ''}
                 label="难度"
-                onChange={(e) => setFormData(prev => ({ ...prev, difficulty: Number(e.target.value) }))}
+                onChange={(e) => setFormData(prev => ({ ...prev, difficulty: e.target.value ? Number(e.target.value) : undefined }))}
               >
+                <MenuItem value="">未设置</MenuItem>
                 {[1, 2, 3, 4, 5].map((value) => (
                   <MenuItem key={value} value={value}>
                     {value}
@@ -289,10 +290,11 @@ const ScriptEdit: React.FC = () => {
             <FormControl fullWidth>
               <InputLabel>状态</InputLabel>
               <Select
-                value={formData.status}
+                value={formData.status || ''}
                 label="状态"
-                onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value }))}
+                onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value || undefined }))}
               >
+                <MenuItem value="">未设置</MenuItem>
                 <MenuItem value="Scripting">编写中</MenuItem>
                 <MenuItem value="Reviewing">审核中</MenuItem>
                 <MenuItem value="Completed">已完成</MenuItem>
@@ -305,8 +307,9 @@ const ScriptEdit: React.FC = () => {
               <Select
                 value={formData.channel_id || ''}
                 label="频道"
-                onChange={(e) => setFormData(prev => ({ ...prev, channel_id: Number(e.target.value) }))}
+                onChange={(e) => setFormData(prev => ({ ...prev, channel_id: e.target.value ? Number(e.target.value) : undefined }))}
               >
+                <MenuItem value="">未设置</MenuItem>
                 {channels.map((channel) => (
                   <MenuItem key={channel.channel_id} value={channel.channel_id}>
                     {channel.channel_name}
@@ -321,8 +324,9 @@ const ScriptEdit: React.FC = () => {
               <Select
                 value={formData.category_id || ''}
                 label="分类"
-                onChange={(e) => setFormData(prev => ({ ...prev, category_id: Number(e.target.value) }))}
+                onChange={(e) => setFormData(prev => ({ ...prev, category_id: e.target.value ? Number(e.target.value) : undefined }))}
               >
+                <MenuItem value="">未设置</MenuItem>
                 {categories.map((category) => (
                   <MenuItem key={category.category_id} value={category.category_id}>
                     {category.category_name}

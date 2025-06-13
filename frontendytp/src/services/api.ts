@@ -8,32 +8,160 @@ const api = axios.create({
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
-    'X-User-ID': '1'
+    'Accept': 'application/json',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization'
   },
 });
 
+let isRefreshing = false;
+let failedQueue: any[] = [];
+
+const processQueue = (error: any, token: string | null = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
 // 请求拦截器
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('accessToken');
+    console.log('Request interceptor - Token:', token);
+    console.log('Request URL:', config.url);
+    console.log('Full request config:', {
+      url: config.url,
+      method: config.method,
+      headers: config.headers,
+      data: config.data,
+      params: config.params
+    });
+    
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+      console.log('Request headers:', config.headers);
+    } else {
+      console.warn('No token found for request:', config.url);
+    }
+
+    // 确保请求头中包含正确的 Content-Type
+    if (config.method === 'post' || config.method === 'put') {
+      config.headers['Content-Type'] = 'application/json';
+    }
+
+    return config;
+  },
+  (error) => {
+    console.error('Request interceptor error:', error);
+    return Promise.reject(error);
   }
-  console.log('API Request:', config.method?.toUpperCase(), config.url, config.params || config.data);
-  return config;
-});
+);
 
 // 响应拦截器
 api.interceptors.response.use(
   (response) => {
-    console.log('API Response:', response.config.url, response.data);
-    return response.data;
-  },
-  (error) => {
-    console.error('API Error:', error.config?.url, error.response?.data || error.message);
-    if (error.response?.data?.message) {
-      throw new Error(error.response.data.message);
+    console.log('Response success:', {
+      url: response.config.url,
+      status: response.status,
+      headers: response.headers,
+      data: response.data
+    });
+
+    // 对于登录请求的特殊处理
+    if (response.config.url?.includes('/auth/login')) {
+      console.log('Processing login response:', response.data);
+      return response.data;
     }
-    throw error;
+
+    // 如果响应成功，直接返回响应数据
+    if (response.data && response.data.success) {
+      return response.data;
+    }
+
+    // 如果响应成功但没有 success 字段，包装成标准格式
+    return {
+      success: true,
+      code: response.status,
+      message: '操作成功',
+      data: response.data
+    };
+  },
+  async (error) => {
+    console.error('Response error details:', {
+      url: error.config?.url,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      headers: error.response?.headers,
+      data: error.response?.data,
+      message: error.message
+    });
+
+    const originalRequest = error.config;
+
+    // 如果是401错误且不是刷新token的请求
+    if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url.includes('/auth/refresh')) {
+      console.log('Handling 401 error, attempting token refresh');
+      
+      if (isRefreshing) {
+        console.log('Token refresh already in progress, queueing request');
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then(token => {
+            console.log('Retrying request with new token');
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            return api(originalRequest);
+          })
+          .catch(err => Promise.reject(err));
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        const refreshToken = localStorage.getItem('refreshToken');
+        console.log('Refresh token available:', !!refreshToken);
+        
+        if (!refreshToken) {
+          throw new Error('No refresh token available');
+        }
+
+        console.log('Attempting to refresh token');
+        const response = await api.post('/auth/refresh', { refreshToken });
+        const { accessToken } = response.data.data;
+        
+        console.log('Token refresh successful');
+        localStorage.setItem('accessToken', accessToken);
+        api.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
+        
+        processQueue(null, accessToken);
+        return api(originalRequest);
+      } catch (refreshError) {
+        console.error('Token refresh failed:', refreshError);
+        processQueue(refreshError, null);
+        // 清除所有认证信息
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        delete api.defaults.headers.common.Authorization;
+        // 重定向到登录页面
+        window.location.href = '/login';
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
+      }
+    }
+
+    // 处理其他错误
+    if (error.response?.data?.message) {
+      return Promise.reject(new Error(error.response.data.message));
+    }
+    return Promise.reject(error);
   }
 );
 

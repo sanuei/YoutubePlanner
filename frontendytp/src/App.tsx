@@ -6,6 +6,7 @@ import { SnackbarProvider } from 'notistack';
 import theme from './theme';
 import Layout from './components/Layout';
 import Login from './components/Login';
+import Register from './components/Register';
 import ChannelList from './components/ChannelList';
 import UserManagement from './components/UserManagement';
 import CategoryManagement from './components/CategoryManagement';
@@ -25,6 +26,7 @@ function App() {
           <SnackbarProvider maxSnack={3}>
             <Routes>
               <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
               <Route
                 path="/*"
                 element={
