@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { logger } from './logger';
 
 const API_BASE_URL = 'http://localhost:8080/api/v1';
 
@@ -33,21 +34,12 @@ const processQueue = (error: any, token: string | null = null) => {
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('accessToken');
-    console.log('Request interceptor - Token:', token);
-    console.log('Request URL:', config.url);
-    console.log('Full request config:', {
-      url: config.url,
-      method: config.method,
-      headers: config.headers,
-      data: config.data,
-      params: config.params
-    });
+    logger.log('Request URL:', config.url);
     
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-      console.log('Request headers:', config.headers);
     } else {
-      console.warn('No token found for request:', config.url);
+      logger.warn('No token found for request:', config.url);
     }
 
     // 确保请求头中包含正确的 Content-Type
@@ -58,7 +50,7 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
-    console.error('Request interceptor error:', error);
+    logger.error('Request interceptor error:', error);
     return Promise.reject(error);
   }
 );
@@ -66,16 +58,8 @@ api.interceptors.request.use(
 // 响应拦截器
 api.interceptors.response.use(
   (response) => {
-    console.log('Response success:', {
-      url: response.config.url,
-      status: response.status,
-      headers: response.headers,
-      data: response.data
-    });
-
     // 对于登录请求的特殊处理
     if (response.config.url?.includes('/auth/login')) {
-      console.log('Processing login response:', response.data);
       return response.data;
     }
 
@@ -93,12 +77,9 @@ api.interceptors.response.use(
     };
   },
   async (error) => {
-    console.error('Response error details:', {
+    logger.error('Response error details:', {
       url: error.config?.url,
       status: error.response?.status,
-      statusText: error.response?.statusText,
-      headers: error.response?.headers,
-      data: error.response?.data,
       message: error.message
     });
 
@@ -106,15 +87,15 @@ api.interceptors.response.use(
 
     // 如果是401错误且不是刷新token的请求
     if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url.includes('/auth/refresh')) {
-      console.log('Handling 401 error, attempting token refresh');
+      logger.log('Handling 401 error, attempting token refresh');
       
       if (isRefreshing) {
-        console.log('Token refresh already in progress, queueing request');
+        logger.log('Token refresh already in progress, queueing request');
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         })
           .then(token => {
-            console.log('Retrying request with new token');
+            logger.log('Retrying request with new token');
             originalRequest.headers.Authorization = `Bearer ${token}`;
             return api(originalRequest);
           })
@@ -126,24 +107,23 @@ api.interceptors.response.use(
 
       try {
         const refreshToken = localStorage.getItem('refreshToken');
-        console.log('Refresh token available:', !!refreshToken);
         
         if (!refreshToken) {
           throw new Error('No refresh token available');
         }
 
-        console.log('Attempting to refresh token');
+        logger.log('Attempting to refresh token');
         const response = await api.post('/auth/refresh', { refreshToken });
         const { accessToken } = response.data.data;
         
-        console.log('Token refresh successful');
+        logger.log('Token refresh successful');
         localStorage.setItem('accessToken', accessToken);
         api.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
         
         processQueue(null, accessToken);
         return api(originalRequest);
       } catch (refreshError) {
-        console.error('Token refresh failed:', refreshError);
+        logger.error('Token refresh failed:', refreshError);
         processQueue(refreshError, null);
         // 清除所有认证信息
         localStorage.removeItem('accessToken');
