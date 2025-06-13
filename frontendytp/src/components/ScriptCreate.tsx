@@ -144,7 +144,7 @@ const ScriptCreate: React.FC = () => {
 
       <Paper sx={{ p: 4 }}>
         <Grid container spacing={3}>
-          <Grid item xs={12}>
+          <Grid size={{ xs: 12 }}>
             <TextField
               required
               fullWidth
@@ -154,7 +154,7 @@ const ScriptCreate: React.FC = () => {
               sx={{ mb: 3 }}
             />
           </Grid>
-          <Grid item xs={12}>
+          <Grid size={{ xs: 12 }}>
             <TextField
               fullWidth
               label="备选标题"
@@ -163,7 +163,7 @@ const ScriptCreate: React.FC = () => {
               sx={{ mb: 3 }}
             />
           </Grid>
-          <Grid item xs={12}>
+          <Grid size={{ xs: 12 }}>
             <TextField
               fullWidth
               multiline
@@ -175,7 +175,7 @@ const ScriptCreate: React.FC = () => {
             />
           </Grid>
 
-          <Grid item xs={12} sm={6}>
+          <Grid size={{ xs: 12, sm: 6 }}>
             <FormControl fullWidth>
               <InputLabel>分类</InputLabel>
               <Select
@@ -192,7 +192,7 @@ const ScriptCreate: React.FC = () => {
             </FormControl>
           </Grid>
 
-          <Grid item xs={12}>
+          <Grid size={{ xs: 12 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
               <Typography variant="h6">章节</Typography>
               <Button
@@ -244,7 +244,7 @@ const ScriptCreate: React.FC = () => {
             ))}
           </Grid>
 
-          <Grid item xs={12}>
+          <Grid size={{ xs: 12 }}>
             <Box sx={{ 
               display: 'flex', 
               justifyContent: 'space-between', 

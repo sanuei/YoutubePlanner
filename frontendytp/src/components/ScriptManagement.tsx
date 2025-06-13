@@ -16,7 +16,6 @@ import {
   Paper,
   Button,
   IconButton,
-  Grid,
   Chip,
   Stack,
   CircularProgress,
@@ -32,6 +31,7 @@ import {
   Pagination,
   InputAdornment,
   Table,
+  Grid,
   TableBody,
   TableCell,
   TableContainer,
@@ -356,7 +356,7 @@ const ScriptManagement: React.FC = () => {
       {/* 筛选和搜索区域 */}
       <Paper sx={{ p: 2, mb: 3 }}>
         <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} sm={6} md={2}>
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <TextField
               fullWidth
               size="small"
@@ -372,7 +372,7 @@ const ScriptManagement: React.FC = () => {
               }}
             />
           </Grid>
-          <Grid item xs={12} sm={6} md={2}>
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <FormControl fullWidth size="small">
               <InputLabel>频道</InputLabel>
               <Select
@@ -389,7 +389,7 @@ const ScriptManagement: React.FC = () => {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} sm={6} md={2}>
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <FormControl fullWidth size="small">
               <InputLabel>分类</InputLabel>
               <Select
@@ -409,7 +409,7 @@ const ScriptManagement: React.FC = () => {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} sm={6} md={2}>
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <FormControl fullWidth size="small">
               <InputLabel>状态</InputLabel>
               <Select
@@ -424,7 +424,7 @@ const ScriptManagement: React.FC = () => {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} sm={6} md={2}>
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <FormControl fullWidth size="small">
               <InputLabel>星级</InputLabel>
               <Select
@@ -441,7 +441,7 @@ const ScriptManagement: React.FC = () => {
               </Select>
             </FormControl>
           </Grid>
-          <Grid item xs={12} sm={6} md={2}>
+          <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <Stack direction="row" spacing={1} alignItems="center">
               <FormControl size="small">
                 <InputLabel>排序</InputLabel>
@@ -462,7 +462,7 @@ const ScriptManagement: React.FC = () => {
             </Stack>
           </Grid>
           {selectedScripts.length > 0 && (
-            <Grid item xs={12} sm={6} md={2}>
+            <Grid size={{ xs: 12, sm: 6, md: 2 }}>
               <Stack direction="row" spacing={1} alignItems="center">
                 <Typography variant="body2" color="text.secondary">
                   已选择 {selectedScripts.length} 项
@@ -588,7 +588,7 @@ const ScriptManagement: React.FC = () => {
         <DialogTitle>编辑脚本</DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ mt: 1 }}>
-            <Grid item xs={12} sm={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <FormControl fullWidth>
                 <InputLabel>难度</InputLabel>
                 <Select
@@ -604,7 +604,7 @@ const ScriptManagement: React.FC = () => {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <FormControl fullWidth>
                 <InputLabel>状态</InputLabel>
                 <Select
@@ -618,7 +618,7 @@ const ScriptManagement: React.FC = () => {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12}>
+            <Grid size={{ xs: 12 }}>
               <TextField
                 fullWidth
                 type="date"
@@ -628,7 +628,7 @@ const ScriptManagement: React.FC = () => {
                 InputLabelProps={{ shrink: true }}
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <FormControl fullWidth>
                 <InputLabel>频道</InputLabel>
                 <Select
@@ -644,7 +644,7 @@ const ScriptManagement: React.FC = () => {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <FormControl fullWidth>
                 <InputLabel>分类</InputLabel>
                 <Select

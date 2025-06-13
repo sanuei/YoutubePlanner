@@ -110,7 +110,7 @@ const ScriptPreview: React.FC = () => {
       {/* 脚本基本信息 */}
       <Paper sx={{ p: 3, mb: 3 }}>
         <Grid container spacing={3}>
-          <Grid item xs={12}>
+          <Grid size={{ xs: 12 }}>
             <Typography variant="h4" gutterBottom>
               {script.title}
             </Typography>
@@ -121,7 +121,7 @@ const ScriptPreview: React.FC = () => {
             )}
           </Grid>
 
-          <Grid item xs={12}>
+          <Grid size={{ xs: 12 }}>
             <Stack direction="row" spacing={2} alignItems="center">
               <Chip
                 label={script.status || '未设置'}
@@ -147,14 +147,14 @@ const ScriptPreview: React.FC = () => {
           </Grid>
 
           {script.description && (
-            <Grid item xs={12}>
+            <Grid size={{ xs: 12 }}>
               <Typography variant="body1" color="text.secondary">
                 {script.description}
               </Typography>
             </Grid>
           )}
 
-          <Grid item xs={12}>
+          <Grid size={{ xs: 12 }}>
             <Stack direction="row" spacing={4}>
               <Typography variant="body2" color="text.secondary">
                 创建时间：{format(new Date(script.created_at), 'yyyy-MM-dd HH:mm')}

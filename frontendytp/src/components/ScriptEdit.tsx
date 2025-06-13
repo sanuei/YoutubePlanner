@@ -239,7 +239,7 @@ const ScriptEdit: React.FC = () => {
 
       <Paper sx={{ p: 4 }}>
         <Grid container spacing={3}>
-          <Grid item xs={12}>
+          <Grid component="div" size={{ xs: 12 }}>
             <TextField
               required
               fullWidth
@@ -249,7 +249,7 @@ const ScriptEdit: React.FC = () => {
               sx={{ mb: 3 }}
             />
           </Grid>
-          <Grid item xs={12}>
+          <Grid component="div" size={{ xs: 12 }}>
             <TextField
               fullWidth
               label="备选标题"
@@ -258,7 +258,7 @@ const ScriptEdit: React.FC = () => {
               sx={{ mb: 3 }}
             />
           </Grid>
-          <Grid item xs={12}>
+          <Grid component="div" size={{ xs: 12 }}>
             <TextField
               fullWidth
               multiline
@@ -269,13 +269,12 @@ const ScriptEdit: React.FC = () => {
               sx={{ mb: 3 }}
             />
           </Grid>
-
-          <Grid item xs={12} sm={6}>
+          <Grid component="div" size={{ xs: 12, sm: 6 }}>
             <FormControl fullWidth>
-              <InputLabel>星级</InputLabel>
+              <InputLabel>难度</InputLabel>
               <Select
-                value={formData.difficulty || 3}
-                label="星级"
+                value={formData.difficulty}
+                label="难度"
                 onChange={(e) => setFormData(prev => ({ ...prev, difficulty: Number(e.target.value) }))}
               >
                 {[1, 2, 3, 4, 5].map((value) => (
@@ -286,12 +285,11 @@ const ScriptEdit: React.FC = () => {
               </Select>
             </FormControl>
           </Grid>
-
-          <Grid item xs={12} sm={6}>
+          <Grid component="div" size={{ xs: 12, sm: 6 }}>
             <FormControl fullWidth>
               <InputLabel>状态</InputLabel>
               <Select
-                value={formData.status || 'Scripting'}
+                value={formData.status}
                 label="状态"
                 onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value }))}
               >
@@ -301,8 +299,7 @@ const ScriptEdit: React.FC = () => {
               </Select>
             </FormControl>
           </Grid>
-
-          <Grid item xs={12} sm={6}>
+          <Grid component="div" size={{ xs: 12, sm: 6 }}>
             <FormControl fullWidth>
               <InputLabel>频道</InputLabel>
               <Select
@@ -318,8 +315,7 @@ const ScriptEdit: React.FC = () => {
               </Select>
             </FormControl>
           </Grid>
-
-          <Grid item xs={12} sm={6}>
+          <Grid component="div" size={{ xs: 12, sm: 6 }}>
             <FormControl fullWidth>
               <InputLabel>分类</InputLabel>
               <Select
@@ -335,8 +331,7 @@ const ScriptEdit: React.FC = () => {
               </Select>
             </FormControl>
           </Grid>
-
-          <Grid item xs={12}>
+          <Grid component="div" size={{ xs: 12 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
               <Typography variant="h6">章节</Typography>
               <Button
@@ -387,35 +382,23 @@ const ScriptEdit: React.FC = () => {
               </Box>
             ))}
           </Grid>
-
-          <Grid item xs={12}>
+          <Grid component="div" size={{ xs: 12 }}>
             <Box sx={{ 
               display: 'flex', 
               justifyContent: 'space-between', 
-              alignItems: 'center', 
-              mt: 2,
-              pt: 2,
-              borderTop: '1px solid',
-              borderColor: 'divider'
+              alignItems: 'center',
+              mt: 2
             }}>
               <Typography variant="body2" color="text.secondary">
                 总字数：{wordCount}
               </Typography>
-              <Box sx={{ display: 'flex', gap: 2 }}>
-                <Button
-                  variant="outlined"
-                  onClick={() => navigate('/scripts')}
-                >
-                  取消
-                </Button>
-                <Button
-                  variant="contained"
-                  onClick={handleSubmit}
-                  disabled={!formData.title || formData.chapters?.some(chapter => !chapter.content)}
-                >
-                  保存更改
-                </Button>
-              </Box>
+              <Button
+                variant="contained"
+                onClick={handleSubmit}
+                sx={{ textTransform: 'none' }}
+              >
+                保存
+              </Button>
             </Box>
           </Grid>
         </Grid>
