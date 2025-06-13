@@ -506,7 +506,7 @@ const ScriptManagement: React.FC = () => {
         <Table>
           <TableHead>
             <TableRow>
-              <TableCell padding="checkbox">
+              <TableCell padding="checkbox" sx={{ width: '48px' }}>
                 <Checkbox
                   checked={selectedScripts.length === scripts.length}
                   indeterminate={selectedScripts.length > 0 && selectedScripts.length < scripts.length}
@@ -519,13 +519,13 @@ const ScriptManagement: React.FC = () => {
                   }}
                 />
               </TableCell>
-              <TableCell>标题</TableCell>
-              <TableCell>星级</TableCell>
-              <TableCell>状态</TableCell>
-              <TableCell>频道</TableCell>
-              <TableCell>分类</TableCell>
-              <TableCell>最后修改</TableCell>
-              <TableCell align="right">操作</TableCell>
+              <TableCell sx={{ width: '25%' }}>标题</TableCell>
+              <TableCell sx={{ width: '12%' }}>星级</TableCell>
+              <TableCell sx={{ width: '12%' }}>状态</TableCell>
+              <TableCell sx={{ width: '12%' }}>频道</TableCell>
+              <TableCell sx={{ width: '12%' }}>分类</TableCell>
+              <TableCell sx={{ width: '15%' }}>最后修改</TableCell>
+              <TableCell align="center" sx={{ width: '60px' }}>预览</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -540,15 +540,15 @@ const ScriptManagement: React.FC = () => {
                 }}
                 sx={{ cursor: 'pointer' }}
               >
-                <TableCell padding="checkbox" onClick={(e) => e.stopPropagation()}>
+                <TableCell padding="checkbox" onClick={(e) => e.stopPropagation()} sx={{ width: '48px' }}>
                   <Checkbox
                     checked={selectedScripts.includes(script.script_id)}
                     onChange={() => handleRowSelect(script.script_id)}
                   />
                 </TableCell>
-                <TableCell>{script.title}</TableCell>
-                <TableCell>{renderStars(script.difficulty || 0)}</TableCell>
-                <TableCell>
+                <TableCell sx={{ width: '25%', pl: 2 }}>{script.title}</TableCell>
+                <TableCell sx={{ width: '12%', pl: 2 }}>{renderStars(script.difficulty || 0)}</TableCell>
+                <TableCell sx={{ width: '12%', pl: 2 }}>
                   <Chip
                     label={script.status || '未设置'}
                     size="small"
@@ -556,7 +556,7 @@ const ScriptManagement: React.FC = () => {
                     variant="outlined"
                   />
                 </TableCell>
-                <TableCell>
+                <TableCell sx={{ width: '12%', pl: 2 }}>
                   <Chip
                     label={getChannelName(script)}
                     size="small"
@@ -564,7 +564,7 @@ const ScriptManagement: React.FC = () => {
                     variant="outlined"
                   />
                 </TableCell>
-                <TableCell>
+                <TableCell sx={{ width: '12%', pl: 2 }}>
                   <Chip
                     label={getCategoryName(script)}
                     size="small"
@@ -572,19 +572,30 @@ const ScriptManagement: React.FC = () => {
                     variant="outlined"
                   />
                 </TableCell>
-                <TableCell>
+                <TableCell sx={{ width: '15%', pl: 2 }}>
                   {script.updated_at
                     ? format(new Date(script.updated_at), 'yyyy-MM-dd HH:mm')
                     : '-'}
                 </TableCell>
-                <TableCell align="right" onClick={(e) => e.stopPropagation()}>
+                <TableCell 
+                  align="center" 
+                  onClick={(e) => e.stopPropagation()} 
+                  sx={{ 
+                    width: '60px',
+                    '& .MuiIconButton-root': {
+                      opacity: 0.7,
+                      '&:hover': {
+                        opacity: 1
+                      }
+                    }
+                  }}
+                >
                   <IconButton
                     size="small"
                     onClick={(e) => {
                       e.stopPropagation();
                       navigate(`/scripts/${script.script_id}/preview`);
                     }}
-                    sx={{ mr: 1 }}
                   >
                     <VisibilityIcon fontSize="small" />
                   </IconButton>

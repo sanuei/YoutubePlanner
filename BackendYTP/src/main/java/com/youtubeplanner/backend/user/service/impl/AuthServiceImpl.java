@@ -17,6 +17,7 @@ package com.youtubeplanner.backend.user.service.impl;
 
 import com.youtubeplanner.backend.user.dto.*;
 import com.youtubeplanner.backend.user.entity.User;
+import com.youtubeplanner.backend.user.entity.Role;
 import com.youtubeplanner.backend.user.repository.UserRepository;
 import com.youtubeplanner.backend.user.service.AuthService;
 import com.youtubeplanner.backend.user.service.JwtService;

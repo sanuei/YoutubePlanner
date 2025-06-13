@@ -24,22 +24,13 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/api/**") // 匹配所有 /api 开头的路径
-                .allowedOrigins(
-                    "http://localhost:3000",  // React 默认端口
-                    "http://localhost:3001",  // React 备用端口
-                    "http://localhost:4200",  // Angular 默认端口
-                    "http://localhost:8080",  // Vue 默认端口
-                    "http://localhost:5173",  // Vite 默认端口
-                    "http://127.0.0.1:3000",  // React IP 访问（3000）
-                    "http://127.0.0.1:3001",  // React IP 访问（3001）
-                    "http://127.0.0.1:5173"   // Vite IP 访问
-                ) 
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // 允许的 HTTP 方法
-                .allowedHeaders("*") // 允许所有请求头
-                .exposedHeaders("*") // 允许前端访问的响应头
-                .allowCredentials(true) // 允许发送认证信息（cookies等）
-                .maxAge(3600); // 预检请求的缓存时间（秒）
+        registry.addMapping("/**") // 匹配所有路径
+                .allowedOriginPatterns("*") // 允许所有来源
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
+                .allowedHeaders("*")
+                .exposedHeaders("*")
+                .allowCredentials(true)
+                .maxAge(3600);
     }
 
     

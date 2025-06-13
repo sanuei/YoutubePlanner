@@ -21,6 +21,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +30,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @Service
 public class JwtServiceImpl implements JwtService {
     @Value("${jwt.secret}")
@@ -47,11 +49,13 @@ public class JwtServiceImpl implements JwtService {
 
     @Override
     public String generateAccessToken(User user) {
+        log.debug("Generating access token for user: {}", user.getUsername());
         return generateToken(user, accessTokenExpiration);
     }
 
     @Override
     public String generateRefreshToken(User user) {
+        log.debug("Generating refresh token for user: {}", user.getUsername());
         return generateToken(user, refreshTokenExpiration);
     }
 
@@ -59,6 +63,9 @@ public class JwtServiceImpl implements JwtService {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", user.getUserId());
         claims.put("username", user.getUsername());
+
+        log.debug("Generating token with claims: {}", claims);
+        log.debug("Token expiration: {} seconds", expiration);
 
         return Jwts.builder()
                 .setClaims(claims)
@@ -71,24 +78,41 @@ public class JwtServiceImpl implements JwtService {
     @Override
     public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder()
+            log.debug("Validating token: {}", token);
+            Claims claims = Jwts.parserBuilder()
                     .setSigningKey(getSigningKey())
                     .build()
-                    .parseClaimsJws(token);
-            return true;
+                    .parseClaimsJws(token)
+                    .getBody();
+            
+            log.debug("Token claims: {}", claims);
+            log.debug("Token expiration: {}", claims.getExpiration());
+            
+            boolean isValid = !claims.getExpiration().before(new Date());
+            log.debug("Token is valid: {}", isValid);
+            
+            return isValid;
         } catch (Exception e) {
+            log.error("Token validation failed", e);
             return false;
         }
     }
 
     @Override
     public String getUsernameFromToken(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
 
-        return claims.get("username", String.class);
+            String username = claims.get("username", String.class);
+            log.debug("Extracted username from token: {}", username);
+            return username;
+        } catch (Exception e) {
+            log.error("Failed to extract username from token", e);
+            return null;
+        }
     }
 } 

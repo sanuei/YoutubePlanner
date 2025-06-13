@@ -59,31 +59,65 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (token) {
         try {
-          // 验证token有效性
-          const response = await api.get<ApiResponse<User>>('/auth/verify');
-          console.log('Token verification response:', response);
+          // 检查token是否存在且未过期
+          const tokenData = JSON.parse(atob(token.split('.')[1]));
+          const expirationTime = tokenData.exp * 1000; // 转换为毫秒
           
-          if (response.data.success) {
-            setUser(response.data.data);
+          if (Date.now() < expirationTime) {
+            // token未过期，设置用户信息和请求头
+            setUser({
+              id: tokenData.userId,
+              username: tokenData.username,
+              email: ''
+            });
             api.defaults.headers.common.Authorization = `Bearer ${token}`;
           } else {
-            // token无效，清除存储
+            // token已过期，清除存储并跳转到登录页
+            console.log('Token expired, redirecting to login');
             localStorage.removeItem('accessToken');
             localStorage.removeItem('refreshToken');
             delete api.defaults.headers.common.Authorization;
+            navigate('/login');
           }
         } catch (error) {
-          console.error('Token verification failed:', error);
+          console.error('Token validation failed:', error);
+          // token解析失败，清除存储并跳转到登录页
           localStorage.removeItem('accessToken');
           localStorage.removeItem('refreshToken');
           delete api.defaults.headers.common.Authorization;
+          navigate('/login');
         }
+      } else {
+        // 没有token，直接跳转到登录页
+        navigate('/login');
       }
       setLoading(false);
     };
 
     initAuth();
-  }, []);
+  }, [navigate]);
+
+  // 添加响应拦截器
+  useEffect(() => {
+    const interceptor = api.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response?.status === 401 || error.response?.status === 403) {
+          // 清除认证信息
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          delete api.defaults.headers.common.Authorization;
+          setUser(null);
+          navigate('/login');
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    return () => {
+      api.interceptors.response.eject(interceptor);
+    };
+  }, [navigate]);
 
   const login = async (username: string, password: string) => {
     try {
