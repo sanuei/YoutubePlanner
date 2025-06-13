@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+
+
+    <!-- 粗壮卡通风格的铅笔主体 -->
+    <path d="M360 96L432 168L216 384H144V312L360 96Z" fill="#4A90E2" stroke="#2C5282" stroke-width="12" stroke-linejoin="round"/>
+
+    <!-- 卡通笔尖 -->
+    <path d="M144 312L72 384L144 456L216 384L144 312Z" fill="#2C5282" stroke="#1A365D" stroke-width="12" stroke-linejoin="round"/>
+
+    <!-- 粗大的橡皮擦 -->
+    <rect x="432" y="168" width="48" height="48" rx="8" fill="#FF6B6B" stroke="#C53030" stroke-width="8"/>
+
+    <!-- 木纹线（保留一条作为装饰） -->
+    <path d="M360 96L432 168" stroke="#2C5282" stroke-width="8"/>
+</svg>
