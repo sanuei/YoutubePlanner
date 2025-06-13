@@ -32,8 +32,8 @@ RUN mkdir -p /app/logs && \
     chown -R spring:spring /app/logs && \
     chmod 755 /app/logs
 
-# 复制JAR文件
-COPY target/backend-0.0.1-SNAPSHOT.jar app.jar
+# 从构建阶段复制JAR文件
+COPY --from=builder /build/target/backend-0.0.1-SNAPSHOT.jar app.jar
 
 # 验证JAR文件
 RUN ls -l app.jar && \
@@ -44,7 +44,7 @@ RUN ls -l app.jar && \
 USER spring:spring
 
 # 暴露端口
-EXPOSE 8080
+EXPOSE ${PORT:-8080}
 
 # 设置JVM参数
 ENV JAVA_OPTS="-Xms512m -Xmx1024m -Djava.security.egd=file:/dev/./urandom"
