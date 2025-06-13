@@ -18,6 +18,7 @@ import com.youtubeplanner.backend.channel.dto.GetChannelsRequest;
 import com.youtubeplanner.backend.channel.dto.UpdateChannelRequest;
 import com.youtubeplanner.backend.common.ApiResponse;
 import com.youtubeplanner.backend.common.PageResponse;
+import com.youtubeplanner.backend.user.entity.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -81,6 +82,7 @@ public class ChannelController {
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new RuntimeException("用户未认证");
         }
-        return Long.parseLong(authentication.getName());
+        com.youtubeplanner.backend.user.entity.User user = (com.youtubeplanner.backend.user.entity.User) authentication.getPrincipal();
+        return user.getUserId();
     }
 } 

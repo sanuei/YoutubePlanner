@@ -1,3 +1,18 @@
+/*
+ * 文件名：ScriptController.java
+ * 创建日期：2024年3月19日
+ * 作者：[你的名字]
+ * 
+ * 文件描述：
+ * 脚本控制器，处理脚本相关的HTTP请求。
+ * 包括创建、查询、更新和删除脚本的功能。
+ * 
+ * 修改历史：
+ * 2024年3月19日 - 初始版本
+ * 
+ * 版权所有 (c) 2024 YoutubePlanner
+ */
+
 package com.youtubeplanner.backend.script;
 
 import com.youtubeplanner.backend.common.ApiResponse;
@@ -6,6 +21,7 @@ import com.youtubeplanner.backend.script.dto.CreateScriptRequest;
 import com.youtubeplanner.backend.script.dto.GetScriptsRequest;
 import com.youtubeplanner.backend.script.dto.ScriptListItemResponse;
 import com.youtubeplanner.backend.script.dto.ScriptResponse;
+import com.youtubeplanner.backend.user.entity.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -57,6 +73,7 @@ public class ScriptController {
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new RuntimeException("用户未认证");
         }
-        return Long.parseLong(authentication.getName());
+        com.youtubeplanner.backend.user.entity.User user = (com.youtubeplanner.backend.user.entity.User) authentication.getPrincipal();
+        return user.getUserId();
     }
 } 

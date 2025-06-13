@@ -16,16 +16,18 @@ import {
   Paper,
   Checkbox,
   InputAdornment,
+  Chip,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import {
   Add as AddIcon,
   Search as SearchIcon,
   Delete as DeleteIcon,
+  Category as CategoryIcon,
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { useSnackbar } from 'notistack';
-import { channelsApi, Channel } from '../services/api';
+import { channelsApi, categoriesApi, Channel, Category } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 
 const StyledCard = styled(motion(Card))(({ theme }) => ({
@@ -41,8 +43,54 @@ const StyledCard = styled(motion(Card))(({ theme }) => ({
   cursor: 'pointer',
 }));
 
+const CategoryLabel = ({ label }: { label: string }) => (
+  <Box
+    sx={{
+      display: 'inline-flex',
+      alignItems: 'center',
+      height: 24,
+      padding: '0 8px',
+      borderRadius: '16px',
+      backgroundColor: 'transparent',
+      border: '1px solid',
+      borderColor: 'primary.main',
+      color: 'primary.main',
+      fontSize: '0.75rem',
+      fontWeight: 500,
+      gap: 0.5,
+    }}
+  >
+    <CategoryIcon sx={{ fontSize: '0.875rem' }} />
+    {label}
+  </Box>
+);
+
+const CategoryList = ({ categories }: { categories: Category[] }) => (
+  <Box sx={{ mt: 1 }}>
+    {categories.map((category) => (
+      <Typography
+        key={category.category_id}
+        variant="body2"
+        color="text.secondary"
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 0.5,
+          '&:not(:last-child)': {
+            mb: 0.5
+          }
+        }}
+      >
+        <CategoryIcon sx={{ fontSize: '0.875rem' }} />
+        {category.category_name}
+      </Typography>
+    ))}
+  </Box>
+);
+
 const ChannelList: React.FC = () => {
   const [channels, setChannels] = useState<Channel[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
   const [sortBy, setSortBy] = useState('created_at');
@@ -78,9 +126,24 @@ const ChannelList: React.FC = () => {
     }
   }, [search, sortBy, order, enqueueSnackbar]);
 
+  const fetchCategories = useCallback(async () => {
+    try {
+      const response = await categoriesApi.getList({
+        limit: 100,
+      });
+      
+      if (response.success) {
+        setCategories(response.data.items);
+      }
+    } catch (error) {
+      console.error('获取分类列表失败:', error);
+    }
+  }, []);
+
   useEffect(() => {
     fetchChannels();
-  }, [fetchChannels]);
+    fetchCategories();
+  }, [fetchChannels, fetchCategories]);
 
   const handleCreateChannel = async () => {
     if (!channelName.trim()) {
@@ -149,6 +212,13 @@ const ChannelList: React.FC = () => {
       prev.includes(channelId) 
         ? prev.filter(id => id !== channelId)
         : [...prev, channelId]
+    );
+  };
+
+  // 获取频道的分类列表
+  const getChannelCategories = (channelId: number) => {
+    return categories.filter(category => 
+      category.user_id === user?.id
     );
   };
 
@@ -223,39 +293,45 @@ const ChannelList: React.FC = () => {
           gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
           gap: 3,
         }}>
-          {channels.map((channel) => (
-            <StyledCard 
-              key={channel.channel_id} 
-              elevation={1}
-              onClick={() => handleOpenDialog(channel)}
-            >
-              <CardContent sx={{ flexGrow: 1, pb: 2 }}>
-                <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-                  <Checkbox
-                    checked={selectedChannels.includes(channel.channel_id)}
-                    onChange={(e) => {
-                      e.stopPropagation();
-                      handleChannelSelect(channel.channel_id);
-                    }}
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                  <Box sx={{ flex: 1 }}>
-                    <Typography variant="h6" gutterBottom noWrap>
-                      {channel.channel_name}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" gutterBottom>
-                      创建时间：{new Date(channel.created_at).toLocaleDateString()}
-                    </Typography>
-                    {channel.scripts_count !== undefined && (
-                      <Typography variant="body2" color="text.secondary">
-                        脚本数量：{channel.scripts_count}
+          {channels.map((channel) => {
+            const channelCategories = getChannelCategories(channel.channel_id);
+            return (
+              <StyledCard 
+                key={channel.channel_id} 
+                elevation={1}
+                onClick={() => handleOpenDialog(channel)}
+              >
+                <CardContent sx={{ flexGrow: 1, pb: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                    <Checkbox
+                      checked={selectedChannels.includes(channel.channel_id)}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        handleChannelSelect(channel.channel_id);
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                    <Box sx={{ flex: 1 }}>
+                      <Typography variant="h6" gutterBottom noWrap>
+                        {channel.channel_name}
                       </Typography>
-                    )}
+                      <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+                        <CategoryLabel label={`${channelCategories.length} 个分类`} />
+                        {channel.scripts_count !== undefined && (
+                          <Typography variant="body2" color="text.secondary">
+                            脚本数量：{channel.scripts_count}
+                          </Typography>
+                        )}
+                      </Stack>
+                      {channelCategories.length > 0 && (
+                        <CategoryList categories={channelCategories} />
+                      )}
+                    </Box>
                   </Box>
-                </Box>
-              </CardContent>
-            </StyledCard>
-          ))}
+                </CardContent>
+              </StyledCard>
+            );
+          })}
         </Box>
       )}
 

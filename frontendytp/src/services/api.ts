@@ -333,4 +333,47 @@ export const categoriesApi = {
   },
 };
 
+// 用户相关接口
+export interface UserStats {
+  total_scripts: number;
+  total_channels: number;
+  total_categories: number;
+}
+
+export interface User {
+  user_id: number;
+  username: string;
+  email: string;
+  created_at: string;
+  updated_at: string;
+  avatar_url: string;
+  display_name: string;
+  stats: UserStats;
+}
+
+export interface UpdateUserData {
+  email?: string;
+  display_name?: string;
+  avatar_url?: string;
+}
+
+export interface ChangePasswordData {
+  current_password: string;
+  new_password: string;
+}
+
+export const usersApi = {
+  getCurrentUser: (): Promise<ApiResponse<User>> => {
+    return api.get('/users/me');
+  },
+
+  updateCurrentUser: (data: UpdateUserData): Promise<ApiResponse<User>> => {
+    return api.put('/users/me', data);
+  },
+
+  changePassword: (data: ChangePasswordData): Promise<ApiResponse<void>> => {
+    return api.put('/users/me/password', data);
+  },
+};
+
 export default api; 

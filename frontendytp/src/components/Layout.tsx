@@ -36,7 +36,7 @@ const menuItems = [
   { text: '影片脚本管理', icon: <DescriptionIcon />, path: '/scripts' },
   { text: '分类管理', icon: <CategoryIcon />, path: '/categories' },
   { text: '频道管理', icon: <YouTubeIcon />, path: '/channels' },
-  { text: '用户管理', icon: <PeopleIcon />, path: '/users' },
+  { text: '我的信息', icon: <PeopleIcon />, path: '/users' },
 ];
 
 // Loading 占位组件

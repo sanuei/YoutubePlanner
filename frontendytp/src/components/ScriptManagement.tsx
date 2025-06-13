@@ -101,7 +101,7 @@ const ScriptManagement: React.FC = () => {
         search: filters.search,
         sort_by: sortBy,
         order,
-        include: 'category'
+        include: 'category,channel'
       };
 
       // 只有当值不为空字符串时才添加筛选参数
@@ -126,9 +126,22 @@ const ScriptManagement: React.FC = () => {
         console.log('Scripts response:', response.data);
         // 在前端进行额外的筛选，以防后端筛选不生效
         const filteredItems = response.data.items.filter(script => {
-          if (filters.category_id && filters.category_id !== '') {
-            return script.category?.category_id.toString() === filters.category_id;
+          // 检查频道筛选
+          if (filters.channel_id) {
+            const scriptChannelId = script.channel?.channel_id || script.channel_id;
+            if (scriptChannelId?.toString() !== filters.channel_id) {
+              return false;
+            }
           }
+          
+          // 检查分类筛选
+          if (filters.category_id && filters.category_id !== '') {
+            const scriptCategoryId = script.category?.category_id || script.category_id;
+            if (scriptCategoryId?.toString() !== filters.category_id) {
+              return false;
+            }
+          }
+          
           return true;
         });
         
@@ -350,6 +363,47 @@ const ScriptManagement: React.FC = () => {
     return '未设置';
   };
 
+  // 添加样式组件
+  const StatusLabel = ({ label }: { label: string }) => (
+    <Box
+      sx={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        height: 24,
+        padding: '0 8px',
+        borderRadius: '16px',
+        backgroundColor: 'transparent',
+        border: '1px solid',
+        borderColor: 'secondary.main',
+        color: 'secondary.main',
+        fontSize: '0.75rem',
+        fontWeight: 500,
+      }}
+    >
+      {label}
+    </Box>
+  );
+
+  const InfoLabel = ({ label }: { label: string }) => (
+    <Box
+      sx={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        height: 24,
+        padding: '0 8px',
+        borderRadius: '16px',
+        backgroundColor: 'transparent',
+        border: '1px solid',
+        borderColor: 'primary.main',
+        color: 'primary.main',
+        fontSize: '0.75rem',
+        fontWeight: 500,
+      }}
+    >
+      {label}
+    </Box>
+  );
+
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
@@ -525,7 +579,7 @@ const ScriptManagement: React.FC = () => {
               <TableCell sx={{ width: '12%' }}>频道</TableCell>
               <TableCell sx={{ width: '12%' }}>分类</TableCell>
               <TableCell sx={{ width: '15%' }}>最后修改</TableCell>
-              <TableCell align="center" sx={{ width: '60px' }}>预览</TableCell>
+              <TableCell align="center" sx={{ width: '60px' }}>提词器</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -549,28 +603,13 @@ const ScriptManagement: React.FC = () => {
                 <TableCell sx={{ width: '25%', pl: 2 }}>{script.title}</TableCell>
                 <TableCell sx={{ width: '12%', pl: 2 }}>{renderStars(script.difficulty || 0)}</TableCell>
                 <TableCell sx={{ width: '12%', pl: 2 }}>
-                  <Chip
-                    label={script.status || '未设置'}
-                    size="small"
-                    color="secondary"
-                    variant="outlined"
-                  />
+                  <StatusLabel label={script.status || '未设置'} />
                 </TableCell>
                 <TableCell sx={{ width: '12%', pl: 2 }}>
-                  <Chip
-                    label={getChannelName(script)}
-                    size="small"
-                    color="primary"
-                    variant="outlined"
-                  />
+                  <InfoLabel label={getChannelName(script)} />
                 </TableCell>
                 <TableCell sx={{ width: '12%', pl: 2 }}>
-                  <Chip
-                    label={getCategoryName(script)}
-                    size="small"
-                    color="primary"
-                    variant="outlined"
-                  />
+                  <InfoLabel label={getCategoryName(script)} />
                 </TableCell>
                 <TableCell sx={{ width: '15%', pl: 2 }}>
                   {script.updated_at

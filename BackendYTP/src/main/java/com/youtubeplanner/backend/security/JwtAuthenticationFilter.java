@@ -14,6 +14,7 @@
 
 package com.youtubeplanner.backend.security;
 
+import com.youtubeplanner.backend.user.entity.User;
 import com.youtubeplanner.backend.user.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -69,7 +70,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (jwtService.validateToken(jwt)) {
                 log.debug("Token is valid");
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails.getUsername(),
+                        userDetails,  // 使用整个UserDetails对象作为principal
                         null,
                         userDetails.getAuthorities()
                 );

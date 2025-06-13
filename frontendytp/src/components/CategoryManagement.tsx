@@ -26,6 +26,8 @@ import {
   Add as AddIcon,
   Search as SearchIcon,
   Delete as DeleteIcon,
+  Category as CategoryIcon,
+  Description as DescriptionIcon,
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { useSnackbar } from 'notistack';
@@ -46,6 +48,71 @@ const StyledCard = styled(motion(Card))(({ theme }) => ({
   },
   cursor: 'pointer',
 }));
+
+const StatusLabel = ({ label }: { label: string }) => (
+  <Box
+    sx={{
+      display: 'inline-flex',
+      alignItems: 'center',
+      height: 24,
+      padding: '0 8px',
+      borderRadius: '16px',
+      backgroundColor: 'transparent',
+      border: '1px solid',
+      borderColor: 'secondary.main',
+      color: 'secondary.main',
+      fontSize: '0.75rem',
+      fontWeight: 500,
+    }}
+  >
+    {label}
+  </Box>
+);
+
+const CategoryLabel = ({ label }: { label: string }) => (
+  <Box
+    sx={{
+      display: 'inline-flex',
+      alignItems: 'center',
+      height: 24,
+      padding: '0 8px',
+      borderRadius: '16px',
+      backgroundColor: 'transparent',
+      border: '1px solid',
+      borderColor: 'primary.main',
+      color: 'primary.main',
+      fontSize: '0.75rem',
+      fontWeight: 500,
+      gap: 0.5,
+    }}
+  >
+    <CategoryIcon sx={{ fontSize: '0.875rem' }} />
+    {label}
+  </Box>
+);
+
+const CategoryList = ({ categories }: { categories: Category[] }) => (
+  <Box sx={{ mt: 1 }}>
+    {categories.map((category) => (
+      <Typography
+        key={category.category_id}
+        variant="body2"
+        color="text.secondary"
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 0.5,
+          '&:not(:last-child)': {
+            mb: 0.5
+          }
+        }}
+      >
+        <CategoryIcon sx={{ fontSize: '0.875rem' }} />
+        {category.category_name}
+      </Typography>
+    ))}
+  </Box>
+);
 
 const CategoryManagement: React.FC = () => {
   const navigate = useNavigate();
@@ -254,7 +321,7 @@ const CategoryManagement: React.FC = () => {
       ) : (
         <Box sx={{ 
           display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
           gap: 3,
         }}>
           {categories.map((category) => {
@@ -266,94 +333,56 @@ const CategoryManagement: React.FC = () => {
                 key={category.category_id} 
                 elevation={1}
               >
-                <CardContent sx={{ flexGrow: 1, pb: 2, position: 'relative' }}>
-                  <Checkbox
-                    checked={selectedCategories.includes(category.category_id)}
-                    onChange={(e) => {
-                      e.stopPropagation();
-                      handleCategorySelect(category.category_id);
-                    }}
-                    onClick={(e) => e.stopPropagation()}
-                    sx={{
-                      position: 'absolute',
-                      top: 0,
-                      right: 0,
-                      '& .MuiSvgIcon-root': {
-                        borderRadius: '50%',
-                        backgroundColor: 'background.paper',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                      }
-                    }}
-                  />
-                  <Box sx={{ flex: 1 }}>
-                    <Box 
-                      sx={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        gap: 2,
-                        mb: 2,
-                        cursor: 'pointer',
-                        pr: 4,
-                        '&:hover': {
-                          opacity: 0.8
-                        }
+                <CardContent sx={{ flexGrow: 1, pb: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                    <Checkbox
+                      checked={selectedCategories.includes(category.category_id)}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        handleCategorySelect(category.category_id);
                       }}
-                      onClick={() => handleOpenDialog(category)}
-                    >
-                      <Typography variant="h6" noWrap>
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                    <Box sx={{ flex: 1 }}>
+                      <Typography variant="h6" gutterBottom noWrap>
                         {category.category_name}
                       </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        ({categoryScripts.length})
-                      </Typography>
-                    </Box>
-                    {categoryScripts.length > 0 && (
-                      <List dense sx={{ mt: 2, maxHeight: 200, overflow: 'auto' }}>
-                        {categoryScripts.slice(0, 5).map((script) => (
-                          <ListItem 
-                            key={script.script_id} 
-                            disablePadding
-                            sx={{ 
-                              py: 0.5,
-                              '&:hover': {
-                                backgroundColor: 'action.hover',
-                              }
-                            }}
-                          >
-                            <ListItemText
-                              primary={
-                                <Box 
-                                  sx={{ 
-                                    display: 'flex', 
-                                    alignItems: 'center', 
-                                    gap: 1,
-                                    cursor: 'pointer'
-                                  }}
-                                  onClick={(e) => handleScriptClick(script.script_id, e)}
-                                >
-                                  <Typography variant="body2" noWrap sx={{ flex: 1 }}>
-                                    {script.title}
-                                  </Typography>
-                                  <Chip
-                                    label={script.status || '未设置'}
-                                    size="small"
-                                    color="secondary"
-                                    variant="outlined"
-                                  />
-                                </Box>
-                              }
-                            />
-                          </ListItem>
-                        ))}
-                        {categoryScripts.length > 5 && (
-                          <ListItem>
+                      <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+                        <CategoryLabel label={`${categoryScripts.length} 个脚本`} />
+                      </Stack>
+                      {categoryScripts.length > 0 && (
+                        <Box sx={{ mt: 1 }}>
+                          {categoryScripts.slice(0, 5).map((script) => (
+                            <Typography
+                              key={script.script_id}
+                              variant="body2"
+                              color="text.secondary"
+                              sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 0.5,
+                                cursor: 'pointer',
+                                '&:not(:last-child)': {
+                                  mb: 0.5
+                                },
+                                '&:hover': {
+                                  color: 'primary.main'
+                                }
+                              }}
+                              onClick={(e) => handleScriptClick(script.script_id, e)}
+                            >
+                              <DescriptionIcon sx={{ fontSize: '0.875rem' }} />
+                              {script.title}
+                            </Typography>
+                          ))}
+                          {categoryScripts.length > 5 && (
                             <Typography variant="caption" color="text.secondary">
                               还有 {categoryScripts.length - 5} 个脚本...
                             </Typography>
-                          </ListItem>
-                        )}
-                      </List>
-                    )}
+                          )}
+                        </Box>
+                      )}
+                    </Box>
                   </Box>
                 </CardContent>
               </StyledCard>
