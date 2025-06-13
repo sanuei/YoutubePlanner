@@ -26,6 +26,7 @@ import {
 import { motion } from 'framer-motion';
 import { useSnackbar } from 'notistack';
 import { channelsApi, Channel } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 
 const StyledCard = styled(motion(Card))(({ theme }) => ({
   height: '100%',
@@ -51,6 +52,7 @@ const ChannelList: React.FC = () => {
   const [channelName, setChannelName] = useState('');
   const [selectedChannels, setSelectedChannels] = useState<number[]>([]);
   const { enqueueSnackbar } = useSnackbar();
+  const { user } = useAuth();
 
   const fetchChannels = useCallback(async () => {
     try {
@@ -87,7 +89,7 @@ const ChannelList: React.FC = () => {
     }
     
     try {
-      await channelsApi.create(channelName);
+      await channelsApi.create(channelName, user?.id);
       enqueueSnackbar('创建频道成功', { variant: 'success' });
       setOpenDialog(false);
       setChannelName('');

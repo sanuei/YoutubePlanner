@@ -17,12 +17,14 @@ package com.youtubeplanner.backend.config;
 
 import com.youtubeplanner.backend.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -32,8 +34,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+@Slf4j
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final UserDetailsService userDetailsService;
@@ -41,22 +45,39 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        log.debug("Configuring security filter chain");
+        
         http
-            .csrf(csrf -> csrf.disable())
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/v1/auth/**").permitAll()
-                .requestMatchers("/api/v1/**").permitAll()
-                .anyRequest().authenticated()
-            )
+            .csrf(csrf -> {
+                log.debug("Disabling CSRF protection");
+                csrf.disable();
+            })
+            .cors(cors -> {
+                log.debug("Configuring CORS");
+                cors.configure(http);
+            })
+            .sessionManagement(session -> {
+                log.debug("Configuring session management to STATELESS");
+                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+            })
+            .authorizeHttpRequests(auth -> {
+                log.debug("Configuring request authorization");
+                auth
+                    .requestMatchers("/api/v1/auth/**").permitAll()
+                    .requestMatchers("/api/v1/channels/**").hasRole("USER")
+                    .requestMatchers("/api/v1/**").authenticated()
+                    .anyRequest().authenticated();
+            })
             .authenticationProvider(authenticationProvider())
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         
+        log.debug("Security filter chain configuration completed");
         return http.build();
     }
 
     @Bean
     public AuthenticationProvider authenticationProvider() {
+        log.debug("Configuring authentication provider");
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
         authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());
@@ -65,11 +86,13 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
+        log.debug("Creating password encoder");
         return new BCryptPasswordEncoder();
     }
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        log.debug("Creating authentication manager");
         return config.getAuthenticationManager();
     }
 } 

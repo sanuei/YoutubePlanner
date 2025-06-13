@@ -31,6 +31,8 @@ import { motion } from 'framer-motion';
 import { useSnackbar } from 'notistack';
 import { categoriesApi, scriptsApi, Category, Script } from '../services/api';
 import { format } from 'date-fns';
+import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const StyledCard = styled(motion(Card))(({ theme }) => ({
   height: '100%',
@@ -46,6 +48,7 @@ const StyledCard = styled(motion(Card))(({ theme }) => ({
 }));
 
 const CategoryManagement: React.FC = () => {
+  const navigate = useNavigate();
   const [categories, setCategories] = useState<Category[]>([]);
   const [scripts, setScripts] = useState<Script[]>([]);
   const [loading, setLoading] = useState(false);
@@ -55,6 +58,7 @@ const CategoryManagement: React.FC = () => {
   const [search, setSearch] = useState('');
   const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
   const { enqueueSnackbar } = useSnackbar();
+  const { user } = useAuth();
 
   const fetchCategories = useCallback(async () => {
     try {
@@ -83,6 +87,7 @@ const CategoryManagement: React.FC = () => {
       });
       
       if (response.success) {
+        console.log('获取到的脚本列表:', response.data.items);
         setScripts(response.data.items);
       }
     } catch (error: any) {
@@ -104,7 +109,7 @@ const CategoryManagement: React.FC = () => {
     try {
       const response = await categoriesApi.create({ 
         category_name: categoryName,
-        user_id: 1  // 使用当前登录用户的ID
+        user_id: user?.id
       });
       if (response.success) {
         enqueueSnackbar('创建分类成功', { variant: 'success' });
@@ -128,7 +133,7 @@ const CategoryManagement: React.FC = () => {
     try {
       const response = await categoriesApi.update(editCategory.category_id, { 
         category_name: categoryName,
-        user_id: 1  // 使用当前登录用户的ID
+        user_id: user?.id
       });
       if (response.success) {
         enqueueSnackbar('更新分类成功', { variant: 'success' });
@@ -174,6 +179,11 @@ const CategoryManagement: React.FC = () => {
         ? prev.filter(id => id !== categoryId)
         : [...prev, categoryId]
     );
+  };
+
+  const handleScriptClick = (scriptId: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    navigate(`/scripts/${scriptId}/preview`);
   };
 
   if (loading) {
@@ -244,62 +254,106 @@ const CategoryManagement: React.FC = () => {
       ) : (
         <Box sx={{ 
           display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))',
           gap: 3,
         }}>
           {categories.map((category) => {
-            const categoryScripts = scripts.filter(script => script.category_id === category.category_id);
+            const categoryScripts = scripts.filter(script => 
+              script.category?.category_id === category.category_id
+            );
             return (
               <StyledCard 
                 key={category.category_id} 
                 elevation={1}
-                onClick={() => handleOpenDialog(category)}
               >
-                <CardContent sx={{ flexGrow: 1, pb: 2 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
-                    <Checkbox
-                      checked={selectedCategories.includes(category.category_id)}
-                      onChange={(e) => {
-                        e.stopPropagation();
-                        handleCategorySelect(category.category_id);
+                <CardContent sx={{ flexGrow: 1, pb: 2, position: 'relative' }}>
+                  <Checkbox
+                    checked={selectedCategories.includes(category.category_id)}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      handleCategorySelect(category.category_id);
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                    sx={{
+                      position: 'absolute',
+                      top: 0,
+                      right: 0,
+                      '& .MuiSvgIcon-root': {
+                        borderRadius: '50%',
+                        backgroundColor: 'background.paper',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                      }
+                    }}
+                  />
+                  <Box sx={{ flex: 1 }}>
+                    <Box 
+                      sx={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: 2,
+                        mb: 2,
+                        cursor: 'pointer',
+                        pr: 4,
+                        '&:hover': {
+                          opacity: 0.8
+                        }
                       }}
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                    <Box sx={{ flex: 1 }}>
-                      <Typography variant="h6" gutterBottom noWrap>
+                      onClick={() => handleOpenDialog(category)}
+                    >
+                      <Typography variant="h6" noWrap>
                         {category.category_name}
                       </Typography>
-                      <Typography variant="body2" color="text.secondary" gutterBottom>
-                        创建时间：{format(new Date(category.created_at), 'yyyy-MM-dd')}
+                      <Typography variant="body2" color="text.secondary">
+                        ({categoryScripts.length})
                       </Typography>
-                      <Typography variant="body2" color="text.secondary" gutterBottom>
-                        脚本数量：{categoryScripts.length}
-                      </Typography>
-                      {categoryScripts.length > 0 && (
-                        <List dense sx={{ mt: 2 }}>
-                          {categoryScripts.map((script) => (
-                            <ListItem key={script.script_id} disablePadding>
-                              <ListItemText
-                                primary={script.title}
-                                secondary={
-                                  <Stack direction="row" spacing={1} alignItems="center">
-                                    <Chip
-                                      label={script.status || '未设置'}
-                                      size="small"
-                                      color="secondary"
-                                      variant="outlined"
-                                    />
-                                    <Typography variant="caption" color="text.secondary">
-                                      {format(new Date(script.updated_at), 'yyyy-MM-dd')}
-                                    </Typography>
-                                  </Stack>
-                                }
-                              />
-                            </ListItem>
-                          ))}
-                        </List>
-                      )}
                     </Box>
+                    {categoryScripts.length > 0 && (
+                      <List dense sx={{ mt: 2, maxHeight: 200, overflow: 'auto' }}>
+                        {categoryScripts.slice(0, 5).map((script) => (
+                          <ListItem 
+                            key={script.script_id} 
+                            disablePadding
+                            sx={{ 
+                              py: 0.5,
+                              '&:hover': {
+                                backgroundColor: 'action.hover',
+                              }
+                            }}
+                          >
+                            <ListItemText
+                              primary={
+                                <Box 
+                                  sx={{ 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    gap: 1,
+                                    cursor: 'pointer'
+                                  }}
+                                  onClick={(e) => handleScriptClick(script.script_id, e)}
+                                >
+                                  <Typography variant="body2" noWrap sx={{ flex: 1 }}>
+                                    {script.title}
+                                  </Typography>
+                                  <Chip
+                                    label={script.status || '未设置'}
+                                    size="small"
+                                    color="secondary"
+                                    variant="outlined"
+                                  />
+                                </Box>
+                              }
+                            />
+                          </ListItem>
+                        ))}
+                        {categoryScripts.length > 5 && (
+                          <ListItem>
+                            <Typography variant="caption" color="text.secondary">
+                              还有 {categoryScripts.length - 5} 个脚本...
+                            </Typography>
+                          </ListItem>
+                        )}
+                      </List>
+                    )}
                   </Box>
                 </CardContent>
               </StyledCard>

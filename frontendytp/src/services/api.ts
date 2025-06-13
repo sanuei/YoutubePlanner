@@ -243,8 +243,11 @@ export interface ScriptListParams {
 }
 
 export const channelsApi = {
-  create: (channelName: string): Promise<ApiResponse<Channel>> => {
-    return api.post('/channels', { channel_name: channelName });
+  create: (channelName: string, userId?: number): Promise<ApiResponse<Channel>> => {
+    return api.post('/channels', { 
+      channel_name: channelName,
+      user_id: userId
+    });
   },
 
   getList: (params: {

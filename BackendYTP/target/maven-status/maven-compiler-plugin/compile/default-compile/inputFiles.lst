@@ -27,6 +27,7 @@ C:\Users\yan.sanuei\Desktop\個人資料\YoutubePlanner\BackendYTP\src\main\java\com
 C:\Users\yan.sanuei\Desktop\個人資料\YoutubePlanner\BackendYTP\src\main\java\com\youtubeplanner\backend\user\dto\RegisterRequest.java
 C:\Users\yan.sanuei\Desktop\個人資料\YoutubePlanner\BackendYTP\src\main\java\com\youtubeplanner\backend\channel\dto\GetChannelsRequest.java
 C:\Users\yan.sanuei\Desktop\個人資料\YoutubePlanner\BackendYTP\src\main\java\com\youtubeplanner\backend\common\PaginationInfo.java
+C:\Users\yan.sanuei\Desktop\個人資料\YoutubePlanner\BackendYTP\src\main\java\com\youtubeplanner\backend\user\entity\Role.java
 C:\Users\yan.sanuei\Desktop\個人資料\YoutubePlanner\BackendYTP\src\main\java\com\youtubeplanner\backend\category\CategoryController.java
 C:\Users\yan.sanuei\Desktop\個人資料\YoutubePlanner\BackendYTP\src\main\java\com\youtubeplanner\backend\script\entity\ScriptChapter.java
 C:\Users\yan.sanuei\Desktop\個人資料\YoutubePlanner\BackendYTP\src\main\java\com\youtubeplanner\backend\user\entity\User.java

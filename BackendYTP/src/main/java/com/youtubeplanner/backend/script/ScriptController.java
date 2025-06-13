@@ -9,6 +9,8 @@ import com.youtubeplanner.backend.script.dto.ScriptResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,38 +22,41 @@ public class ScriptController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<ScriptResponse> createScript(
-            @Valid @RequestBody CreateScriptRequest request,
-            @RequestHeader("X-User-ID") Long userId) {
-        return scriptService.createScript(request, userId);
+            @Valid @RequestBody CreateScriptRequest request) {
+        return scriptService.createScript(request, getUserIdFromContext());
     }
 
     @GetMapping
     public ApiResponse<PageResponse<ScriptListItemResponse>> getScripts(
-            @ModelAttribute @Valid GetScriptsRequest request,
-            @RequestHeader("X-User-ID") Long userId) {
-        return scriptService.getScripts(request, userId);
+            @ModelAttribute @Valid GetScriptsRequest request) {
+        return scriptService.getScripts(request, getUserIdFromContext());
     }
 
     @GetMapping("/{scriptId}")
     public ApiResponse<ScriptResponse> getScriptDetail(
-            @PathVariable Long scriptId,
-            @RequestHeader("X-User-ID") Long userId) {
-        return scriptService.getScriptDetail(scriptId, userId);
+            @PathVariable Long scriptId) {
+        return scriptService.getScriptDetail(scriptId, getUserIdFromContext());
     }
 
     @PutMapping("/{scriptId}")
     public ApiResponse<ScriptResponse> updateScript(
             @PathVariable Long scriptId,
-            @Valid @RequestBody CreateScriptRequest request,
-            @RequestHeader("X-User-ID") Long userId) {
-        return scriptService.updateScript(scriptId, request, userId);
+            @Valid @RequestBody CreateScriptRequest request) {
+        return scriptService.updateScript(scriptId, request, getUserIdFromContext());
     }
 
     @DeleteMapping("/{scriptId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteScript(
-            @PathVariable Long scriptId,
-            @RequestHeader("X-User-ID") Long userId) {
-        scriptService.deleteScript(scriptId, userId);
+            @PathVariable Long scriptId) {
+        scriptService.deleteScript(scriptId, getUserIdFromContext());
+    }
+
+    private Long getUserIdFromContext() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("用户未认证");
+        }
+        return Long.parseLong(authentication.getName());
     }
 } 
