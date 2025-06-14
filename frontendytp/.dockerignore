@@ -1,0 +1,38 @@
+# 排除node_modules（会重新安装）
+node_modules/
+
+# 排除构建产物
+build/
+dist/
+
+# 排除IDE文件
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 排除系统文件
+.DS_Store
+Thumbs.db
+
+# 排除Git文件
+.git/
+.gitignore
+
+# 排除日志文件
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 排除测试覆盖率报告
+coverage/
+
+# 排除环境变量文件（敏感信息）
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# 排除文档
+README.md
+*.md 
