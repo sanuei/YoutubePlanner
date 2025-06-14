@@ -1,0 +1,35 @@
+services:
+  # 后端Web Service (免费套餐优化版)
+  - type: web
+    name: youtubeplanner-backend
+    runtime: docker
+    plan: free
+    dockerfilePath: ./BackendYTP/Dockerfile
+    dockerContext: ./BackendYTP
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: SPRING_DATASOURCE_URL
+        sync: false  # 在Render Dashboard中手动设置
+      - key: SPRING_DATASOURCE_USERNAME
+        sync: false
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_ACCESS_TOKEN_EXPIRATION
+        value: "3600"
+      - key: JWT_REFRESH_TOKEN_EXPIRATION
+        value: "604800"
+      - key: CORS_ALLOWED_ORIGINS
+        value: "*"
+    healthCheckPath: /actuator/health
+
+  # 前端Static Site (免费)
+  - type: static
+    name: youtubeplanner-frontend
+    buildCommand: cd frontendytp && npm ci && npm run build
+    publishPath: frontendytp/build
+    envVars:
+      - key: REACT_APP_API_BASE_URL
+        value: "REPLACE_WITH_BACKEND_URL/api/v1"  # 部署后需要手动替换 

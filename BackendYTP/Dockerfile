@@ -26,8 +26,8 @@ WORKDIR /app
 # 从构建阶段复制jar文件
 COPY --from=builder /app/target/*.jar app.jar
 
-# 创建日志目录
-RUN mkdir -p /app/logs && chown -R spring:spring /app
+# 修改应用文件权限
+RUN chown -R spring:spring /app
 
 # 切换到非root用户
 USER spring
