@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  # 后端服务
+  backend:
+    build:
+      context: ./BackendYTP
+      dockerfile: Dockerfile
+    container_name: youtubeplanner-backend
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db.nvcagxykymgtmprggwhy.supabase.co:5432/postgres
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=OtvO9P8X36b3up5x
+      - JWT_SECRET=404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      - JWT_ACCESS_TOKEN_EXPIRATION=3600
+      - JWT_REFRESH_TOKEN_EXPIRATION=604800
+      - CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:80
+    volumes:
+      - backend_logs:/app/logs
+    networks:
+      - youtubeplanner-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # 前端服务
+  frontend:
+    build:
+      context: ./frontendytp
+      dockerfile: Dockerfile
+    container_name: youtubeplanner-frontend
+    ports:
+      - "3000:80"
+    environment:
+      - REACT_APP_API_BASE_URL=http://localhost:8080/api/v1
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - youtubeplanner-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+networks:
+  youtubeplanner-network:
+    driver: bridge
+
+volumes:
+  backend_logs:
+    driver: local 

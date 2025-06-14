@@ -1,0 +1,69 @@
+services:
+  # 后端Web Service
+  - type: web
+    name: youtubeplanner-backend
+    runtime: docker
+    plan: free
+    dockerfilePath: ./BackendYTP/Dockerfile
+    dockerContext: ./BackendYTP
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: SPRING_DATASOURCE_URL
+        sync: false  # 将在Render界面中手动设置
+      - key: SPRING_DATASOURCE_USERNAME
+        sync: false  # 将在Render界面中手动设置
+      - key: SPRING_DATASOURCE_PASSWORD
+        sync: false  # 将在Render界面中手动设置
+      - key: JWT_SECRET
+        sync: false  # 将在Render界面中手动设置
+      - key: JWT_ACCESS_TOKEN_EXPIRATION
+        value: "3600"
+      - key: JWT_REFRESH_TOKEN_EXPIRATION
+        value: "604800"
+      - key: CORS_ALLOWED_ORIGINS
+        value: "*"  # 生产环境中需要设置为具体的前端域名
+    healthCheckPath: /actuator/health
+    numInstances: 1
+    disk:
+      name: youtubeplanner-backend-disk
+      mountPath: /app/logs
+      sizeGB: 1
+
+  # 前端Web Service (使用Docker)
+  - type: web
+    name: youtubeplanner-frontend
+    runtime: docker
+    plan: free
+    dockerfilePath: ./frontendytp/Dockerfile
+    dockerContext: ./frontendytp
+    envVars:
+      - key: REACT_APP_API_BASE_URL
+        fromService:
+          type: web
+          name: youtubeplanner-backend
+          property: url
+          transform: "$URL/api/v1"
+    healthCheckPath: /health
+    numInstances: 1
+
+  # 替代方案：前端Static Site (更经济)
+  # - type: static
+  #   name: youtubeplanner-frontend-static
+  #   buildCommand: cd frontendytp && npm ci && npm run build
+  #   publishPath: frontendytp/build
+  #   envVars:
+  #     - key: REACT_APP_API_BASE_URL
+  #       fromService:
+  #         type: web
+  #         name: youtubeplanner-backend
+  #         property: url
+  #         transform: "$URL/api/v1"
+
+databases:
+  # 注意：使用现有的Supabase数据库，无需在Render创建新数据库
+  # 如果需要Render托管的PostgreSQL，可以取消注释以下内容：
+  # - name: youtubeplanner-db
+  #   databaseName: youtubeplanner
+  #   user: youtubeplanner
+  #   plan: free 
