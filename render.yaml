@@ -27,28 +27,15 @@ services:
     numInstances: 1
     # 免费套餐不支持disk，日志将输出到标准输出
 
-  # 前端Static Site (免费且更适合)
-  - type: static
-    name: youtubeplanner-frontend
-    buildCommand: cd frontendytp && npm ci && npm run build
-    publishPath: frontendytp/build
-    envVars:
-      - key: REACT_APP_API_BASE_URL
-        value: "https://youtubeplanner-backend.onrender.com/api/v1"  # 需要替换为实际的后端URL
-    # Static sites不支持healthCheckPath
-
-  # 替代方案：前端Static Site (更经济)
-  # - type: static
-  #   name: youtubeplanner-frontend-static
-  #   buildCommand: cd frontendytp && npm ci && npm run build
-  #   publishPath: frontendytp/build
-  #   envVars:
-  #     - key: REACT_APP_API_BASE_URL
-  #       fromService:
-  #         type: web
-  #         name: youtubeplanner-backend
-  #         property: url
-  #         transform: "$URL/api/v1"
+  # 注意：Blueprint YAML不支持static类型
+  # 前端需要手动创建Static Site服务
+  # 
+  # 手动创建步骤：
+  # 1. 在Render Dashboard点击 "New +" -> "Static Site"
+  # 2. 选择仓库，配置：
+  #    - Build Command: cd frontendytp && npm ci && npm run build
+  #    - Publish Directory: frontendytp/build
+  #    - Environment Variable: REACT_APP_API_BASE_URL=https://youtubeplanner-backend.onrender.com/api/v1
 
 databases:
   # 注意：使用现有的Supabase数据库，无需在Render创建新数据库
