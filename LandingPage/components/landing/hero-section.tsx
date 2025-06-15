@@ -304,57 +304,61 @@ export function HeroSection() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 1.2 }}
               >
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Button 
-                    size="xl" 
-                    className="group relative overflow-hidden bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 text-white border-0 shadow-2xl hover:shadow-pink-500/25 px-12 py-6 text-xl font-bold rounded-2xl"
-                  >
-                    <motion.div
-                      className="absolute inset-0 bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600"
-                      initial={{ x: "-100%" }}
-                      whileHover={{ x: "0%" }}
-                      transition={{ duration: 0.3 }}
-                    />
-                    <span className="relative z-10 flex items-center gap-3">
-                      <Rocket className="w-6 h-6" />
-                      立即开始免费试用
-                      <motion.div
-                        animate={{ x: [0, 5, 0] }}
-                        transition={{ duration: 1.5, repeat: Infinity }}
-                      >
-                        →
-                      </motion.div>
-                    </span>
-                    <motion.div
-                      className="absolute inset-0 rounded-2xl"
-                      animate={{
-                        boxShadow: [
-                          "0 0 20px rgba(236, 72, 153, 0.3)",
-                          "0 0 40px rgba(236, 72, 153, 0.5)",
-                          "0 0 20px rgba(236, 72, 153, 0.3)",
-                        ],
-                      }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                    />
-                  </Button>
-                </motion.div>
+                                 <motion.div
+                   whileHover={{ scale: 1.05 }}
+                   whileTap={{ scale: 0.95 }}
+                 >
+                   <Button 
+                     size="xl" 
+                     className="group relative overflow-hidden bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 text-white border-0 shadow-2xl hover:shadow-pink-500/25 px-12 py-6 text-xl font-bold rounded-2xl"
+                     onClick={() => window.open('https://youtubeplanner2025.onrender.com', '_blank')}
+                   >
+                     <motion.div
+                       className="absolute inset-0 bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600"
+                       initial={{ x: "-100%" }}
+                       whileHover={{ x: "0%" }}
+                       transition={{ duration: 0.3 }}
+                     />
+                     <span className="relative z-10 flex items-center gap-3">
+                       <Rocket className="w-6 h-6" />
+                       立即开始免费试用
+                       <motion.div
+                         animate={{ x: [0, 5, 0] }}
+                         transition={{ duration: 1.5, repeat: Infinity }}
+                       >
+                         →
+                       </motion.div>
+                     </span>
+                     <motion.div
+                       className="absolute inset-0 rounded-2xl"
+                       animate={{
+                         boxShadow: [
+                           "0 0 20px rgba(236, 72, 153, 0.3)",
+                           "0 0 40px rgba(236, 72, 153, 0.5)",
+                           "0 0 20px rgba(236, 72, 153, 0.3)",
+                         ],
+                       }}
+                       transition={{ duration: 2, repeat: Infinity }}
+                     />
+                   </Button>
+                 </motion.div>
                 
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Button 
-                    size="xl" 
-                    variant="outline"
-                    className="border-2 border-white/30 text-white hover:bg-white/10 backdrop-blur-sm group px-12 py-6 text-xl font-semibold rounded-2xl hover:border-white/50 transition-all duration-300"
-                  >
-                    <Play className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform" />
-                    观看产品演示
-                  </Button>
-                </motion.div>
+                                 <motion.div
+                   whileHover={{ scale: 1.05 }}
+                   whileTap={{ scale: 0.95 }}
+                 >
+                   <Button 
+                     size="xl" 
+                     className="border-2 border-white/40 text-white bg-white/5 hover:bg-white/15 backdrop-blur-md group px-12 py-6 text-xl font-semibold rounded-2xl hover:border-white/60 transition-all duration-300 shadow-lg"
+                     onClick={() => {
+                       // 可以替换为实际的演示视频链接
+                       alert('演示视频即将播放！')
+                     }}
+                   >
+                     <Play className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform text-white" />
+                     <span className="text-white">观看产品演示</span>
+                   </Button>
+                 </motion.div>
               </motion.div>
 
               {/* 增强的信任标识 */}

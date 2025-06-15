@@ -2,7 +2,7 @@ services:
   - type: web
     name: youtubeplanner-frontend
     env: node
-    buildCommand: npm install && npm run build
+    buildCommand: npm install && npm run build && cp serve.json build/
     startCommand: npx serve -s build -l 3000 -c serve.json
     envVars:
       - key: REACT_APP_API_BASE_URL
