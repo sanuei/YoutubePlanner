@@ -10,8 +10,8 @@ import {
   useTheme,
   useMediaQuery,
   CircularProgress,
-  Link,
 } from '@mui/material';
+import { Link } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
 import {
   Visibility,
@@ -215,13 +215,16 @@ const Login: React.FC = () => {
             <Typography variant="body2" color="text.secondary">
               还没有账号？{' '}
               <Link
-                href="/register"
-                sx={{
-                  color: 'primary.main',
+                to="/register"
+                style={{
+                  color: '#1976d2',
                   textDecoration: 'none',
-                  '&:hover': {
-                    textDecoration: 'underline',
-                  },
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.textDecoration = 'underline';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.textDecoration = 'none';
                 }}
               >
                 立即注册

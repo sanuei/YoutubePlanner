@@ -9,10 +9,7 @@ const api = axios.create({
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
-    'Accept': 'application/json',
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+    'Accept': 'application/json'
   },
 });
 
@@ -58,9 +55,9 @@ api.interceptors.request.use(
 // 响应拦截器
 api.interceptors.response.use(
   (response) => {
-    // 对于登录请求的特殊处理
-    if (response.config.url?.includes('/auth/login')) {
-      return response.data;
+    // 对于认证相关请求的特殊处理 - 返回完整的响应对象
+    if (response.config.url?.includes('/auth/login') || response.config.url?.includes('/auth/register')) {
+      return response;
     }
 
     // 如果响应成功，直接返回响应数据

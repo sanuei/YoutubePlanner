@@ -25,8 +25,15 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**") // 匹配所有路径
-                .allowedOriginPatterns("*") // 允许所有来源
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
+                .allowedOriginPatterns("*") // 允许所有来源模式
+                .allowedOrigins(
+                    "http://localhost:3000",    // React开发服务器
+                    "http://localhost:3001",    // 备用React端口
+                    "http://localhost:8080",    // 本地后端
+                    "http://127.0.0.1:3000",    // 本地IP
+                    "http://127.0.0.1:8080"     // 本地IP后端
+                )
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD")
                 .allowedHeaders("*")
                 .exposedHeaders("*")
                 .allowCredentials(true)

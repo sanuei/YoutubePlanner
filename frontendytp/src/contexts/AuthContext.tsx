@@ -10,14 +10,22 @@ interface User {
 }
 
 interface LoginResponse {
-  accessToken: string;
-  refreshToken: string;
-  tokenType: string;
-  expiresIn: number;
-  user: {
-    userId: number;
-    username: string;
+  success: boolean;
+  code: number;
+  message: string;
+  data: {
+    accessToken: string;
+    refreshToken: string;
+    tokenType: string;
+    expiresIn: number;
+    user: {
+      userId: number;
+      username: string;
+    };
   };
+  errors?: any;
+  timestamp: string;
+  requestId: string;
 }
 
 interface ApiResponse<T> {
@@ -25,6 +33,7 @@ interface ApiResponse<T> {
   code: number;
   message: string;
   data: T;
+  errors?: any;
   timestamp: string;
   requestId: string;
 }
@@ -57,6 +66,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const token = localStorage.getItem('accessToken');
       console.log('Initial token check:', token);
       
+      // 获取当前路径
+      const currentPath = window.location.pathname;
+      const isPublicRoute = currentPath === '/login' || currentPath === '/register';
+      
       if (token) {
         try {
           // 检查token是否存在且未过期
@@ -71,25 +84,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               email: ''
             });
             api.defaults.headers.common.Authorization = `Bearer ${token}`;
+            
+            // 如果用户已登录且在公共页面，重定向到主页
+            if (isPublicRoute) {
+              navigate('/channels');
+            }
           } else {
-            // token已过期，清除存储并跳转到登录页
-            console.log('Token expired, redirecting to login');
+            // token已过期，清除存储
+            console.log('Token expired');
             localStorage.removeItem('accessToken');
             localStorage.removeItem('refreshToken');
             delete api.defaults.headers.common.Authorization;
-            navigate('/login');
+            
+            // 只有在非公共路由时才重定向到登录页
+            if (!isPublicRoute) {
+              navigate('/login');
+            }
           }
         } catch (error) {
           console.error('Token validation failed:', error);
-          // token解析失败，清除存储并跳转到登录页
+          // token解析失败，清除存储
           localStorage.removeItem('accessToken');
           localStorage.removeItem('refreshToken');
           delete api.defaults.headers.common.Authorization;
-          navigate('/login');
+          
+          // 只有在非公共路由时才重定向到登录页
+          if (!isPublicRoute) {
+            navigate('/login');
+          }
         }
       } else {
-        // 没有token，直接跳转到登录页
-        navigate('/login');
+        // 没有token，只有在非公共路由时才重定向到登录页
+        if (!isPublicRoute) {
+          navigate('/login');
+        }
       }
       setLoading(false);
     };
@@ -126,7 +154,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log('Login response:', response);
       console.log('Response data:', response.data);
 
-      const { accessToken, refreshToken, user } = response.data;
+      // 从response.data.data中提取token和用户信息
+      const { accessToken, refreshToken, user } = response.data.data;
       console.log('Extracted tokens and user:', { accessToken, refreshToken, user });
       
       if (accessToken && refreshToken && user) {
@@ -170,29 +199,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log('Registration response:', response);
       console.log('Response data:', response.data);
       
-      // 检查响应状态码和成功标志
+      // 检查响应状态码和成功标志 - 现在response是完整的axios响应对象
       if (response.data?.success && response.data?.code === 201) {
-        console.log('Registration successful, preparing to navigate');
-        // 使用 Promise 来确保导航完成
-        return new Promise<{ success: boolean; message: string }>((resolve) => {
-          // 先返回成功状态
-          resolve({ 
-            success: true, 
-            message: response.data.message || '注册成功' 
-          });
-          
-          // 然后执行导航
-          setTimeout(() => {
-            console.log('Navigating to login page');
-            navigate('/login', { replace: true });
-          }, 1000);
-        });
+        console.log('Registration successful');
+        
+        // 延迟导航，让用户看到成功消息
+        setTimeout(() => {
+          console.log('Navigating to login page');
+          navigate('/login', { replace: true });
+        }, 2000);
+        
+        return { 
+          success: true, 
+          message: response.data.message || '注册成功' 
+        };
       }
       
       console.error('Registration failed - Invalid response:', response);
       return { 
         success: false, 
-        message: response.data.message || '注册失败' 
+        message: response.data?.message || '注册失败' 
       };
     } catch (error: any) {
       console.error('Registration error:', error);

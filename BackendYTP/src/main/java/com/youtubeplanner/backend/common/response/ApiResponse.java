@@ -1,30 +1,15 @@
-/*
- * 文件名：ApiResponse.java
- * 创建日期：2024年3月19日
- * 作者：Yan Sanuei
- * 
- * 文件描述：
- * API响应封装类，用于统一处理API响应格式。
- * 包含成功状态、状态码、消息、数据等字段。
- * 
- * 修改历史：
- * 2024年3月19日 - 初始版本
- * 
- * 版权所有 (c) 2025 YoutubePlanner
- */
-
 package com.youtubeplanner.backend.common.response;
 
-import lombok.Data;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
-@Data
 public class ApiResponse<T> {
     private boolean success;
     private int code;
     private String message;
     private T data;
+    private List<ValidationError> errors;
     private LocalDateTime timestamp;
     private String requestId;
 
@@ -33,6 +18,64 @@ public class ApiResponse<T> {
         this.requestId = UUID.randomUUID().toString();
     }
 
+    // Getters and Setters
+    public boolean isSuccess() {
+        return success;
+    }
+
+    public void setSuccess(boolean success) {
+        this.success = success;
+    }
+
+    public int getCode() {
+        return code;
+    }
+
+    public void setCode(int code) {
+        this.code = code;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public T getData() {
+        return data;
+    }
+
+    public void setData(T data) {
+        this.data = data;
+    }
+
+    public List<ValidationError> getErrors() {
+        return errors;
+    }
+
+    public void setErrors(List<ValidationError> errors) {
+        this.errors = errors;
+    }
+
+    public LocalDateTime getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(LocalDateTime timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public String getRequestId() {
+        return requestId;
+    }
+
+    public void setRequestId(String requestId) {
+        this.requestId = requestId;
+    }
+
+    // Static factory methods
     public static <T> ApiResponse<T> success(T data) {
         return success(200, "操作成功", data);
     }
@@ -56,5 +99,40 @@ public class ApiResponse<T> {
         response.setCode(code);
         response.setMessage(message);
         return response;
+    }
+
+    public static <T> ApiResponse<T> error(int code, String message, List<ValidationError> errors) {
+        ApiResponse<T> response = new ApiResponse<>();
+        response.setSuccess(false);
+        response.setCode(code);
+        response.setMessage(message);
+        response.setErrors(errors);
+        return response;
+    }
+
+    public static class ValidationError {
+        private String field;
+        private String message;
+
+        public ValidationError(String field, String message) {
+            this.field = field;
+            this.message = message;
+        }
+
+        public String getField() {
+            return field;
+        }
+
+        public void setField(String field) {
+            this.field = field;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public void setMessage(String message) {
+            this.message = message;
+        }
     }
 } 

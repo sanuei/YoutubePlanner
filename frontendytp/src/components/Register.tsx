@@ -10,9 +10,9 @@ import {
   useTheme,
   useMediaQuery,
   CircularProgress,
-  Link,
   Alert,
 } from '@mui/material';
+import { Link } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
 import {
   Visibility,
@@ -113,11 +113,22 @@ const Register: React.FC = () => {
     if (!formData.password) {
       newErrors.password = '密码不能为空';
     } else {
-      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/;
-      if (!passwordRegex.test(formData.password)) {
-        newErrors.password = '密码必须包含大小写字母、数字和特殊字符(@$!%*?&)';
-      } else if (formData.password.length < 8 || formData.password.length > 128) {
+      // 检查密码长度
+      if (formData.password.length < 8 || formData.password.length > 128) {
         newErrors.password = '密码长度必须在8-128个字符之间';
+      } else {
+        // 检查是否包含小写字母
+        const hasLowerCase = /[a-z]/.test(formData.password);
+        // 检查是否包含大写字母
+        const hasUpperCase = /[A-Z]/.test(formData.password);
+        // 检查是否包含数字
+        const hasNumber = /\d/.test(formData.password);
+        // 检查是否包含特殊字符（更宽泛的特殊字符集合）
+        const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`！]/.test(formData.password);
+        
+        if (!hasLowerCase || !hasUpperCase || !hasNumber || !hasSpecialChar) {
+          newErrors.password = '密码必须包含大小写字母、数字和特殊字符';
+        }
       }
     }
 
@@ -329,7 +340,7 @@ const Register: React.FC = () => {
               <li>长度在8-128个字符之间</li>
               <li>必须包含大小写字母</li>
               <li>必须包含数字</li>
-              <li>必须包含特殊字符（@$!%*?&）</li>
+              <li>必须包含特殊字符（如：!@#$%^&*等）</li>
             </ul>
           </Alert>
 
@@ -351,13 +362,16 @@ const Register: React.FC = () => {
             <Typography variant="body2" color="text.secondary">
               已有账号？{' '}
               <Link
-                href="/login"
-                sx={{
-                  color: 'primary.main',
+                to="/login"
+                style={{
+                  color: '#1976d2',
                   textDecoration: 'none',
-                  '&:hover': {
-                    textDecoration: 'underline',
-                  },
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.textDecoration = 'underline';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.textDecoration = 'none';
                 }}
               >
                 立即登录

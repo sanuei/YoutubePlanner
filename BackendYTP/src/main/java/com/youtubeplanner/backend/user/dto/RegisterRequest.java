@@ -30,7 +30,7 @@ public class RegisterRequest {
 
     @NotBlank(message = "密码不能为空")
     @Size(min = 6, max = 20, message = "密码长度必须在6-20个字符之间")
-    @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d@$!%*#?&]+$",
+    @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d).+$",
             message = "密码必须包含至少一个字母和一个数字")
     private String password;
 

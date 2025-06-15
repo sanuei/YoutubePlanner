@@ -1,23 +1,7 @@
-/*
- * 文件名：SecurityConfig.java
- * 创建日期：2024年3月19日
- * 作者：Yan Sanuei
- * 
- * 文件描述：
- * Spring Security配置类，配置安全相关的设置。
- * 包括密码编码器、认证管理器等。
- * 
- * 修改历史：
- * 2024年3月19日 - 初始版本
- * 
- * 版权所有 (c) 2025 YoutubePlanner
- */
-
 package com.youtubeplanner.backend.config;
 
 import com.youtubeplanner.backend.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -33,8 +17,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-@Slf4j
+import java.util.Arrays;
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -45,39 +33,40 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        log.debug("Configuring security filter chain");
-        
         http
-            .csrf(csrf -> {
-                log.debug("Disabling CSRF protection");
-                csrf.disable();
-            })
-            .cors(cors -> {
-                log.debug("Configuring CORS");
-                cors.configure(http);
-            })
-            .sessionManagement(session -> {
-                log.debug("Configuring session management to STATELESS");
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-            })
-            .authorizeHttpRequests(auth -> {
-                log.debug("Configuring request authorization");
-                auth
-                    .requestMatchers("/api/v1/auth/**").permitAll()
-                    .requestMatchers("/api/v1/channels/**").hasRole("USER")
-                    .requestMatchers("/api/v1/**").authenticated()
-                    .anyRequest().authenticated();
-            })
+            .csrf(csrf -> csrf.disable())
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/api/v1/auth/**").permitAll()
+                .requestMatchers("/actuator/health").permitAll()
+                .requestMatchers("/api/v1/channels/**").hasRole("USER")
+                .requestMatchers("/api/v1/**").authenticated()
+                .anyRequest().authenticated()
+            )
             .authenticationProvider(authenticationProvider())
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         
-        log.debug("Security filter chain configuration completed");
         return http.build();
     }
 
     @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin", "Access-Control-Request-Method", "Access-Control-Request-Headers"));
+        configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
+        
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+
+    @Bean
     public AuthenticationProvider authenticationProvider() {
-        log.debug("Configuring authentication provider");
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
         authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());
@@ -86,13 +75,11 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        log.debug("Creating password encoder");
         return new BCryptPasswordEncoder();
     }
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        log.debug("Creating authentication manager");
         return config.getAuthenticationManager();
     }
 } 
