@@ -24,7 +24,7 @@ import {
 import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { useSnackbar } from 'notistack';
-import { useNavigate } from 'react-router-dom';
+
 
 const GlassContainer = styled(motion(Paper))(({ theme }) => ({
   background: 'rgba(255, 255, 255, 0.8)',
@@ -88,7 +88,6 @@ const Register: React.FC = () => {
   }>({});
   const { register } = useAuth();
   const { enqueueSnackbar } = useSnackbar();
-  const navigate = useNavigate();
 
   const validateForm = () => {
     const newErrors: typeof errors = {};
@@ -124,7 +123,7 @@ const Register: React.FC = () => {
         // 检查是否包含数字
         const hasNumber = /\d/.test(formData.password);
         // 检查是否包含特殊字符（更宽泛的特殊字符集合）
-        const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~`！]/.test(formData.password);
+        const hasSpecialChar = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?~`！]/.test(formData.password);
         
         if (!hasLowerCase || !hasUpperCase || !hasNumber || !hasSpecialChar) {
           newErrors.password = '密码必须包含大小写字母、数字和特殊字符';

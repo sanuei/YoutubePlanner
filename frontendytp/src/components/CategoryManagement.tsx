@@ -15,8 +15,6 @@ import {
   Paper,
   Checkbox,
   InputAdornment,
-  ListItemText,
-  Chip,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import {
@@ -29,7 +27,6 @@ import {
 import { motion } from 'framer-motion';
 import { useSnackbar } from 'notistack';
 import { categoriesApi, scriptsApi, Category, Script } from '../services/api';
-import { format } from 'date-fns';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -46,25 +43,7 @@ const StyledCard = styled(motion(Card))(({ theme }) => ({
   cursor: 'pointer',
 }));
 
-const StatusLabel = ({ label }: { label: string }) => (
-  <Box
-    sx={{
-      display: 'inline-flex',
-      alignItems: 'center',
-      height: 24,
-      padding: '0 8px',
-      borderRadius: '16px',
-      backgroundColor: 'transparent',
-      border: '1px solid',
-      borderColor: 'secondary.main',
-      color: 'secondary.main',
-      fontSize: '0.75rem',
-      fontWeight: 500,
-    }}
-  >
-    {label}
-  </Box>
-);
+
 
 const CategoryLabel = ({ label }: { label: string }) => (
   <Box
@@ -88,28 +67,7 @@ const CategoryLabel = ({ label }: { label: string }) => (
   </Box>
 );
 
-const CategoryList = ({ categories }: { categories: Category[] }) => (
-  <Box sx={{ mt: 1 }}>
-    {categories.map((category) => (
-      <Typography
-        key={category.category_id}
-        variant="body2"
-        color="text.secondary"
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 0.5,
-          '&:not(:last-child)': {
-            mb: 0.5
-          }
-        }}
-      >
-        <CategoryIcon sx={{ fontSize: '0.875rem' }} />
-        {category.category_name}
-      </Typography>
-    ))}
-  </Box>
-);
+
 
 const CategoryManagement: React.FC = () => {
   const navigate = useNavigate();

@@ -10,13 +10,11 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  IconButton,
   CircularProgress,
   Stack,
   Paper,
   Checkbox,
   InputAdornment,
-  Chip,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import {
@@ -93,8 +91,8 @@ const ChannelList: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
-  const [sortBy, setSortBy] = useState('created_at');
-  const [order, setOrder] = useState<'asc' | 'desc'>('desc');
+  const [sortBy] = useState('created_at');
+  const [order] = useState<'asc' | 'desc'>('desc');
   const [openDialog, setOpenDialog] = useState(false);
   const [editChannel, setEditChannel] = useState<Channel | null>(null);
   const [channelName, setChannelName] = useState('');

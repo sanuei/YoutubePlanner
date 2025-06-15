@@ -32,7 +32,6 @@ import {
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
 import { scriptsApi, channelsApi, categoriesApi, Script, Chapter } from '../services/api';
-import { format } from 'date-fns';
 
 // 添加字数统计函数
 const calculateWordCount = (chapters: Chapter[]): number => {

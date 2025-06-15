@@ -4,15 +4,11 @@ import {
   Box,
   Paper,
   Typography,
-  Chip,
   Stack,
   Button,
   CircularProgress,
   Divider,
-  Grid,
-  IconButton,
   Slider,
-  Tooltip,
 } from '@mui/material';
 import {
   ArrowBack as ArrowBackIcon,

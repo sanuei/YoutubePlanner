@@ -16,17 +16,13 @@ import {
   Paper,
   Button,
   IconButton,
-  Chip,
   Stack,
   CircularProgress,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
+
   TextField,
   Pagination,
   InputAdornment,
@@ -41,12 +37,10 @@ import {
 } from '@mui/material';
 import {
   Add as AddIcon,
-  Edit as EditIcon,
   Delete as DeleteIcon,
   Search as SearchIcon,
   Sort as SortIcon,
   Star as StarIcon,
-  StarBorder as StarBorderIcon,
   Visibility as VisibilityIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
@@ -60,15 +54,7 @@ const ScriptManagement: React.FC = () => {
   const [channels, setChannels] = useState<Channel[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
-  const [openEditDialog, setOpenEditDialog] = useState(false);
-  const [editingScript, setEditingScript] = useState<Script | null>(null);
-  const [editFormData, setEditFormData] = useState({
-    difficulty: 3,
-    status: 'Scripting',
-    release_date: '',
-    channel_id: '',
-    category_id: '',
-  });
+
 
   // 分页和筛选状态
   const [pagination, setPagination] = useState({
@@ -167,7 +153,7 @@ const ScriptManagement: React.FC = () => {
     fetchScripts();
   }, [fetchScripts]);
 
-  const fetchChannels = async () => {
+  const fetchChannels = useCallback(async () => {
     try {
       const response = await channelsApi.getList({});
       if (response.success) {
@@ -176,9 +162,9 @@ const ScriptManagement: React.FC = () => {
     } catch (error: any) {
       enqueueSnackbar(error.message || '获取频道列表失败', { variant: 'error' });
     }
-  };
+  }, [enqueueSnackbar]);
 
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     try {
       const response = await categoriesApi.getList({
         limit: 100,
@@ -197,63 +183,18 @@ const ScriptManagement: React.FC = () => {
       console.error('Error fetching categories:', error);
       enqueueSnackbar(error.message || '获取分类列表失败', { variant: 'error' });
     }
-  };
+  }, [enqueueSnackbar]);
 
   useEffect(() => {
     fetchChannels();
     fetchCategories();
-  }, []);
+  }, [fetchChannels, fetchCategories]);
 
-  const handleEdit = (script: Script) => {
-    setEditingScript(script);
-    setEditFormData({
-      difficulty: script.difficulty || 3,
-      status: script.status || 'Scripting',
-      release_date: script.release_date || '',
-      channel_id: script.channel_id?.toString() || '',
-      category_id: script.category?.category_id?.toString() || '',
-    });
-    setOpenEditDialog(true);
-  };
 
-  const handleUpdate = async () => {
-    if (!editingScript) return;
 
-    try {
-      const payload = {
-        ...editFormData,
-        channel_id: editFormData.channel_id ? parseInt(editFormData.channel_id) : undefined,
-        category_id: editFormData.category_id ? parseInt(editFormData.category_id) : undefined,
-      };
 
-      const response = await scriptsApi.update(editingScript.script_id, payload);
-      if (response.success) {
-        enqueueSnackbar('脚本更新成功', { variant: 'success' });
-        setOpenEditDialog(false);
-        fetchScripts();
-      } else {
-        enqueueSnackbar(response.message || '更新脚本失败', { variant: 'error' });
-      }
-    } catch (error: any) {
-      enqueueSnackbar(error.message || '更新脚本失败', { variant: 'error' });
-    }
-  };
 
-  const handleDelete = async (scriptId: number) => {
-    if (!window.confirm('确定要删除这个脚本吗？')) return;
 
-    try {
-      const response = await scriptsApi.delete(scriptId);
-      if (response.success) {
-        enqueueSnackbar('脚本删除成功', { variant: 'success' });
-        fetchScripts();
-      } else {
-        enqueueSnackbar(response.message || '删除脚本失败', { variant: 'error' });
-      }
-    } catch (error: any) {
-      enqueueSnackbar(error.message || '删除脚本失败', { variant: 'error' });
-    }
-  };
 
   const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
     setPagination(prev => ({ ...prev, page: value }));
@@ -269,20 +210,7 @@ const ScriptManagement: React.FC = () => {
     setPagination(prev => ({ ...prev, page: 1 })); // 重置页码
   };
 
-  // 计算字数的函数
-  const calculateWordCount = (script: Script): number => {
-    let count = 0;
-    if (script.chapters && Array.isArray(script.chapters)) {
-      script.chapters.forEach(chapter => {
-        if (chapter.content) {
-          // 移除HTML标签和特殊字符，只保留中英文
-          const text = chapter.content.replace(/<[^>]+>/g, '').replace(/[^\u4e00-\u9fa5a-zA-Z0-9]/g, '');
-          count += text.length;
-        }
-      });
-    }
-    return count;
-  };
+
 
   // 渲染星级
   const renderStars = (difficulty: number) => {
@@ -657,97 +585,7 @@ const ScriptManagement: React.FC = () => {
         </Box>
       )}
 
-      {/* 编辑对话框 */}
-      <Dialog
-        open={openEditDialog}
-        onClose={() => setOpenEditDialog(false)}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle>编辑脚本</DialogTitle>
-        <DialogContent>
-          <Grid container spacing={2} sx={{ mt: 1 }}>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <FormControl fullWidth>
-                <InputLabel>难度</InputLabel>
-                <Select
-                  value={editFormData.difficulty}
-                  label="难度"
-                  onChange={(e) => setEditFormData(prev => ({ ...prev, difficulty: Number(e.target.value) }))}
-                >
-                  {[1, 2, 3, 4, 5].map((value) => (
-                    <MenuItem key={value} value={value}>
-                      {value}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <FormControl fullWidth>
-                <InputLabel>状态</InputLabel>
-                <Select
-                  value={editFormData.status}
-                  label="状态"
-                  onChange={(e) => setEditFormData(prev => ({ ...prev, status: e.target.value }))}
-                >
-                  <MenuItem value="Scripting">编写中</MenuItem>
-                  <MenuItem value="Reviewing">审核中</MenuItem>
-                  <MenuItem value="Completed">已完成</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid size={{ xs: 12 }}>
-              <TextField
-                fullWidth
-                type="date"
-                label="发布日期"
-                value={editFormData.release_date}
-                onChange={(e) => setEditFormData(prev => ({ ...prev, release_date: e.target.value }))}
-                InputLabelProps={{ shrink: true }}
-              />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <FormControl fullWidth>
-                <InputLabel>频道</InputLabel>
-                <Select
-                  value={editFormData.channel_id}
-                  label="频道"
-                  onChange={(e) => setEditFormData(prev => ({ ...prev, channel_id: e.target.value }))}
-                >
-                  {channels.map((channel) => (
-                    <MenuItem key={channel.channel_id} value={channel.channel_id}>
-                      {channel.channel_name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <FormControl fullWidth>
-                <InputLabel>分类</InputLabel>
-                <Select
-                  value={editFormData.category_id}
-                  label="分类"
-                  onChange={(e) => setEditFormData(prev => ({ ...prev, category_id: e.target.value }))}
-                >
-                  {categories.map((category) => (
-                    <MenuItem key={category.category_id} value={category.category_id}>
-                      {category.category_name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-          </Grid>
-        </DialogContent>
-        <DialogActions sx={{ p: 2 }}>
-          <Button onClick={() => setOpenEditDialog(false)}>取消</Button>
-          <Button variant="contained" onClick={handleUpdate}>
-            更新
-          </Button>
-        </DialogActions>
-      </Dialog>
+
     </Box>
   );
 };

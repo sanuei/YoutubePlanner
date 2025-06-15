@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -7,9 +7,6 @@ import {
   TextField,
   Button,
   Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   CircularProgress,
   Alert,
   Card,
@@ -18,7 +15,6 @@ import {
   ListItem,
   ListItemText,
   ListItemIcon,
-  Divider,
   IconButton,
   InputAdornment,
 } from '@mui/material';
@@ -114,7 +110,7 @@ const UserManagement: React.FC = () => {
   };
 
   // 获取用户信息
-  const fetchUserData = async () => {
+  const fetchUserData = useCallback(async () => {
     try {
       setLoading(true);
       const response = await usersApi.getCurrentUser();
@@ -130,10 +126,10 @@ const UserManagement: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [enqueueSnackbar]);
 
   // 获取统计数据
-  const fetchStatsData = async () => {
+  const fetchStatsData = useCallback(async () => {
     try {
       // 使用现有的API获取数据
       const [scriptsRes, channelsRes, categoriesRes] = await Promise.all([
@@ -150,12 +146,12 @@ const UserManagement: React.FC = () => {
     } catch (err) {
       enqueueSnackbar('获取统计数据失败', { variant: 'error' });
     }
-  };
+  }, [enqueueSnackbar]);
 
   useEffect(() => {
     fetchUserData();
     fetchStatsData();
-  }, []);
+  }, [fetchUserData, fetchStatsData]);
 
   // 处理表单输入变化
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
