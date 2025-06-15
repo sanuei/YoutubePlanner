@@ -5421,3 +5421,704 @@ Caused by: java.lang.ClassNotFoundException: ApiResponse
 2025-06-15T15:34:33.727+09:00  INFO 63593 --- [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path ''
 2025-06-15T15:34:33.733+09:00  INFO 63593 --- [restartedMain] c.y.backend.BackendApplication           : Started BackendApplication in 2.177 seconds (process running for 8479.776)
 2025-06-15T15:34:33.734+09:00  INFO 63593 --- [restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
+2025-06-15T16:03:29.035+09:00  INFO 63593 --- [http-nio-8080-exec-1] o.a.c.c.C.[Tomcat-1].[localhost].[/]     : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-06-15T16:03:29.045+09:00  INFO 63593 --- [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2025-06-15T16:03:29.056+09:00  INFO 63593 --- [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 11 ms
+2025-06-15T16:03:29.073+09:00 DEBUG 63593 --- [http-nio-8080-exec-2] c.y.b.security.JwtAuthenticationFilter   : Processing request: POST /api/v1/auth/login
+2025-06-15T16:03:29.073+09:00 DEBUG 63593 --- [http-nio-8080-exec-2] c.y.b.security.JwtAuthenticationFilter   : Authorization header: null
+2025-06-15T16:03:29.073+09:00 DEBUG 63593 --- [http-nio-8080-exec-2] c.y.b.security.JwtAuthenticationFilter   : No valid Authorization header found
+2025-06-15T16:03:29.204+09:00 DEBUG 63593 --- [http-nio-8080-exec-2] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.avatar_url,
+        u1_0.created_at,
+        u1_0.display_name,
+        u1_0.email,
+        u1_0.password_hash,
+        u1_0.role,
+        u1_0.updated_at,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-06-15T16:03:29.412+09:00 DEBUG 63593 --- [http-nio-8080-exec-2] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.avatar_url,
+        u1_0.created_at,
+        u1_0.display_name,
+        u1_0.email,
+        u1_0.password_hash,
+        u1_0.role,
+        u1_0.updated_at,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-06-15T16:03:29.435+09:00 DEBUG 63593 --- [http-nio-8080-exec-2] c.y.b.user.service.impl.JwtServiceImpl   : Generating access token for user: sonic_yann
+2025-06-15T16:03:29.436+09:00 DEBUG 63593 --- [http-nio-8080-exec-2] c.y.b.user.service.impl.JwtServiceImpl   : Generating token with claims: {userId=30, username=sonic_yann}
+2025-06-15T16:03:29.436+09:00 DEBUG 63593 --- [http-nio-8080-exec-2] c.y.b.user.service.impl.JwtServiceImpl   : Token expiration: 3600 seconds
+2025-06-15T16:03:29.438+09:00 DEBUG 63593 --- [http-nio-8080-exec-2] c.y.b.user.service.impl.JwtServiceImpl   : Generating refresh token for user: sonic_yann
+2025-06-15T16:03:29.438+09:00 DEBUG 63593 --- [http-nio-8080-exec-2] c.y.b.user.service.impl.JwtServiceImpl   : Generating token with claims: {userId=30, username=sonic_yann}
+2025-06-15T16:03:29.438+09:00 DEBUG 63593 --- [http-nio-8080-exec-2] c.y.b.user.service.impl.JwtServiceImpl   : Token expiration: 604800 seconds
+2025-06-15T16:03:29.555+09:00 DEBUG 63593 --- [http-nio-8080-exec-8] c.y.b.security.JwtAuthenticationFilter   : Processing request: GET /api/v1/channels
+2025-06-15T16:03:29.555+09:00 DEBUG 63593 --- [http-nio-8080-exec-8] c.y.b.security.JwtAuthenticationFilter   : Authorization header: Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjMwLCJ1c2VybmFtZSI6InNvbmljX3lhbm4iLCJpYXQiOjE3NDk5NzEwMDksImV4cCI6MTc0OTk3NDYwOX0.aa4PjCKY7KMWSrtBVv8h4cuRgNLh1kDJLTQWeVmbFdw
+2025-06-15T16:03:29.555+09:00 DEBUG 63593 --- [http-nio-8080-exec-7] c.y.b.security.JwtAuthenticationFilter   : Processing request: GET /api/v1/categories
+2025-06-15T16:03:29.555+09:00 DEBUG 63593 --- [http-nio-8080-exec-7] c.y.b.security.JwtAuthenticationFilter   : Authorization header: Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjMwLCJ1c2VybmFtZSI6InNvbmljX3lhbm4iLCJpYXQiOjE3NDk5NzEwMDksImV4cCI6MTc0OTk3NDYwOX0.aa4PjCKY7KMWSrtBVv8h4cuRgNLh1kDJLTQWeVmbFdw
+2025-06-15T16:03:29.559+09:00 DEBUG 63593 --- [http-nio-8080-exec-8] c.y.b.user.service.impl.JwtServiceImpl   : Extracted username from token: sonic_yann
+2025-06-15T16:03:29.559+09:00 DEBUG 63593 --- [http-nio-8080-exec-7] c.y.b.user.service.impl.JwtServiceImpl   : Extracted username from token: sonic_yann
+2025-06-15T16:03:29.559+09:00 DEBUG 63593 --- [http-nio-8080-exec-8] c.y.b.security.JwtAuthenticationFilter   : Extracted username from token: sonic_yann
+2025-06-15T16:03:29.559+09:00 DEBUG 63593 --- [http-nio-8080-exec-7] c.y.b.security.JwtAuthenticationFilter   : Extracted username from token: sonic_yann
+2025-06-15T16:03:29.590+09:00 DEBUG 63593 --- [http-nio-8080-exec-8] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.avatar_url,
+        u1_0.created_at,
+        u1_0.display_name,
+        u1_0.email,
+        u1_0.password_hash,
+        u1_0.role,
+        u1_0.updated_at,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-06-15T16:03:29.590+09:00 DEBUG 63593 --- [http-nio-8080-exec-7] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.avatar_url,
+        u1_0.created_at,
+        u1_0.display_name,
+        u1_0.email,
+        u1_0.password_hash,
+        u1_0.role,
+        u1_0.updated_at,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-06-15T16:03:29.620+09:00 DEBUG 63593 --- [http-nio-8080-exec-8] c.y.b.security.JwtAuthenticationFilter   : Loaded user details: User(userId=30, username=sonic_yann, passwordHash=$2a$10$8qb01gGQLN8lhAgN14AIyupE55JFLFb3i9mOVcENdMaFt.SujynHK, email=sonic@gmail.com, createdAt=2025-06-15T07:02:10.626397, updatedAt=2025-06-15T07:02:10.626425, avatarUrl=null, displayName=null, role=USER)
+2025-06-15T16:03:29.622+09:00 DEBUG 63593 --- [http-nio-8080-exec-8] c.y.b.security.JwtAuthenticationFilter   : User authorities: [ROLE_USER]
+2025-06-15T16:03:29.622+09:00 DEBUG 63593 --- [http-nio-8080-exec-8] c.y.b.user.service.impl.JwtServiceImpl   : Validating token: eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjMwLCJ1c2VybmFtZSI6InNvbmljX3lhbm4iLCJpYXQiOjE3NDk5NzEwMDksImV4cCI6MTc0OTk3NDYwOX0.aa4PjCKY7KMWSrtBVv8h4cuRgNLh1kDJLTQWeVmbFdw
+2025-06-15T16:03:29.622+09:00 DEBUG 63593 --- [http-nio-8080-exec-8] c.y.b.user.service.impl.JwtServiceImpl   : Token claims: {userId=30, username=sonic_yann, iat=1749971009, exp=1749974609}
+2025-06-15T16:03:29.622+09:00 DEBUG 63593 --- [http-nio-8080-exec-8] c.y.b.user.service.impl.JwtServiceImpl   : Token expiration: Sun Jun 15 17:03:29 JST 2025
+2025-06-15T16:03:29.622+09:00 DEBUG 63593 --- [http-nio-8080-exec-8] c.y.b.user.service.impl.JwtServiceImpl   : Token is valid: true
+2025-06-15T16:03:29.622+09:00 DEBUG 63593 --- [http-nio-8080-exec-8] c.y.b.security.JwtAuthenticationFilter   : Token is valid
+2025-06-15T16:03:29.623+09:00 DEBUG 63593 --- [http-nio-8080-exec-8] c.y.b.security.JwtAuthenticationFilter   : Authentication set in SecurityContext
+2025-06-15T16:03:29.648+09:00 DEBUG 63593 --- [http-nio-8080-exec-8] org.hibernate.SQL                        : 
+    select
+        c1_0.channel_id,
+        c1_0.channel_name,
+        c1_0.created_at,
+        c1_0.deleted,
+        c1_0.user_id 
+    from
+        channels c1_0 
+    where
+        (
+            c1_0.deleted = false
+        ) 
+        and c1_0.user_id=? 
+        and (
+            ? is null 
+            or cast(c1_0.channel_name as text) like ('%'||cast(? as text)||'%') escape ''
+        ) 
+    order by
+        c1_0.created_at desc 
+    offset
+        ? rows 
+    fetch
+        first ? rows only
+2025-06-15T16:03:29.686+09:00 DEBUG 63593 --- [http-nio-8080-exec-7] c.y.b.security.JwtAuthenticationFilter   : Loaded user details: User(userId=30, username=sonic_yann, passwordHash=$2a$10$8qb01gGQLN8lhAgN14AIyupE55JFLFb3i9mOVcENdMaFt.SujynHK, email=sonic@gmail.com, createdAt=2025-06-15T07:02:10.626397, updatedAt=2025-06-15T07:02:10.626425, avatarUrl=null, displayName=null, role=USER)
+2025-06-15T16:03:29.686+09:00 DEBUG 63593 --- [http-nio-8080-exec-7] c.y.b.security.JwtAuthenticationFilter   : User authorities: [ROLE_USER]
+2025-06-15T16:03:29.686+09:00 DEBUG 63593 --- [http-nio-8080-exec-7] c.y.b.user.service.impl.JwtServiceImpl   : Validating token: eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjMwLCJ1c2VybmFtZSI6InNvbmljX3lhbm4iLCJpYXQiOjE3NDk5NzEwMDksImV4cCI6MTc0OTk3NDYwOX0.aa4PjCKY7KMWSrtBVv8h4cuRgNLh1kDJLTQWeVmbFdw
+2025-06-15T16:03:29.687+09:00 DEBUG 63593 --- [http-nio-8080-exec-7] c.y.b.user.service.impl.JwtServiceImpl   : Token claims: {userId=30, username=sonic_yann, iat=1749971009, exp=1749974609}
+2025-06-15T16:03:29.687+09:00 DEBUG 63593 --- [http-nio-8080-exec-7] c.y.b.user.service.impl.JwtServiceImpl   : Token expiration: Sun Jun 15 17:03:29 JST 2025
+2025-06-15T16:03:29.687+09:00 DEBUG 63593 --- [http-nio-8080-exec-7] c.y.b.user.service.impl.JwtServiceImpl   : Token is valid: true
+2025-06-15T16:03:29.687+09:00 DEBUG 63593 --- [http-nio-8080-exec-7] c.y.b.security.JwtAuthenticationFilter   : Token is valid
+2025-06-15T16:03:29.687+09:00 DEBUG 63593 --- [http-nio-8080-exec-7] c.y.b.security.JwtAuthenticationFilter   : Authentication set in SecurityContext
+2025-06-15T16:03:29.691+09:00 DEBUG 63593 --- [http-nio-8080-exec-7] org.hibernate.SQL                        : 
+    select
+        c1_0.category_id,
+        c1_0.category_name,
+        c1_0.created_at,
+        c1_0.user_id 
+    from
+        categories c1_0 
+    where
+        c1_0.user_id=? 
+        and (
+            ? is null 
+            or ?='' 
+            or lower(cast(c1_0.category_name as text)) like lower(('%'||cast(? as text)||'%')) escape ''
+        ) 
+    order by
+        c1_0.created_at desc 
+    offset
+        ? rows 
+    fetch
+        first ? rows only
+2025-06-15T16:03:29.732+09:00 DEBUG 63593 --- [http-nio-8080-exec-9] c.y.b.security.JwtAuthenticationFilter   : Processing request: GET /api/v1/channels
+2025-06-15T16:03:29.732+09:00 DEBUG 63593 --- [http-nio-8080-exec-9] c.y.b.security.JwtAuthenticationFilter   : Authorization header: Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjMwLCJ1c2VybmFtZSI6InNvbmljX3lhbm4iLCJpYXQiOjE3NDk5NzEwMDksImV4cCI6MTc0OTk3NDYwOX0.aa4PjCKY7KMWSrtBVv8h4cuRgNLh1kDJLTQWeVmbFdw
+2025-06-15T16:03:29.733+09:00 DEBUG 63593 --- [http-nio-8080-exec-9] c.y.b.user.service.impl.JwtServiceImpl   : Extracted username from token: sonic_yann
+2025-06-15T16:03:29.733+09:00 DEBUG 63593 --- [http-nio-8080-exec-9] c.y.b.security.JwtAuthenticationFilter   : Extracted username from token: sonic_yann
+2025-06-15T16:03:29.734+09:00 DEBUG 63593 --- [http-nio-8080-exec-9] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.avatar_url,
+        u1_0.created_at,
+        u1_0.display_name,
+        u1_0.email,
+        u1_0.password_hash,
+        u1_0.role,
+        u1_0.updated_at,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-06-15T16:03:29.762+09:00 DEBUG 63593 --- [http-nio-8080-exec-10] c.y.b.security.JwtAuthenticationFilter   : Processing request: GET /api/v1/categories
+2025-06-15T16:03:29.762+09:00 DEBUG 63593 --- [http-nio-8080-exec-10] c.y.b.security.JwtAuthenticationFilter   : Authorization header: Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjMwLCJ1c2VybmFtZSI6InNvbmljX3lhbm4iLCJpYXQiOjE3NDk5NzEwMDksImV4cCI6MTc0OTk3NDYwOX0.aa4PjCKY7KMWSrtBVv8h4cuRgNLh1kDJLTQWeVmbFdw
+2025-06-15T16:03:29.763+09:00 DEBUG 63593 --- [http-nio-8080-exec-10] c.y.b.user.service.impl.JwtServiceImpl   : Extracted username from token: sonic_yann
+2025-06-15T16:03:29.763+09:00 DEBUG 63593 --- [http-nio-8080-exec-10] c.y.b.security.JwtAuthenticationFilter   : Extracted username from token: sonic_yann
+2025-06-15T16:03:29.764+09:00 DEBUG 63593 --- [http-nio-8080-exec-10] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.avatar_url,
+        u1_0.created_at,
+        u1_0.display_name,
+        u1_0.email,
+        u1_0.password_hash,
+        u1_0.role,
+        u1_0.updated_at,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-06-15T16:03:29.767+09:00 DEBUG 63593 --- [http-nio-8080-exec-9] c.y.b.security.JwtAuthenticationFilter   : Loaded user details: User(userId=30, username=sonic_yann, passwordHash=$2a$10$8qb01gGQLN8lhAgN14AIyupE55JFLFb3i9mOVcENdMaFt.SujynHK, email=sonic@gmail.com, createdAt=2025-06-15T07:02:10.626397, updatedAt=2025-06-15T07:02:10.626425, avatarUrl=null, displayName=null, role=USER)
+2025-06-15T16:03:29.768+09:00 DEBUG 63593 --- [http-nio-8080-exec-9] c.y.b.security.JwtAuthenticationFilter   : User authorities: [ROLE_USER]
+2025-06-15T16:03:29.768+09:00 DEBUG 63593 --- [http-nio-8080-exec-9] c.y.b.user.service.impl.JwtServiceImpl   : Validating token: eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjMwLCJ1c2VybmFtZSI6InNvbmljX3lhbm4iLCJpYXQiOjE3NDk5NzEwMDksImV4cCI6MTc0OTk3NDYwOX0.aa4PjCKY7KMWSrtBVv8h4cuRgNLh1kDJLTQWeVmbFdw
+2025-06-15T16:03:29.768+09:00 DEBUG 63593 --- [http-nio-8080-exec-9] c.y.b.user.service.impl.JwtServiceImpl   : Token claims: {userId=30, username=sonic_yann, iat=1749971009, exp=1749974609}
+2025-06-15T16:03:29.768+09:00 DEBUG 63593 --- [http-nio-8080-exec-9] c.y.b.user.service.impl.JwtServiceImpl   : Token expiration: Sun Jun 15 17:03:29 JST 2025
+2025-06-15T16:03:29.768+09:00 DEBUG 63593 --- [http-nio-8080-exec-9] c.y.b.user.service.impl.JwtServiceImpl   : Token is valid: true
+2025-06-15T16:03:29.768+09:00 DEBUG 63593 --- [http-nio-8080-exec-9] c.y.b.security.JwtAuthenticationFilter   : Token is valid
+2025-06-15T16:03:29.768+09:00 DEBUG 63593 --- [http-nio-8080-exec-9] c.y.b.security.JwtAuthenticationFilter   : Authentication set in SecurityContext
+2025-06-15T16:03:29.769+09:00 DEBUG 63593 --- [http-nio-8080-exec-9] org.hibernate.SQL                        : 
+    select
+        c1_0.channel_id,
+        c1_0.channel_name,
+        c1_0.created_at,
+        c1_0.deleted,
+        c1_0.user_id 
+    from
+        channels c1_0 
+    where
+        (
+            c1_0.deleted = false
+        ) 
+        and c1_0.user_id=? 
+        and (
+            ? is null 
+            or cast(c1_0.channel_name as text) like ('%'||cast(? as text)||'%') escape ''
+        ) 
+    order by
+        c1_0.created_at desc 
+    offset
+        ? rows 
+    fetch
+        first ? rows only
+2025-06-15T16:03:29.795+09:00 DEBUG 63593 --- [http-nio-8080-exec-10] c.y.b.security.JwtAuthenticationFilter   : Loaded user details: User(userId=30, username=sonic_yann, passwordHash=$2a$10$8qb01gGQLN8lhAgN14AIyupE55JFLFb3i9mOVcENdMaFt.SujynHK, email=sonic@gmail.com, createdAt=2025-06-15T07:02:10.626397, updatedAt=2025-06-15T07:02:10.626425, avatarUrl=null, displayName=null, role=USER)
+2025-06-15T16:03:29.795+09:00 DEBUG 63593 --- [http-nio-8080-exec-10] c.y.b.security.JwtAuthenticationFilter   : User authorities: [ROLE_USER]
+2025-06-15T16:03:29.795+09:00 DEBUG 63593 --- [http-nio-8080-exec-10] c.y.b.user.service.impl.JwtServiceImpl   : Validating token: eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjMwLCJ1c2VybmFtZSI6InNvbmljX3lhbm4iLCJpYXQiOjE3NDk5NzEwMDksImV4cCI6MTc0OTk3NDYwOX0.aa4PjCKY7KMWSrtBVv8h4cuRgNLh1kDJLTQWeVmbFdw
+2025-06-15T16:03:29.797+09:00 DEBUG 63593 --- [http-nio-8080-exec-10] c.y.b.user.service.impl.JwtServiceImpl   : Token claims: {userId=30, username=sonic_yann, iat=1749971009, exp=1749974609}
+2025-06-15T16:03:29.797+09:00 DEBUG 63593 --- [http-nio-8080-exec-10] c.y.b.user.service.impl.JwtServiceImpl   : Token expiration: Sun Jun 15 17:03:29 JST 2025
+2025-06-15T16:03:29.797+09:00 DEBUG 63593 --- [http-nio-8080-exec-10] c.y.b.user.service.impl.JwtServiceImpl   : Token is valid: true
+2025-06-15T16:03:29.797+09:00 DEBUG 63593 --- [http-nio-8080-exec-10] c.y.b.security.JwtAuthenticationFilter   : Token is valid
+2025-06-15T16:03:29.797+09:00 DEBUG 63593 --- [http-nio-8080-exec-10] c.y.b.security.JwtAuthenticationFilter   : Authentication set in SecurityContext
+2025-06-15T16:03:29.798+09:00 DEBUG 63593 --- [http-nio-8080-exec-10] org.hibernate.SQL                        : 
+    select
+        c1_0.category_id,
+        c1_0.category_name,
+        c1_0.created_at,
+        c1_0.user_id 
+    from
+        categories c1_0 
+    where
+        c1_0.user_id=? 
+        and (
+            ? is null 
+            or ?='' 
+            or lower(cast(c1_0.category_name as text)) like lower(('%'||cast(? as text)||'%')) escape ''
+        ) 
+    order by
+        c1_0.created_at desc 
+    offset
+        ? rows 
+    fetch
+        first ? rows only
+2025-06-15T16:04:11.877+09:00  INFO 63593 --- [File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 71 class path changes (0 additions, 71 deletions, 0 modifications)
+2025-06-15T16:04:11.908+09:00  INFO 63593 --- [Thread-78] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-06-15T16:04:11.909+09:00  INFO 63593 --- [Thread-78] com.zaxxer.hikari.HikariDataSource       : HikariPool-20 - Shutdown initiated...
+2025-06-15T16:04:12.424+09:00  INFO 63593 --- [Thread-78] com.zaxxer.hikari.HikariDataSource       : HikariPool-20 - Shutdown completed.
+2025-06-15T16:04:19.569+09:00  INFO 63593 --- [restartedMain] c.y.backend.BackendApplication           : Starting BackendApplication using Java 23.0.2 with PID 63593 (/Users/yangshangwei/Desktop/YoutubePlanner/BackendYTP/target/classes started by yangshangwei in /Users/yangshangwei/Desktop/YoutubePlanner/BackendYTP)
+2025-06-15T16:04:19.569+09:00 DEBUG 63593 --- [restartedMain] c.y.backend.BackendApplication           : Running with Spring Boot v3.2.3, Spring v6.1.4
+2025-06-15T16:04:19.569+09:00  INFO 63593 --- [restartedMain] c.y.backend.BackendApplication           : No active profile set, falling back to 1 default profile: "default"
+2025-06-15T16:04:19.942+09:00  INFO 63593 --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-06-15T16:04:19.957+09:00  INFO 63593 --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 14 ms. Found 4 JPA repository interfaces.
+2025-06-15T16:04:20.194+09:00  INFO 63593 --- [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2025-06-15T16:04:20.195+09:00  INFO 63593 --- [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-06-15T16:04:20.195+09:00  INFO 63593 --- [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.19]
+2025-06-15T16:04:20.203+09:00  INFO 63593 --- [restartedMain] o.a.c.c.C.[Tomcat-2].[localhost].[/]     : Initializing Spring embedded WebApplicationContext
+2025-06-15T16:04:20.203+09:00  INFO 63593 --- [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 626 ms
+2025-06-15T16:04:20.423+09:00  INFO 63593 --- [restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-06-15T16:04:20.430+09:00  INFO 63593 --- [restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-06-15T16:04:20.435+09:00  INFO 63593 --- [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-06-15T16:04:20.437+09:00  INFO 63593 --- [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-21 - Starting...
+2025-06-15T16:04:20.833+09:00  INFO 63593 --- [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-21 - Added connection org.postgresql.jdbc.PgConnection@3ac86220
+2025-06-15T16:04:20.834+09:00  INFO 63593 --- [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-21 - Start completed.
+2025-06-15T16:04:20.884+09:00  WARN 63593 --- [restartedMain] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-06-15T16:04:21.143+09:00  INFO 63593 --- [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-06-15T16:04:21.475+09:00  INFO 63593 --- [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-06-15T16:04:21.611+09:00 DEBUG 63593 --- [restartedMain] c.y.b.security.JwtAuthenticationFilter   : Filter 'jwtAuthenticationFilter' configured for use
+2025-06-15T16:04:21.782+09:00 ERROR 63593 --- [restartedMain] c.y.b.script.service.ScriptServiceImpl   : === TEST LOG MESSAGE ===
+2025-06-15T16:04:21.845+09:00  WARN 63593 --- [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-06-15T16:04:22.293+09:00  INFO 63593 --- [restartedMain] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint(s) beneath base path '/actuator'
+2025-06-15T16:04:22.375+09:00  INFO 63593 --- [restartedMain] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@7311431, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@48c9579c, org.springframework.security.web.context.SecurityContextHolderFilter@504f009d, org.springframework.security.web.header.HeaderWriterFilter@65ee2974, org.springframework.web.filter.CorsFilter@6fffa809, org.springframework.security.web.authentication.logout.LogoutFilter@5d35a9a4, com.youtubeplanner.backend.security.JwtAuthenticationFilter@6fc123b5, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@3a98fa58, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@5bbac2ee, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@2488bf0b, org.springframework.security.web.session.SessionManagementFilter@59135ea7, org.springframework.security.web.access.ExceptionTranslationFilter@18c14e59, org.springframework.security.web.access.intercept.AuthorizationFilter@7fd61c2f]
+2025-06-15T16:04:22.707+09:00  INFO 63593 --- [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2025-06-15T16:04:22.731+09:00  INFO 63593 --- [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path ''
+2025-06-15T16:04:22.736+09:00  INFO 63593 --- [restartedMain] c.y.backend.BackendApplication           : Started BackendApplication in 3.251 seconds (process running for 10268.784)
+2025-06-15T16:04:22.738+09:00  INFO 63593 --- [restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
+2025-06-15T16:07:14.507+09:00  INFO 63593 --- [File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 2 class path changes (0 additions, 0 deletions, 2 modifications)
+2025-06-15T16:07:14.527+09:00  INFO 63593 --- [Thread-82] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-06-15T16:07:14.530+09:00  INFO 63593 --- [Thread-82] com.zaxxer.hikari.HikariDataSource       : HikariPool-21 - Shutdown initiated...
+2025-06-15T16:07:14.881+09:00  INFO 63593 --- [Thread-82] com.zaxxer.hikari.HikariDataSource       : HikariPool-21 - Shutdown completed.
+2025-06-15T16:07:15.001+09:00  INFO 63593 --- [restartedMain] c.y.backend.BackendApplication           : Starting BackendApplication using Java 23.0.2 with PID 63593 (/Users/yangshangwei/Desktop/YoutubePlanner/BackendYTP/target/classes started by yangshangwei in /Users/yangshangwei/Desktop/YoutubePlanner/BackendYTP)
+2025-06-15T16:07:15.001+09:00 DEBUG 63593 --- [restartedMain] c.y.backend.BackendApplication           : Running with Spring Boot v3.2.3, Spring v6.1.4
+2025-06-15T16:07:15.001+09:00  INFO 63593 --- [restartedMain] c.y.backend.BackendApplication           : No active profile set, falling back to 1 default profile: "default"
+2025-06-15T16:07:15.168+09:00  INFO 63593 --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-06-15T16:07:15.176+09:00  INFO 63593 --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 7 ms. Found 4 JPA repository interfaces.
+2025-06-15T16:07:15.282+09:00  INFO 63593 --- [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2025-06-15T16:07:15.282+09:00  INFO 63593 --- [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-06-15T16:07:15.282+09:00  INFO 63593 --- [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.19]
+2025-06-15T16:07:15.287+09:00  INFO 63593 --- [restartedMain] o.a.c.c.C.[Tomcat-2].[localhost].[/]     : Initializing Spring embedded WebApplicationContext
+2025-06-15T16:07:15.287+09:00  INFO 63593 --- [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 285 ms
+2025-06-15T16:07:15.400+09:00  INFO 63593 --- [restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-06-15T16:07:15.401+09:00  INFO 63593 --- [restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-06-15T16:07:15.403+09:00  INFO 63593 --- [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-06-15T16:07:15.404+09:00  INFO 63593 --- [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-22 - Starting...
+2025-06-15T16:07:15.826+09:00  INFO 63593 --- [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-22 - Added connection org.postgresql.jdbc.PgConnection@68701211
+2025-06-15T16:07:15.827+09:00  INFO 63593 --- [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-22 - Start completed.
+2025-06-15T16:07:15.860+09:00  WARN 63593 --- [restartedMain] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-06-15T16:07:16.000+09:00  INFO 63593 --- [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-06-15T16:07:16.300+09:00  INFO 63593 --- [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-06-15T16:07:16.397+09:00 DEBUG 63593 --- [restartedMain] c.y.b.security.JwtAuthenticationFilter   : Filter 'jwtAuthenticationFilter' configured for use
+2025-06-15T16:07:16.512+09:00 ERROR 63593 --- [restartedMain] c.y.b.script.service.ScriptServiceImpl   : === TEST LOG MESSAGE ===
+2025-06-15T16:07:16.546+09:00  WARN 63593 --- [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-06-15T16:07:16.728+09:00  INFO 63593 --- [restartedMain] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint(s) beneath base path '/actuator'
+2025-06-15T16:07:16.776+09:00  INFO 63593 --- [restartedMain] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@1b191dad, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@61b4ecf1, org.springframework.security.web.context.SecurityContextHolderFilter@1c4aad01, org.springframework.security.web.header.HeaderWriterFilter@1af571f3, org.springframework.web.filter.CorsFilter@14c611c0, org.springframework.security.web.authentication.logout.LogoutFilter@2e965eaf, com.youtubeplanner.backend.security.JwtAuthenticationFilter@446be8a3, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@62c66e4c, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@2638359b, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@5e8593fd, org.springframework.security.web.session.SessionManagementFilter@50f5841b, org.springframework.security.web.access.ExceptionTranslationFilter@75d36a8c, org.springframework.security.web.access.intercept.AuthorizationFilter@1ff650a]
+2025-06-15T16:07:16.955+09:00  INFO 63593 --- [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2025-06-15T16:07:16.969+09:00  INFO 63593 --- [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path ''
+2025-06-15T16:07:16.974+09:00  INFO 63593 --- [restartedMain] c.y.backend.BackendApplication           : Started BackendApplication in 1.986 seconds (process running for 10443.022)
+2025-06-15T16:07:16.974+09:00  INFO 63593 --- [restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
+2025-06-15T16:10:01.044+09:00  INFO 63593 --- [http-nio-8080-exec-1] o.a.c.c.C.[Tomcat-2].[localhost].[/]     : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-06-15T16:10:01.045+09:00  INFO 63593 --- [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2025-06-15T16:10:01.047+09:00  INFO 63593 --- [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
+2025-06-15T16:10:01.068+09:00 DEBUG 63593 --- [http-nio-8080-exec-1] c.y.b.security.JwtAuthenticationFilter   : Processing request: GET /api/v1/channels
+2025-06-15T16:10:01.068+09:00 DEBUG 63593 --- [http-nio-8080-exec-1] c.y.b.security.JwtAuthenticationFilter   : Authorization header: Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjMwLCJ1c2VybmFtZSI6InNvbmljX3lhbm4iLCJpYXQiOjE3NDk5NzEwMDksImV4cCI6MTc0OTk3NDYwOX0.aa4PjCKY7KMWSrtBVv8h4cuRgNLh1kDJLTQWeVmbFdw
+2025-06-15T16:10:01.069+09:00 DEBUG 63593 --- [http-nio-8080-exec-4] c.y.b.security.JwtAuthenticationFilter   : Processing request: GET /api/v1/scripts
+2025-06-15T16:10:01.069+09:00 DEBUG 63593 --- [http-nio-8080-exec-4] c.y.b.security.JwtAuthenticationFilter   : Authorization header: Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjMwLCJ1c2VybmFtZSI6InNvbmljX3lhbm4iLCJpYXQiOjE3NDk5NzEwMDksImV4cCI6MTc0OTk3NDYwOX0.aa4PjCKY7KMWSrtBVv8h4cuRgNLh1kDJLTQWeVmbFdw
+2025-06-15T16:10:01.069+09:00 DEBUG 63593 --- [http-nio-8080-exec-5] c.y.b.security.JwtAuthenticationFilter   : Processing request: GET /api/v1/categories
+2025-06-15T16:10:01.069+09:00 DEBUG 63593 --- [http-nio-8080-exec-5] c.y.b.security.JwtAuthenticationFilter   : Authorization header: Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjMwLCJ1c2VybmFtZSI6InNvbmljX3lhbm4iLCJpYXQiOjE3NDk5NzEwMDksImV4cCI6MTc0OTk3NDYwOX0.aa4PjCKY7KMWSrtBVv8h4cuRgNLh1kDJLTQWeVmbFdw
+2025-06-15T16:10:01.070+09:00 DEBUG 63593 --- [http-nio-8080-exec-5] c.y.b.user.service.impl.JwtServiceImpl   : Extracted username from token: sonic_yann
+2025-06-15T16:10:01.070+09:00 DEBUG 63593 --- [http-nio-8080-exec-4] c.y.b.user.service.impl.JwtServiceImpl   : Extracted username from token: sonic_yann
+2025-06-15T16:10:01.070+09:00 DEBUG 63593 --- [http-nio-8080-exec-1] c.y.b.user.service.impl.JwtServiceImpl   : Extracted username from token: sonic_yann
+2025-06-15T16:10:01.070+09:00 DEBUG 63593 --- [http-nio-8080-exec-5] c.y.b.security.JwtAuthenticationFilter   : Extracted username from token: sonic_yann
+2025-06-15T16:10:01.070+09:00 DEBUG 63593 --- [http-nio-8080-exec-4] c.y.b.security.JwtAuthenticationFilter   : Extracted username from token: sonic_yann
+2025-06-15T16:10:01.070+09:00 DEBUG 63593 --- [http-nio-8080-exec-1] c.y.b.security.JwtAuthenticationFilter   : Extracted username from token: sonic_yann
+2025-06-15T16:10:01.099+09:00 DEBUG 63593 --- [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.avatar_url,
+        u1_0.created_at,
+        u1_0.display_name,
+        u1_0.email,
+        u1_0.password_hash,
+        u1_0.role,
+        u1_0.updated_at,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-06-15T16:10:01.099+09:00 DEBUG 63593 --- [http-nio-8080-exec-4] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.avatar_url,
+        u1_0.created_at,
+        u1_0.display_name,
+        u1_0.email,
+        u1_0.password_hash,
+        u1_0.role,
+        u1_0.updated_at,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-06-15T16:10:01.099+09:00 DEBUG 63593 --- [http-nio-8080-exec-5] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.avatar_url,
+        u1_0.created_at,
+        u1_0.display_name,
+        u1_0.email,
+        u1_0.password_hash,
+        u1_0.role,
+        u1_0.updated_at,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-06-15T16:10:01.167+09:00 DEBUG 63593 --- [http-nio-8080-exec-5] c.y.b.security.JwtAuthenticationFilter   : Loaded user details: User(userId=30, username=sonic_yann, passwordHash=$2a$10$8qb01gGQLN8lhAgN14AIyupE55JFLFb3i9mOVcENdMaFt.SujynHK, email=sonic@gmail.com, createdAt=2025-06-15T07:02:10.626397, updatedAt=2025-06-15T07:02:10.626425, avatarUrl=null, displayName=null, role=USER)
+2025-06-15T16:10:01.167+09:00 DEBUG 63593 --- [http-nio-8080-exec-1] c.y.b.security.JwtAuthenticationFilter   : Loaded user details: User(userId=30, username=sonic_yann, passwordHash=$2a$10$8qb01gGQLN8lhAgN14AIyupE55JFLFb3i9mOVcENdMaFt.SujynHK, email=sonic@gmail.com, createdAt=2025-06-15T07:02:10.626397, updatedAt=2025-06-15T07:02:10.626425, avatarUrl=null, displayName=null, role=USER)
+2025-06-15T16:10:01.167+09:00 DEBUG 63593 --- [http-nio-8080-exec-4] c.y.b.security.JwtAuthenticationFilter   : Loaded user details: User(userId=30, username=sonic_yann, passwordHash=$2a$10$8qb01gGQLN8lhAgN14AIyupE55JFLFb3i9mOVcENdMaFt.SujynHK, email=sonic@gmail.com, createdAt=2025-06-15T07:02:10.626397, updatedAt=2025-06-15T07:02:10.626425, avatarUrl=null, displayName=null, role=USER)
+2025-06-15T16:10:01.170+09:00 DEBUG 63593 --- [http-nio-8080-exec-5] c.y.b.security.JwtAuthenticationFilter   : User authorities: [ROLE_USER]
+2025-06-15T16:10:01.170+09:00 DEBUG 63593 --- [http-nio-8080-exec-1] c.y.b.security.JwtAuthenticationFilter   : User authorities: [ROLE_USER]
+2025-06-15T16:10:01.170+09:00 DEBUG 63593 --- [http-nio-8080-exec-4] c.y.b.security.JwtAuthenticationFilter   : User authorities: [ROLE_USER]
+2025-06-15T16:10:01.170+09:00 DEBUG 63593 --- [http-nio-8080-exec-5] c.y.b.user.service.impl.JwtServiceImpl   : Validating token: eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjMwLCJ1c2VybmFtZSI6InNvbmljX3lhbm4iLCJpYXQiOjE3NDk5NzEwMDksImV4cCI6MTc0OTk3NDYwOX0.aa4PjCKY7KMWSrtBVv8h4cuRgNLh1kDJLTQWeVmbFdw
+2025-06-15T16:10:01.170+09:00 DEBUG 63593 --- [http-nio-8080-exec-4] c.y.b.user.service.impl.JwtServiceImpl   : Validating token: eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjMwLCJ1c2VybmFtZSI6InNvbmljX3lhbm4iLCJpYXQiOjE3NDk5NzEwMDksImV4cCI6MTc0OTk3NDYwOX0.aa4PjCKY7KMWSrtBVv8h4cuRgNLh1kDJLTQWeVmbFdw
+2025-06-15T16:10:01.170+09:00 DEBUG 63593 --- [http-nio-8080-exec-1] c.y.b.user.service.impl.JwtServiceImpl   : Validating token: eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjMwLCJ1c2VybmFtZSI6InNvbmljX3lhbm4iLCJpYXQiOjE3NDk5NzEwMDksImV4cCI6MTc0OTk3NDYwOX0.aa4PjCKY7KMWSrtBVv8h4cuRgNLh1kDJLTQWeVmbFdw
+2025-06-15T16:10:01.171+09:00 DEBUG 63593 --- [http-nio-8080-exec-4] c.y.b.user.service.impl.JwtServiceImpl   : Token claims: {userId=30, username=sonic_yann, iat=1749971009, exp=1749974609}
+2025-06-15T16:10:01.171+09:00 DEBUG 63593 --- [http-nio-8080-exec-5] c.y.b.user.service.impl.JwtServiceImpl   : Token claims: {userId=30, username=sonic_yann, iat=1749971009, exp=1749974609}
+2025-06-15T16:10:01.171+09:00 DEBUG 63593 --- [http-nio-8080-exec-1] c.y.b.user.service.impl.JwtServiceImpl   : Token claims: {userId=30, username=sonic_yann, iat=1749971009, exp=1749974609}
+2025-06-15T16:10:01.171+09:00 DEBUG 63593 --- [http-nio-8080-exec-4] c.y.b.user.service.impl.JwtServiceImpl   : Token expiration: Sun Jun 15 17:03:29 JST 2025
+2025-06-15T16:10:01.171+09:00 DEBUG 63593 --- [http-nio-8080-exec-5] c.y.b.user.service.impl.JwtServiceImpl   : Token expiration: Sun Jun 15 17:03:29 JST 2025
+2025-06-15T16:10:01.171+09:00 DEBUG 63593 --- [http-nio-8080-exec-1] c.y.b.user.service.impl.JwtServiceImpl   : Token expiration: Sun Jun 15 17:03:29 JST 2025
+2025-06-15T16:10:01.171+09:00 DEBUG 63593 --- [http-nio-8080-exec-4] c.y.b.user.service.impl.JwtServiceImpl   : Token is valid: true
+2025-06-15T16:10:01.171+09:00 DEBUG 63593 --- [http-nio-8080-exec-5] c.y.b.user.service.impl.JwtServiceImpl   : Token is valid: true
+2025-06-15T16:10:01.171+09:00 DEBUG 63593 --- [http-nio-8080-exec-1] c.y.b.user.service.impl.JwtServiceImpl   : Token is valid: true
+2025-06-15T16:10:01.171+09:00 DEBUG 63593 --- [http-nio-8080-exec-4] c.y.b.security.JwtAuthenticationFilter   : Token is valid
+2025-06-15T16:10:01.171+09:00 DEBUG 63593 --- [http-nio-8080-exec-5] c.y.b.security.JwtAuthenticationFilter   : Token is valid
+2025-06-15T16:10:01.171+09:00 DEBUG 63593 --- [http-nio-8080-exec-1] c.y.b.security.JwtAuthenticationFilter   : Token is valid
+2025-06-15T16:10:01.171+09:00 DEBUG 63593 --- [http-nio-8080-exec-4] c.y.b.security.JwtAuthenticationFilter   : Authentication set in SecurityContext
+2025-06-15T16:10:01.171+09:00 DEBUG 63593 --- [http-nio-8080-exec-5] c.y.b.security.JwtAuthenticationFilter   : Authentication set in SecurityContext
+2025-06-15T16:10:01.171+09:00 DEBUG 63593 --- [http-nio-8080-exec-1] c.y.b.security.JwtAuthenticationFilter   : Authentication set in SecurityContext
+2025-06-15T16:10:01.179+09:00 DEBUG 63593 --- [http-nio-8080-exec-5] org.hibernate.SQL                        : 
+    select
+        c1_0.category_id,
+        c1_0.category_name,
+        c1_0.created_at,
+        c1_0.user_id 
+    from
+        categories c1_0 
+    where
+        c1_0.user_id=? 
+        and (
+            ? is null 
+            or ?='' 
+            or lower(cast(c1_0.category_name as text)) like lower(('%'||cast(? as text)||'%')) escape ''
+        ) 
+    order by
+        c1_0.created_at 
+    offset
+        ? rows 
+    fetch
+        first ? rows only
+2025-06-15T16:10:01.183+09:00 DEBUG 63593 --- [http-nio-8080-exec-4] org.hibernate.SQL                        : 
+    select
+        s1_0.script_id,
+        s1_0.alternative_title1,
+        s1_0.category_id,
+        s1_0.channel_id,
+        s1_0.created_at,
+        s1_0.description,
+        s1_0.difficulty,
+        s1_0.release_date,
+        s1_0.status,
+        s1_0.title,
+        s1_0.updated_at,
+        s1_0.user_id 
+    from
+        scripts s1_0 
+    where
+        s1_0.user_id=? 
+        and (
+            ? is null 
+            or s1_0.channel_id=?
+        ) 
+        and (
+            ? is null 
+            or s1_0.category_id=?
+        ) 
+        and (
+            ? is null 
+            or ?='' 
+            or s1_0.status=?
+        ) 
+        and (
+            ? is null 
+            or s1_0.difficulty=?
+        ) 
+        and (
+            ? is null 
+            or s1_0.release_date>=?
+        ) 
+        and (
+            ? is null 
+            or s1_0.release_date<=?
+        ) 
+        and (
+            ? is null 
+            or ?='' 
+            or lower(cast(s1_0.title as text)) like lower(('%'||cast(? as text)||'%')) escape '' 
+            or lower(cast(s1_0.description as text)) like lower(('%'||cast(? as text)||'%')) escape ''
+        ) 
+    order by
+        s1_0.created_at desc 
+    offset
+        ? rows 
+    fetch
+        first ? rows only
+2025-06-15T16:10:01.184+09:00 DEBUG 63593 --- [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        c1_0.channel_id,
+        c1_0.channel_name,
+        c1_0.created_at,
+        c1_0.deleted,
+        c1_0.user_id 
+    from
+        channels c1_0 
+    where
+        (
+            c1_0.deleted = false
+        ) 
+        and c1_0.user_id=? 
+        and (
+            ? is null 
+            or cast(c1_0.channel_name as text) like ('%'||cast(? as text)||'%') escape ''
+        ) 
+    order by
+        c1_0.created_at desc 
+    offset
+        ? rows 
+    fetch
+        first ? rows only
+2025-06-15T16:10:01.260+09:00 DEBUG 63593 --- [http-nio-8080-exec-10] c.y.b.security.JwtAuthenticationFilter   : Processing request: GET /api/v1/categories
+2025-06-15T16:10:01.260+09:00 DEBUG 63593 --- [http-nio-8080-exec-10] c.y.b.security.JwtAuthenticationFilter   : Authorization header: Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjMwLCJ1c2VybmFtZSI6InNvbmljX3lhbm4iLCJpYXQiOjE3NDk5NzEwMDksImV4cCI6MTc0OTk3NDYwOX0.aa4PjCKY7KMWSrtBVv8h4cuRgNLh1kDJLTQWeVmbFdw
+2025-06-15T16:10:01.260+09:00 DEBUG 63593 --- [http-nio-8080-exec-1] c.y.b.security.JwtAuthenticationFilter   : Processing request: GET /api/v1/scripts
+2025-06-15T16:10:01.260+09:00 DEBUG 63593 --- [http-nio-8080-exec-1] c.y.b.security.JwtAuthenticationFilter   : Authorization header: Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjMwLCJ1c2VybmFtZSI6InNvbmljX3lhbm4iLCJpYXQiOjE3NDk5NzEwMDksImV4cCI6MTc0OTk3NDYwOX0.aa4PjCKY7KMWSrtBVv8h4cuRgNLh1kDJLTQWeVmbFdw
+2025-06-15T16:10:01.260+09:00 DEBUG 63593 --- [http-nio-8080-exec-6] c.y.b.security.JwtAuthenticationFilter   : Processing request: GET /api/v1/channels
+2025-06-15T16:10:01.260+09:00 DEBUG 63593 --- [http-nio-8080-exec-6] c.y.b.security.JwtAuthenticationFilter   : Authorization header: Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjMwLCJ1c2VybmFtZSI6InNvbmljX3lhbm4iLCJpYXQiOjE3NDk5NzEwMDksImV4cCI6MTc0OTk3NDYwOX0.aa4PjCKY7KMWSrtBVv8h4cuRgNLh1kDJLTQWeVmbFdw
+2025-06-15T16:10:01.262+09:00 DEBUG 63593 --- [http-nio-8080-exec-6] c.y.b.user.service.impl.JwtServiceImpl   : Extracted username from token: sonic_yann
+2025-06-15T16:10:01.262+09:00 DEBUG 63593 --- [http-nio-8080-exec-1] c.y.b.user.service.impl.JwtServiceImpl   : Extracted username from token: sonic_yann
+2025-06-15T16:10:01.262+09:00 DEBUG 63593 --- [http-nio-8080-exec-10] c.y.b.user.service.impl.JwtServiceImpl   : Extracted username from token: sonic_yann
+2025-06-15T16:10:01.262+09:00 DEBUG 63593 --- [http-nio-8080-exec-6] c.y.b.security.JwtAuthenticationFilter   : Extracted username from token: sonic_yann
+2025-06-15T16:10:01.262+09:00 DEBUG 63593 --- [http-nio-8080-exec-1] c.y.b.security.JwtAuthenticationFilter   : Extracted username from token: sonic_yann
+2025-06-15T16:10:01.262+09:00 DEBUG 63593 --- [http-nio-8080-exec-10] c.y.b.security.JwtAuthenticationFilter   : Extracted username from token: sonic_yann
+2025-06-15T16:10:01.263+09:00 DEBUG 63593 --- [http-nio-8080-exec-6] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.avatar_url,
+        u1_0.created_at,
+        u1_0.display_name,
+        u1_0.email,
+        u1_0.password_hash,
+        u1_0.role,
+        u1_0.updated_at,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-06-15T16:10:01.263+09:00 DEBUG 63593 --- [http-nio-8080-exec-10] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.avatar_url,
+        u1_0.created_at,
+        u1_0.display_name,
+        u1_0.email,
+        u1_0.password_hash,
+        u1_0.role,
+        u1_0.updated_at,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-06-15T16:10:01.263+09:00 DEBUG 63593 --- [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        u1_0.user_id,
+        u1_0.avatar_url,
+        u1_0.created_at,
+        u1_0.display_name,
+        u1_0.email,
+        u1_0.password_hash,
+        u1_0.role,
+        u1_0.updated_at,
+        u1_0.username 
+    from
+        users u1_0 
+    where
+        u1_0.username=?
+2025-06-15T16:10:01.289+09:00 DEBUG 63593 --- [http-nio-8080-exec-1] c.y.b.security.JwtAuthenticationFilter   : Loaded user details: User(userId=30, username=sonic_yann, passwordHash=$2a$10$8qb01gGQLN8lhAgN14AIyupE55JFLFb3i9mOVcENdMaFt.SujynHK, email=sonic@gmail.com, createdAt=2025-06-15T07:02:10.626397, updatedAt=2025-06-15T07:02:10.626425, avatarUrl=null, displayName=null, role=USER)
+2025-06-15T16:10:01.289+09:00 DEBUG 63593 --- [http-nio-8080-exec-1] c.y.b.security.JwtAuthenticationFilter   : User authorities: [ROLE_USER]
+2025-06-15T16:10:01.289+09:00 DEBUG 63593 --- [http-nio-8080-exec-1] c.y.b.user.service.impl.JwtServiceImpl   : Validating token: eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjMwLCJ1c2VybmFtZSI6InNvbmljX3lhbm4iLCJpYXQiOjE3NDk5NzEwMDksImV4cCI6MTc0OTk3NDYwOX0.aa4PjCKY7KMWSrtBVv8h4cuRgNLh1kDJLTQWeVmbFdw
+2025-06-15T16:10:01.290+09:00 DEBUG 63593 --- [http-nio-8080-exec-1] c.y.b.user.service.impl.JwtServiceImpl   : Token claims: {userId=30, username=sonic_yann, iat=1749971009, exp=1749974609}
+2025-06-15T16:10:01.290+09:00 DEBUG 63593 --- [http-nio-8080-exec-1] c.y.b.user.service.impl.JwtServiceImpl   : Token expiration: Sun Jun 15 17:03:29 JST 2025
+2025-06-15T16:10:01.290+09:00 DEBUG 63593 --- [http-nio-8080-exec-1] c.y.b.user.service.impl.JwtServiceImpl   : Token is valid: true
+2025-06-15T16:10:01.290+09:00 DEBUG 63593 --- [http-nio-8080-exec-1] c.y.b.security.JwtAuthenticationFilter   : Token is valid
+2025-06-15T16:10:01.290+09:00 DEBUG 63593 --- [http-nio-8080-exec-1] c.y.b.security.JwtAuthenticationFilter   : Authentication set in SecurityContext
+2025-06-15T16:10:01.290+09:00 DEBUG 63593 --- [http-nio-8080-exec-6] c.y.b.security.JwtAuthenticationFilter   : Loaded user details: User(userId=30, username=sonic_yann, passwordHash=$2a$10$8qb01gGQLN8lhAgN14AIyupE55JFLFb3i9mOVcENdMaFt.SujynHK, email=sonic@gmail.com, createdAt=2025-06-15T07:02:10.626397, updatedAt=2025-06-15T07:02:10.626425, avatarUrl=null, displayName=null, role=USER)
+2025-06-15T16:10:01.290+09:00 DEBUG 63593 --- [http-nio-8080-exec-6] c.y.b.security.JwtAuthenticationFilter   : User authorities: [ROLE_USER]
+2025-06-15T16:10:01.290+09:00 DEBUG 63593 --- [http-nio-8080-exec-6] c.y.b.user.service.impl.JwtServiceImpl   : Validating token: eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjMwLCJ1c2VybmFtZSI6InNvbmljX3lhbm4iLCJpYXQiOjE3NDk5NzEwMDksImV4cCI6MTc0OTk3NDYwOX0.aa4PjCKY7KMWSrtBVv8h4cuRgNLh1kDJLTQWeVmbFdw
+2025-06-15T16:10:01.290+09:00 DEBUG 63593 --- [http-nio-8080-exec-10] c.y.b.security.JwtAuthenticationFilter   : Loaded user details: User(userId=30, username=sonic_yann, passwordHash=$2a$10$8qb01gGQLN8lhAgN14AIyupE55JFLFb3i9mOVcENdMaFt.SujynHK, email=sonic@gmail.com, createdAt=2025-06-15T07:02:10.626397, updatedAt=2025-06-15T07:02:10.626425, avatarUrl=null, displayName=null, role=USER)
+2025-06-15T16:10:01.290+09:00 DEBUG 63593 --- [http-nio-8080-exec-10] c.y.b.security.JwtAuthenticationFilter   : User authorities: [ROLE_USER]
+2025-06-15T16:10:01.290+09:00 DEBUG 63593 --- [http-nio-8080-exec-10] c.y.b.user.service.impl.JwtServiceImpl   : Validating token: eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjMwLCJ1c2VybmFtZSI6InNvbmljX3lhbm4iLCJpYXQiOjE3NDk5NzEwMDksImV4cCI6MTc0OTk3NDYwOX0.aa4PjCKY7KMWSrtBVv8h4cuRgNLh1kDJLTQWeVmbFdw
+2025-06-15T16:10:01.291+09:00 DEBUG 63593 --- [http-nio-8080-exec-6] c.y.b.user.service.impl.JwtServiceImpl   : Token claims: {userId=30, username=sonic_yann, iat=1749971009, exp=1749974609}
+2025-06-15T16:10:01.291+09:00 DEBUG 63593 --- [http-nio-8080-exec-6] c.y.b.user.service.impl.JwtServiceImpl   : Token expiration: Sun Jun 15 17:03:29 JST 2025
+2025-06-15T16:10:01.291+09:00 DEBUG 63593 --- [http-nio-8080-exec-6] c.y.b.user.service.impl.JwtServiceImpl   : Token is valid: true
+2025-06-15T16:10:01.291+09:00 DEBUG 63593 --- [http-nio-8080-exec-6] c.y.b.security.JwtAuthenticationFilter   : Token is valid
+2025-06-15T16:10:01.291+09:00 DEBUG 63593 --- [http-nio-8080-exec-6] c.y.b.security.JwtAuthenticationFilter   : Authentication set in SecurityContext
+2025-06-15T16:10:01.291+09:00 DEBUG 63593 --- [http-nio-8080-exec-10] c.y.b.user.service.impl.JwtServiceImpl   : Token claims: {userId=30, username=sonic_yann, iat=1749971009, exp=1749974609}
+2025-06-15T16:10:01.291+09:00 DEBUG 63593 --- [http-nio-8080-exec-10] c.y.b.user.service.impl.JwtServiceImpl   : Token expiration: Sun Jun 15 17:03:29 JST 2025
+2025-06-15T16:10:01.291+09:00 DEBUG 63593 --- [http-nio-8080-exec-10] c.y.b.user.service.impl.JwtServiceImpl   : Token is valid: true
+2025-06-15T16:10:01.291+09:00 DEBUG 63593 --- [http-nio-8080-exec-10] c.y.b.security.JwtAuthenticationFilter   : Token is valid
+2025-06-15T16:10:01.291+09:00 DEBUG 63593 --- [http-nio-8080-exec-10] c.y.b.security.JwtAuthenticationFilter   : Authentication set in SecurityContext
+2025-06-15T16:10:01.292+09:00 DEBUG 63593 --- [http-nio-8080-exec-1] org.hibernate.SQL                        : 
+    select
+        s1_0.script_id,
+        s1_0.alternative_title1,
+        s1_0.category_id,
+        s1_0.channel_id,
+        s1_0.created_at,
+        s1_0.description,
+        s1_0.difficulty,
+        s1_0.release_date,
+        s1_0.status,
+        s1_0.title,
+        s1_0.updated_at,
+        s1_0.user_id 
+    from
+        scripts s1_0 
+    where
+        s1_0.user_id=? 
+        and (
+            ? is null 
+            or s1_0.channel_id=?
+        ) 
+        and (
+            ? is null 
+            or s1_0.category_id=?
+        ) 
+        and (
+            ? is null 
+            or ?='' 
+            or s1_0.status=?
+        ) 
+        and (
+            ? is null 
+            or s1_0.difficulty=?
+        ) 
+        and (
+            ? is null 
+            or s1_0.release_date>=?
+        ) 
+        and (
+            ? is null 
+            or s1_0.release_date<=?
+        ) 
+        and (
+            ? is null 
+            or ?='' 
+            or lower(cast(s1_0.title as text)) like lower(('%'||cast(? as text)||'%')) escape '' 
+            or lower(cast(s1_0.description as text)) like lower(('%'||cast(? as text)||'%')) escape ''
+        ) 
+    order by
+        s1_0.created_at desc 
+    offset
+        ? rows 
+    fetch
+        first ? rows only
+2025-06-15T16:10:01.292+09:00 DEBUG 63593 --- [http-nio-8080-exec-6] org.hibernate.SQL                        : 
+    select
+        c1_0.channel_id,
+        c1_0.channel_name,
+        c1_0.created_at,
+        c1_0.deleted,
+        c1_0.user_id 
+    from
+        channels c1_0 
+    where
+        (
+            c1_0.deleted = false
+        ) 
+        and c1_0.user_id=? 
+        and (
+            ? is null 
+            or cast(c1_0.channel_name as text) like ('%'||cast(? as text)||'%') escape ''
+        ) 
+    order by
+        c1_0.created_at desc 
+    offset
+        ? rows 
+    fetch
+        first ? rows only
+2025-06-15T16:10:01.292+09:00 DEBUG 63593 --- [http-nio-8080-exec-10] org.hibernate.SQL                        : 
+    select
+        c1_0.category_id,
+        c1_0.category_name,
+        c1_0.created_at,
+        c1_0.user_id 
+    from
+        categories c1_0 
+    where
+        c1_0.user_id=? 
+        and (
+            ? is null 
+            or ?='' 
+            or lower(cast(c1_0.category_name as text)) like lower(('%'||cast(? as text)||'%')) escape ''
+        ) 
+    order by
+        c1_0.created_at 
+    offset
+        ? rows 
+    fetch
+        first ? rows only
+2025-06-15T16:34:23.897+09:00  INFO 63593 --- [File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 71 class path changes (0 additions, 71 deletions, 0 modifications)
+2025-06-15T16:34:23.916+09:00  INFO 63593 --- [Thread-89] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-06-15T16:34:23.923+09:00  INFO 63593 --- [Thread-89] com.zaxxer.hikari.HikariDataSource       : HikariPool-22 - Shutdown initiated...
+2025-06-15T16:34:24.259+09:00  INFO 63593 --- [Thread-89] com.zaxxer.hikari.HikariDataSource       : HikariPool-22 - Shutdown completed.
+2025-06-15T16:34:26.703+09:00  INFO 63593 --- [restartedMain] c.y.backend.BackendApplication           : Starting BackendApplication using Java 23.0.2 with PID 63593 (/Users/yangshangwei/Desktop/YoutubePlanner/BackendYTP/target/classes started by yangshangwei in /Users/yangshangwei/Desktop/YoutubePlanner/BackendYTP)
+2025-06-15T16:34:26.703+09:00 DEBUG 63593 --- [restartedMain] c.y.backend.BackendApplication           : Running with Spring Boot v3.2.3, Spring v6.1.4
+2025-06-15T16:34:26.703+09:00  INFO 63593 --- [restartedMain] c.y.backend.BackendApplication           : No active profile set, falling back to 1 default profile: "default"
+2025-06-15T16:34:26.950+09:00  INFO 63593 --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-06-15T16:34:26.971+09:00  INFO 63593 --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 21 ms. Found 4 JPA repository interfaces.
+2025-06-15T16:34:27.130+09:00  INFO 63593 --- [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2025-06-15T16:34:27.131+09:00  INFO 63593 --- [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-06-15T16:34:27.131+09:00  INFO 63593 --- [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.19]
+2025-06-15T16:34:27.140+09:00  INFO 63593 --- [restartedMain] o.a.c.c.C.[Tomcat-3].[localhost].[/]     : Initializing Spring embedded WebApplicationContext
+2025-06-15T16:34:27.140+09:00  INFO 63593 --- [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 435 ms
+2025-06-15T16:34:27.270+09:00  INFO 63593 --- [restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-06-15T16:34:27.273+09:00  INFO 63593 --- [restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-06-15T16:34:27.276+09:00  INFO 63593 --- [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-06-15T16:34:27.277+09:00  INFO 63593 --- [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-23 - Starting...
+2025-06-15T16:34:27.669+09:00  INFO 63593 --- [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-23 - Added connection org.postgresql.jdbc.PgConnection@46b443fb
+2025-06-15T16:34:27.670+09:00  INFO 63593 --- [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-23 - Start completed.
+2025-06-15T16:34:27.709+09:00  WARN 63593 --- [restartedMain] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-06-15T16:34:27.909+09:00  INFO 63593 --- [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-06-15T16:34:28.265+09:00  INFO 63593 --- [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-06-15T16:34:28.417+09:00 DEBUG 63593 --- [restartedMain] c.y.b.security.JwtAuthenticationFilter   : Filter 'jwtAuthenticationFilter' configured for use
+2025-06-15T16:34:28.602+09:00 ERROR 63593 --- [restartedMain] c.y.b.script.service.ScriptServiceImpl   : === TEST LOG MESSAGE ===
+2025-06-15T16:34:28.652+09:00  WARN 63593 --- [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-06-15T16:34:29.026+09:00  INFO 63593 --- [restartedMain] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint(s) beneath base path '/actuator'
+2025-06-15T16:34:29.109+09:00  INFO 63593 --- [restartedMain] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@7d2bd5b9, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@6c1c4ec8, org.springframework.security.web.context.SecurityContextHolderFilter@4e379af5, org.springframework.security.web.header.HeaderWriterFilter@400d2c10, org.springframework.web.filter.CorsFilter@72643423, org.springframework.security.web.authentication.logout.LogoutFilter@20ba45c4, com.youtubeplanner.backend.security.JwtAuthenticationFilter@68f337f0, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@52a68ff1, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@365620d0, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@57f7e705, org.springframework.security.web.session.SessionManagementFilter@70df7872, org.springframework.security.web.access.ExceptionTranslationFilter@80dbaa, org.springframework.security.web.access.intercept.AuthorizationFilter@1d3192f6]
+2025-06-15T16:34:29.481+09:00  INFO 63593 --- [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2025-06-15T16:34:29.501+09:00  INFO 63593 --- [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path ''
+2025-06-15T16:34:29.507+09:00  INFO 63593 --- [restartedMain] c.y.backend.BackendApplication           : Started BackendApplication in 2.836 seconds (process running for 12075.583)
+2025-06-15T16:34:29.508+09:00  INFO 63593 --- [restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
