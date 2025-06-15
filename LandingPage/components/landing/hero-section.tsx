@@ -1,7 +1,7 @@
 "use client"
 
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion"
-import { Button } from "@/components/ui/button"
+import { Button } from "../ui/button"
 import { Play, Star, Users, Video, Sparkles, Zap, TrendingUp, Award, Globe, Rocket } from "lucide-react"
 import { useEffect, useState } from "react"
 
