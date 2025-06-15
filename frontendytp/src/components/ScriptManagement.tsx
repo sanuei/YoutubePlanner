@@ -165,7 +165,7 @@ const ScriptManagement: React.FC = () => {
 
   useEffect(() => {
     fetchScripts();
-  }, [filters, fetchScripts]);
+  }, [fetchScripts]);
 
   const fetchChannels = async () => {
     try {

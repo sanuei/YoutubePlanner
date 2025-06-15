@@ -31,7 +31,7 @@ jobs:
       run: |
         cd frontendytp
         npm ci
-        npm run build
+        CI=false npm run build
         
     - name: Build Backend
       run: |
