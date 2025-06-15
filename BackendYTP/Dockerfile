@@ -1,5 +1,8 @@
 # 第一阶段：构建阶段
-FROM maven:3.9.6-openjdk-17-slim AS builder
+FROM eclipse-temurin:17-jdk AS builder
+
+# 安装Maven
+RUN apt-get update && apt-get install -y maven && rm -rf /var/lib/apt/lists/*
 
 # 设置工作目录
 WORKDIR /app
@@ -12,7 +15,7 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # 第二阶段：运行阶段
-FROM openjdk:17-jre-slim AS runtime
+FROM eclipse-temurin:17-jre AS runtime
 
 # 安装curl用于健康检查
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*

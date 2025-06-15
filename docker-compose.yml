@@ -1,4 +1,4 @@
-version: '3.8'
+# version属性在新版Docker Compose中已弃用，移除以避免警告
 
 services:
   # 后端服务
