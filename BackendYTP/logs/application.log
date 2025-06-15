@@ -5101,3 +5101,35 @@ Caused by: java.lang.ClassNotFoundException: ApiResponse
 2025-06-15T13:45:36.550+09:00  INFO 63593 --- [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path ''
 2025-06-15T13:45:36.556+09:00  INFO 63593 --- [restartedMain] c.y.backend.BackendApplication           : Started BackendApplication in 2.344 seconds (process running for 1942.461)
 2025-06-15T13:45:36.557+09:00  INFO 63593 --- [restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
+2025-06-15T14:21:08.736+09:00  INFO 63593 --- [File Watcher] rtingClassPathChangeChangedEventListener : Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification)
+2025-06-15T14:21:08.758+09:00  INFO 63593 --- [Thread-38] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-06-15T14:21:08.762+09:00  INFO 63593 --- [Thread-38] com.zaxxer.hikari.HikariDataSource       : HikariPool-10 - Shutdown initiated...
+2025-06-15T14:21:09.135+09:00  INFO 63593 --- [Thread-38] com.zaxxer.hikari.HikariDataSource       : HikariPool-10 - Shutdown completed.
+2025-06-15T14:21:09.257+09:00  INFO 63593 --- [restartedMain] c.y.backend.BackendApplication           : Starting BackendApplication using Java 23.0.2 with PID 63593 (/Users/yangshangwei/Desktop/YoutubePlanner/BackendYTP/target/classes started by yangshangwei in /Users/yangshangwei/Desktop/YoutubePlanner/BackendYTP)
+2025-06-15T14:21:09.257+09:00 DEBUG 63593 --- [restartedMain] c.y.backend.BackendApplication           : Running with Spring Boot v3.2.3, Spring v6.1.4
+2025-06-15T14:21:09.257+09:00  INFO 63593 --- [restartedMain] c.y.backend.BackendApplication           : No active profile set, falling back to 1 default profile: "default"
+2025-06-15T14:21:09.624+09:00  INFO 63593 --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-06-15T14:21:09.642+09:00  INFO 63593 --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 17 ms. Found 4 JPA repository interfaces.
+2025-06-15T14:21:09.899+09:00  INFO 63593 --- [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2025-06-15T14:21:09.900+09:00  INFO 63593 --- [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-06-15T14:21:09.900+09:00  INFO 63593 --- [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.19]
+2025-06-15T14:21:09.910+09:00  INFO 63593 --- [restartedMain] o.a.c.c.C.[Tomcat-1].[localhost].[/]     : Initializing Spring embedded WebApplicationContext
+2025-06-15T14:21:09.910+09:00  INFO 63593 --- [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 652 ms
+2025-06-15T14:21:10.124+09:00  INFO 63593 --- [restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-06-15T14:21:10.126+09:00  INFO 63593 --- [restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-06-15T14:21:10.129+09:00  INFO 63593 --- [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-06-15T14:21:10.129+09:00  INFO 63593 --- [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-11 - Starting...
+2025-06-15T14:21:10.507+09:00  INFO 63593 --- [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-11 - Added connection org.postgresql.jdbc.PgConnection@72eb6156
+2025-06-15T14:21:10.507+09:00  INFO 63593 --- [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-11 - Start completed.
+2025-06-15T14:21:10.558+09:00  WARN 63593 --- [restartedMain] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-06-15T14:21:10.712+09:00  INFO 63593 --- [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-06-15T14:21:11.004+09:00  INFO 63593 --- [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-06-15T14:21:11.136+09:00 DEBUG 63593 --- [restartedMain] c.y.b.security.JwtAuthenticationFilter   : Filter 'jwtAuthenticationFilter' configured for use
+2025-06-15T14:21:11.281+09:00 ERROR 63593 --- [restartedMain] c.y.b.script.service.ScriptServiceImpl   : === TEST LOG MESSAGE ===
+2025-06-15T14:21:11.328+09:00  WARN 63593 --- [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-06-15T14:21:11.568+09:00  INFO 63593 --- [restartedMain] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint(s) beneath base path '/actuator'
+2025-06-15T14:21:11.640+09:00  INFO 63593 --- [restartedMain] o.s.s.web.DefaultSecurityFilterChain     : Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@7b8a7283, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@2caa9d2e, org.springframework.security.web.context.SecurityContextHolderFilter@209a818a, org.springframework.security.web.header.HeaderWriterFilter@20818f91, org.springframework.web.filter.CorsFilter@379964c2, org.springframework.security.web.authentication.logout.LogoutFilter@688edfee, com.youtubeplanner.backend.security.JwtAuthenticationFilter@3369a465, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@5015a23a, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@38e26a1, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@25c76e73, org.springframework.security.web.session.SessionManagementFilter@44c4cff6, org.springframework.security.web.access.ExceptionTranslationFilter@6144e5dc, org.springframework.security.web.access.intercept.AuthorizationFilter@390dcf4b]
+2025-06-15T14:21:11.920+09:00  INFO 63593 --- [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2025-06-15T14:21:11.938+09:00  INFO 63593 --- [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path ''
+2025-06-15T14:21:11.944+09:00  INFO 63593 --- [restartedMain] c.y.backend.BackendApplication           : Started BackendApplication in 2.71 seconds (process running for 4077.995)
+2025-06-15T14:21:11.945+09:00  INFO 63593 --- [restartedMain] .ConditionEvaluationDeltaLoggingListener : Condition evaluation unchanged
