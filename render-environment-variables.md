@@ -4,11 +4,11 @@
 
 在Render Dashboard的后端服务中设置以下环境变量：
 
-### 必需的环境变量
+### 必需的环境变量 - 修复版本
 
 ```
 SPRING_PROFILES_ACTIVE=prod
-SPRING_DATASOURCE_URL=jdbc:postgresql://db.nvcagxykymgtmprggwhy.supabase.co:5432/postgres?sslmode=require
+SPRING_DATASOURCE_URL=jdbc:postgresql://db.nvcagxykymgtmprggwhy.supabase.co:5432/postgres
 SPRING_DATASOURCE_USERNAME=postgres
 SPRING_DATASOURCE_PASSWORD=OtvO9P8X36b3up5x
 JWT_SECRET=404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
@@ -17,33 +17,45 @@ JWT_REFRESH_TOKEN_EXPIRATION=604800
 CORS_ALLOWED_ORIGINS=*
 ```
 
-### 重要注意事项
+### 重要修复说明
 
-1. **数据库URL**: 添加了 `?sslmode=require` 参数，这对于Supabase连接很重要
-2. **SSL连接**: Supabase要求SSL连接
-3. **网络访问**: 确保Render可以访问外部数据库
+**问题**: PostgreSQL驱动不接受带有 `?sslmode=require` 的URL
+**解决**: 先使用基本URL，然后通过应用配置处理SSL
 
-## 故障排除
+## 故障排除 - URL格式修复
 
-### 如果仍然连接失败，尝试以下URL格式：
+### 推荐的URL格式（按优先级）：
 
 ```
-# 选项1: 带SSL参数
-SPRING_DATASOURCE_URL=jdbc:postgresql://db.nvcagxykymgtmprggwhy.supabase.co:5432/postgres?sslmode=require&user=postgres&password=OtvO9P8X36b3up5x
+# 选项1: 基本URL（推荐先试这个）
+SPRING_DATASOURCE_URL=jdbc:postgresql://db.nvcagxykymgtmprggwhy.supabase.co:5432/postgres
 
-# 选项2: 带更多SSL参数
-SPRING_DATASOURCE_URL=jdbc:postgresql://db.nvcagxykymgtmprggwhy.supabase.co:5432/postgres?sslmode=require&sslcert=&sslkey=&sslrootcert=
+# 选项2: 如果需要SSL，使用这个格式
+SPRING_DATASOURCE_URL=jdbc:postgresql://db.nvcagxykymgtmprggwhy.supabase.co:5432/postgres?ssl=true
 
-# 选项3: 使用连接池参数
-SPRING_DATASOURCE_URL=jdbc:postgresql://db.nvcagxykymgtmprggwhy.supabase.co:5432/postgres?sslmode=require&prepareThreshold=0&preparedStatementCacheQueries=0
+# 选项3: 完整参数格式
+SPRING_DATASOURCE_URL=jdbc:postgresql://db.nvcagxykymgtmprggwhy.supabase.co:5432/postgres?ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory
+
+# 选项4: 如果上述都不行，尝试这个
+SPRING_DATASOURCE_URL=jdbc:postgresql://db.nvcagxykymgtmprggwhy.supabase.co:5432/postgres?sslmode=prefer
+```
+
+### 额外的数据库配置环境变量
+
+如果基本URL不工作，可以添加这些环境变量：
+
+```
+SPRING_DATASOURCE_HIKARI_CONNECTION_TIMEOUT=20000
+SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE=5
+SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE=2
 ```
 
 ### 验证步骤
 
-1. 在Render日志中查看具体的连接错误信息
-2. 确认Supabase数据库是否在线
-3. 检查Supabase的连接限制和防火墙设置
-4. 验证数据库凭据是否正确
+1. 先使用选项1（基本URL）
+2. 在Render中重新部署
+3. 查看日志是否连接成功
+4. 如果失败，依次尝试其他选项
 
 ## 前端环境变量
 
@@ -57,4 +69,13 @@ REACT_APP_API_BASE_URL=https://your-backend-service-name.onrender.com/api/v1
 
 1. 获取后端服务的实际URL
 2. 更新前端的API_BASE_URL
-3. 更新后端的CORS_ALLOWED_ORIGINS为前端的实际URL 
+3. 更新后端的CORS_ALLOWED_ORIGINS为前端的实际URL
+
+## 如果仍然有问题
+
+可能需要在application-prod.properties中添加额外的SSL配置，我们可以通过环境变量来覆盖：
+
+```
+SPRING_DATASOURCE_HIKARI_DATA_SOURCE_PROPERTIES_SSL=true
+SPRING_DATASOURCE_HIKARI_DATA_SOURCE_PROPERTIES_SSLFACTORY=org.postgresql.ssl.NonValidatingFactory
+``` 
