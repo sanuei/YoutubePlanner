@@ -68,7 +68,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // 获取当前路径
       const currentPath = window.location.pathname;
-      const isPublicRoute = currentPath === '/login' || currentPath === '/register';
+      const isPublicRoute = currentPath === '/' || currentPath === '/login' || currentPath === '/register';
       
       if (token) {
         try {
@@ -85,9 +85,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             });
             api.defaults.headers.common.Authorization = `Bearer ${token}`;
             
-            // 如果用户已登录且在公共页面，重定向到主页
-            if (isPublicRoute) {
-              navigate('/channels');
+            // 如果用户已登录且在登录/注册页面，重定向到脚本管理页面
+            if (currentPath === '/login' || currentPath === '/register') {
+              navigate('/scripts');
             }
           } else {
             // token已过期，清除存储
@@ -171,8 +171,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.log('Setting user data:', userData);
         setUser(userData);
         
-        console.log('Navigating to /channels after successful login');
-        navigate('/channels');
+        console.log('Navigating to /scripts after successful login');
+        navigate('/scripts');
         return { success: true, message: '登录成功' };
       }
       
@@ -235,7 +235,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     delete api.defaults.headers.common.Authorization;
     console.log('Cleared Authorization header after logout');
     setUser(null);
-    navigate('/login');
+    navigate('/');
   }, [navigate]);
 
   return (

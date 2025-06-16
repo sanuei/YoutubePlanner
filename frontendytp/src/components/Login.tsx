@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, startTransition } from 'react';
 import {
   Box,
   Paper,
@@ -11,15 +11,17 @@ import {
   useMediaQuery,
   CircularProgress,
 } from '@mui/material';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
 import {
   Visibility,
   VisibilityOff,
   Person as PersonIcon,
   Lock as LockIcon,
+  VideoLibrary as VideoLibraryIcon,
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
+import LogoComponent from './LogoComponent';
 import { useAuth } from '../contexts/AuthContext';
 import { useSnackbar } from 'notistack';
 
@@ -68,6 +70,7 @@ const StyledButton = styled(Button)(({ theme }) => ({
 
 const Login: React.FC = () => {
   const theme = useTheme();
+  const navigate = useNavigate();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -77,6 +80,13 @@ const Login: React.FC = () => {
   });
   const { login } = useAuth();
   const { enqueueSnackbar } = useSnackbar();
+
+  // 安全的导航函数，使用 startTransition 避免 Suspense 错误
+  const safeNavigate = (path: string) => {
+    startTransition(() => {
+      navigate(path);
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -112,127 +122,255 @@ const Login: React.FC = () => {
       sx={{
         minHeight: '100vh',
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+        background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
         padding: theme.spacing(2),
+        position: 'relative',
+        overflow: 'hidden',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'url("data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.05"%3E%3Ccircle cx="30" cy="30" r="4"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")',
+        },
       }}
     >
-      <GlassContainer
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+      {/* Logo 区域 */}
+      <Box
+        sx={{
+          position: 'absolute',
+          top: theme.spacing(3),
+          left: theme.spacing(3),
+          display: 'flex',
+          alignItems: 'center',
+          cursor: 'pointer',
+          zIndex: 2,
+          '&:hover': {
+            opacity: 0.8,
+          },
+        }}
+        onClick={() => safeNavigate('/')}
       >
-        <Box
-          component="form"
-          onSubmit={handleSubmit}
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 3,
-          }}
-        >
-          <Box sx={{ textAlign: 'center', mb: 2 }}>
-            <Typography
-              variant={isMobile ? 'h5' : 'h4'}
-              component="h1"
+        <LogoComponent
+          size="medium"
+          showText={true}
+          color="white"
+        />
+      </Box>
+
+      {/* 装饰性元素 */}
+      <Box
+        sx={{
+          position: 'absolute',
+          top: '10%',
+          right: '10%',
+          width: '200px',
+          height: '200px',
+          borderRadius: '50%',
+          background: 'rgba(255, 255, 255, 0.1)',
+          zIndex: 0,
+        }}
+      />
+      <Box
+        sx={{
+          position: 'absolute',
+          bottom: '15%',
+          left: '5%',
+          width: '150px',
+          height: '150px',
+          borderRadius: '50%',
+          background: 'rgba(255, 255, 255, 0.08)',
+          zIndex: 0,
+        }}
+      />
+
+      {/* 主要内容区域 */}
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '100%',
+          maxWidth: '1200px',
+          gap: 4,
+          zIndex: 1,
+          flexDirection: isMobile ? 'column' : 'row',
+        }}
+      >
+        {/* 左侧介绍区域 */}
+        {!isMobile && (
+          <Box sx={{ flex: 1, color: 'white', pr: 4 }}>
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+            >
+              <Typography
+                variant="h3"
+                sx={{ fontWeight: 'bold', mb: 2 }}
+              >
+                欢迎回来！
+              </Typography>
+              <Typography
+                variant="h6"
+                sx={{ mb: 4, opacity: 0.9, lineHeight: 1.6 }}
+              >
+                继续您的 YouTube 内容创作之旅，管理频道、编辑脚本、规划发布。
+              </Typography>
+              <Box sx={{ display: 'flex', gap: 2, mb: 4 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <VideoLibraryIcon sx={{ fontSize: '1.5rem' }} />
+                  <Typography>频道管理</Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <PersonIcon sx={{ fontSize: '1.5rem' }} />
+                  <Typography>脚本编辑</Typography>
+                </Box>
+              </Box>
+              <Box sx={{ 
+                display: 'flex', 
+                flexDirection: 'column',
+                gap: 1,
+                opacity: 0.8
+              }}>
+                <Typography variant="body2">
+                  ✨ 10,000+ 活跃用户
+                </Typography>
+                <Typography variant="body2">
+                  📝 50,000+ 管理脚本
+                </Typography>
+                <Typography variant="body2">
+                  🎯 99.9% 正常运行时间
+                </Typography>
+              </Box>
+            </motion.div>
+          </Box>
+        )}
+
+        {/* 右侧登录表单 */}
+        <Box sx={{ flex: isMobile ? 'none' : 1, width: isMobile ? '100%' : 'auto' }}>
+          <GlassContainer
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Box
+              component="form"
+              onSubmit={handleSubmit}
               sx={{
-                fontWeight: 700,
-                background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                mb: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 3,
               }}
             >
-              欢迎回来
-            </Typography>
-            <Typography
-              variant="body2"
-              sx={{ color: 'text.secondary', fontWeight: 500 }}
-            >
-              登录以继续使用 YouTube Planner
-            </Typography>
-          </Box>
+              <Box sx={{ textAlign: 'center', mb: 2 }}>
+                <Typography
+                  variant={isMobile ? 'h5' : 'h4'}
+                  component="h1"
+                  sx={{
+                    fontWeight: 700,
+                    background: 'linear-gradient(45deg, #ff6b35 30%, #ff8a65 90%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    mb: 1,
+                  }}
+                >
+                  欢迎回来
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{ color: 'text.secondary', fontWeight: 500 }}
+                >
+                  登录以继续使用 YouTube Planner
+                </Typography>
+              </Box>
 
-          <StyledTextField
-            required
-            fullWidth
-            name="username"
-            placeholder="用户名"
-            value={formData.username}
-            onChange={handleChange}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <PersonIcon sx={{ color: 'text.secondary' }} />
-                </InputAdornment>
-              ),
-            }}
-          />
-
-          <StyledTextField
-            required
-            fullWidth
-            name="password"
-            type={showPassword ? 'text' : 'password'}
-            placeholder="密码"
-            value={formData.password}
-            onChange={handleChange}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <LockIcon sx={{ color: 'text.secondary' }} />
-                </InputAdornment>
-              ),
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    onClick={() => setShowPassword(!showPassword)}
-                    edge="end"
-                  >
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
-
-          <StyledButton
-            type="submit"
-            variant="contained"
-            fullWidth
-            disabled={loading}
-            sx={{ mt: 2 }}
-          >
-            {loading ? (
-              <CircularProgress size={24} color="inherit" />
-            ) : (
-              '登 录'
-            )}
-          </StyledButton>
-
-          <Box sx={{ textAlign: 'center', mt: 2 }}>
-            <Typography variant="body2" color="text.secondary">
-              还没有账号？{' '}
-              <Link
-                to="/register"
-                style={{
-                  color: '#1976d2',
-                  textDecoration: 'none',
+              <StyledTextField
+                required
+                fullWidth
+                name="username"
+                placeholder="用户名"
+                value={formData.username}
+                onChange={handleChange}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <PersonIcon sx={{ color: 'text.secondary' }} />
+                    </InputAdornment>
+                  ),
                 }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.textDecoration = 'underline';
+              />
+
+              <StyledTextField
+                required
+                fullWidth
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                placeholder="密码"
+                value={formData.password}
+                onChange={handleChange}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <LockIcon sx={{ color: 'text.secondary' }} />
+                    </InputAdornment>
+                  ),
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setShowPassword(!showPassword)}
+                        edge="end"
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
                 }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.textDecoration = 'none';
-                }}
+              />
+
+              <StyledButton
+                type="submit"
+                variant="contained"
+                fullWidth
+                disabled={loading}
+                sx={{ mt: 2 }}
               >
-                立即注册
-              </Link>
-            </Typography>
-          </Box>
+                {loading ? (
+                  <CircularProgress size={24} color="inherit" />
+                ) : (
+                  '登 录'
+                )}
+              </StyledButton>
+
+              <Box sx={{ textAlign: 'center', mt: 2 }}>
+                <Typography variant="body2" color="text.secondary">
+                  还没有账号？{' '}
+                  <Link
+                    to="/register"
+                    style={{
+                      color: '#1976d2',
+                      textDecoration: 'none',
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.textDecoration = 'underline';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.textDecoration = 'none';
+                    }}
+                  >
+                    立即注册
+                  </Link>
+                </Typography>
+              </Box>
+            </Box>
+          </GlassContainer>
         </Box>
-      </GlassContainer>
+      </Box>
     </Box>
   );
 };

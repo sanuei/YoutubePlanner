@@ -1,11 +1,10 @@
-import React, { useState, Suspense, memo } from 'react';
+import React, { useState, Suspense, memo, startTransition } from 'react';
 import { useNavigate, useLocation, Outlet } from 'react-router-dom';
 import {
   Box,
   Drawer,
   Toolbar,
   List,
-  Typography,
   Divider,
   IconButton,
   ListItem,
@@ -27,6 +26,7 @@ import {
   Logout as LogoutIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
+import LogoComponent from './LogoComponent';
 
 const drawerWidth = 240;
 const collapsedWidth = 65;
@@ -127,10 +127,18 @@ const Layout: React.FC = () => {
   };
 
   const handleNavigation = (path: string) => {
-    navigate(path);
+    startTransition(() => {
+      navigate(path);
+    });
     if (isMobile) {
       setMobileOpen(false);
     }
+  };
+
+  const safeNavigate = (path: string) => {
+    startTransition(() => {
+      navigate(path);
+    });
   };
 
   const handleLogout = () => {
@@ -138,33 +146,47 @@ const Layout: React.FC = () => {
   };
 
   const drawer = (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', position: 'relative' }}>
       <Toolbar 
         sx={{ 
           display: 'flex', 
-          justifyContent: 'space-between', 
+          justifyContent: 'center',
+          alignItems: 'center',
           px: 1,
           minHeight: '56px !important'
         }}
       >
-        <Fade in={!isDrawerCollapsed && showText}>
-          <Typography 
-            variant="h6" 
-            noWrap 
-            component="div" 
-            sx={{ 
-              opacity: (!isDrawerCollapsed && showText) ? 1 : 0,
-              transition: 'opacity 0.2s',
-              whiteSpace: 'nowrap'
-            }}
-          >
-            YouTube Planner
-          </Typography>
-        </Fade>
-        <IconButton onClick={handleDrawerToggle} size="small">
+        {/* Logo 区域 - 始终居中显示 */}
+        <LogoComponent
+          size="medium"
+          showText={!isDrawerCollapsed}
+          color="#ff6b35"
+          onClick={() => safeNavigate('/')}
+        />
+      </Toolbar>
+      
+      {/* 折叠按钮 - 整个导航栏上下居中 */}
+      {!isMobile && (
+        <IconButton 
+          onClick={handleDrawerToggle} 
+          size="small"
+          sx={{ 
+            position: 'absolute',
+            right: 8,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            zIndex: 1,
+            backgroundColor: 'background.paper',
+            border: '1px solid',
+            borderColor: 'divider',
+            '&:hover': {
+              backgroundColor: 'action.hover',
+            }
+          }}
+        >
           {isDrawerCollapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
         </IconButton>
-      </Toolbar>
+      )}
       <Divider />
       <List>
         {menuItems.map((item) => (

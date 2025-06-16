@@ -66,4 +66,4 @@ coverage/
 *.iso
 
 # Documentation folder (本地文档，不上传到GitHub)
-docs/ 
+docs/ docs/04-配置文档/01-敏感信息配置.md

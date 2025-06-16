@@ -11,6 +11,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthContext';
 
 // 懒加载页面组件
+const HomePage = lazy(() => import('./components/HomePage'));
 const ChannelList = lazy(() => import('./components/ChannelList'));
 const UserManagement = lazy(() => import('./components/UserManagement'));
 const CategoryManagement = lazy(() => import('./components/CategoryManagement'));
@@ -30,6 +31,8 @@ function App() {
             anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
           >
             <Routes>
+              {/* 首页 - 不需要认证 */}
+              <Route path="/" element={<HomePage />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
 
@@ -41,7 +44,7 @@ function App() {
                   </ProtectedRoute>
                 }
               >
-                <Route index element={<Navigate to="/channels" replace />} />
+                <Route path="dashboard" element={<Navigate to="/channels" replace />} />
                 <Route path="users" element={<UserManagement />} />
                 <Route path="channels" element={<ChannelList />} />
                 <Route path="categories" element={<CategoryManagement />} />

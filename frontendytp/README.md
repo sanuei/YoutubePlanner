@@ -6,6 +6,15 @@ YouTube Planner 是一个现代化的 YouTube 内容管理系统，旨在帮助�
 
 ## 核心功能
 
+### 0. 首页展示
+- 产品介绍和功能展示
+- 用户评价和社会证明
+- 数据统计展示
+- CTA 引导注册/登录
+- 响应式设计，支持移动端
+- 智能导航：根据登录状态显示不同按钮
+- 联系方式：GitHub、YouTube、Instagram 链接
+
 ### 1. 用户系统
 - 用户认证与授权
 - 个人信息管理
@@ -61,11 +70,44 @@ YouTube Planner 是一个现代化的 YouTube 内容管理系统，旨在帮助�
 ```
 src/
 ├── components/     # 组件目录
+│   ├── HomePage.tsx           # 首页组件
+│   ├── PlaceholderImage.tsx   # 占位图片组件
+│   ├── Login.tsx              # 登录页面
+│   ├── Register.tsx           # 注册页面
+│   ├── Layout.tsx             # 主布局组件
+│   ├── ProtectedRoute.tsx     # 路由保护组件
+│   ├── UserManagement.tsx     # 用户管理
+│   ├── ChannelList.tsx        # 频道列表
+│   ├── CategoryManagement.tsx # 分类管理
+│   ├── ScriptManagement.tsx   # 脚本管理
+│   ├── ScriptCreate.tsx       # 脚本创建
+│   ├── ScriptEdit.tsx         # 脚本编辑
+│   └── ScriptPreview.tsx      # 脚本预览
 ├── contexts/       # 上下文管理
 ├── services/       # API 服务
 ├── theme/          # 主题配置
 └── utils/          # 工具函数
 ```
+
+### 路由结构
+```
+/                    # 首页（产品介绍，无需登录）
+/login              # 登录页面
+/register           # 注册页面
+/dashboard          # 重定向到 /channels
+/users              # 用户管理（需要登录）
+/channels           # 频道管理（需要登录）
+/categories         # 分类管理（需要登录）
+/scripts            # 脚本管理（需要登录）
+/scripts/create     # 创建脚本（需要登录）
+/scripts/:id/edit   # 编辑脚本（需要登录）
+/scripts/:id/preview # 预览脚本（需要登录）
+```
+
+### 联系方式
+- **GitHub**: [https://github.com/sanuei/YoutubePlanner](https://github.com/sanuei/YoutubePlanner)
+- **YouTube**: [https://www.youtube.com/@sonicyann](https://www.youtube.com/@sonicyann)
+- **Instagram**: [https://www.instagram.com/sonic_yann/](https://www.instagram.com/sonic_yann/)
 
 ## 开发指南
 

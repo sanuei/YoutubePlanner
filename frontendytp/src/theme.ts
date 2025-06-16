@@ -3,18 +3,22 @@ import { createTheme } from '@mui/material/styles';
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#2196f3',
-      light: '#64b5f6',
-      dark: '#1976d2',
+      main: '#ff6b35',
+      light: '#ff8a65',
+      dark: '#e64a19',
     },
     secondary: {
-      main: '#f50057',
-      light: '#ff4081',
-      dark: '#c51162',
+      main: '#ff5722',
+      light: '#ff7043',
+      dark: '#d84315',
     },
     background: {
       default: '#f5f5f5',
       paper: '#ffffff',
+    },
+    text: {
+      primary: '#3e2723',
+      secondary: '#5d4037',
     },
   },
   typography: {
@@ -31,11 +35,11 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: 12,
-          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+          boxShadow: '0 4px 6px rgba(255, 107, 53, 0.1)',
           transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
           '&:hover': {
             transform: 'translateY(-4px)',
-            boxShadow: '0 6px 12px rgba(0, 0, 0, 0.15)',
+            boxShadow: '0 6px 12px rgba(255, 107, 53, 0.15)',
           },
         },
       },
