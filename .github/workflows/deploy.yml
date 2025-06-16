@@ -68,23 +68,23 @@ jobs:
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
           cd /home/ec2-user/youtubeplanner
-          
-          # 加载Docker镜像
+
+          # 加载 Docker 镜像
           docker load < backend.tar.gz
           docker load < frontend.tar.gz
-          
-          # 停止现有服务
+
+          # 停止现有容器（避免失败中断）
           docker-compose -f docker-compose.prod.yml down || true
-          
-          # 清理旧镜像
+
+          # 清理无用镜像
           docker image prune -f
-          
-          # 启动新服务
+
+          # 启动容器
           docker-compose -f docker-compose.prod.yml up -d
-          
-          # 清理临时文件
-          rm -f backend.tar.gz frontend.tar.gz
-          
-          # 检查服务状态
+
+          # 保留 tar.gz 备份，不删除
+          echo "Deployment complete. Archives retained."
+
+          # 检查容器状态
           sleep 30
-          docker-compose -f docker-compose.prod.yml ps 
+          docker-compose -f docker-compose.prod.yml ps
