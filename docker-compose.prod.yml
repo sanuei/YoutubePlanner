@@ -24,6 +24,8 @@ services:
   backend:
     image: youtubeplanner-backend:latest
     container_name: youtubeplanner-backend-prod
+    ports:
+      - "8080:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=prod
       - SPRING_DATASOURCE_URL=jdbc:postgresql://database:5432/youtubeplanner
@@ -52,6 +54,8 @@ services:
   frontend:
     image: youtubeplanner-frontend:latest
     container_name: youtubeplanner-frontend-prod
+    ports:
+      - "3000:80"
     environment:
       - REACT_APP_API_BASE_URL=https://youtubeplanner.duckdns.org/api/v1
     depends_on:
