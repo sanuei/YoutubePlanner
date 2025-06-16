@@ -15,6 +15,10 @@ import {
   Paper,
   Checkbox,
   InputAdornment,
+  useTheme,
+  useMediaQuery,
+  Grid,
+  Fab,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import {
@@ -87,6 +91,8 @@ const CategoryList = ({ categories }: { categories: Category[] }) => (
 );
 
 const ChannelList: React.FC = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [channels, setChannels] = useState<Channel[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
@@ -230,48 +236,60 @@ const ChannelList: React.FC = () => {
 
   return (
     <Stack spacing={3}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h5" fontWeight="500">
+      {/* 标题和操作栏 */}
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: isMobile ? 'flex-start' : 'center',
+        flexDirection: isMobile ? 'column' : 'row',
+        gap: isMobile ? 2 : 0
+      }}>
+        <Typography variant={isMobile ? 'h6' : 'h5'} fontWeight="500">
           频道管理
         </Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => handleOpenDialog()}
-          sx={{ textTransform: 'none' }}
-        >
-          创建频道
-        </Button>
-      </Box>
-
-      <Paper elevation={0} sx={{ p: 2 }}>
-        <Stack direction="row" spacing={2} alignItems="center">
-          <TextField
-            placeholder="搜索频道..."
-            size="small"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon sx={{ color: 'text.secondary' }} />
-                </InputAdornment>
-              ),
-            }}
-            sx={{ width: 300 }}
-          />
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
           {selectedChannels.length > 0 && (
             <Button
-              variant="contained"
+              variant="outlined"
               color="error"
               startIcon={<DeleteIcon />}
               onClick={handleDeleteChannels}
+              size={isMobile ? 'small' : 'medium'}
               sx={{ textTransform: 'none' }}
             >
-              删除选中 ({selectedChannels.length})
+              删除 ({selectedChannels.length})
             </Button>
           )}
-        </Stack>
+          {!isMobile && (
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => handleOpenDialog()}
+              sx={{ textTransform: 'none' }}
+            >
+              创建频道
+            </Button>
+          )}
+        </Box>
+      </Box>
+
+      {/* 搜索栏 */}
+      <Paper elevation={0} sx={{ p: 2 }}>
+        <TextField
+          placeholder="搜索频道..."
+          size="small"
+          fullWidth={isMobile}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon sx={{ color: 'text.secondary' }} />
+              </InputAdornment>
+            ),
+          }}
+          sx={{ width: isMobile ? '100%' : 300 }}
+        />
       </Paper>
 
       {channels.length === 0 ? (
@@ -288,8 +306,10 @@ const ChannelList: React.FC = () => {
       ) : (
         <Box sx={{ 
           display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-          gap: 3,
+          gridTemplateColumns: isMobile 
+            ? '1fr' 
+            : 'repeat(auto-fill, minmax(300px, 1fr))',
+          gap: isMobile ? 2 : 3,
         }}>
           {channels.map((channel) => {
             const channelCategories = getChannelCategories(channel.channel_id);
@@ -368,6 +388,21 @@ const ChannelList: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* 移动端浮动创建按钮 */}
+      {isMobile && (
+        <Fab
+          color="primary"
+          sx={{
+            position: 'fixed',
+            bottom: 16,
+            right: 16,
+          }}
+          onClick={() => handleOpenDialog()}
+        >
+          <AddIcon />
+        </Fab>
+      )}
     </Stack>
   );
 };

@@ -15,6 +15,9 @@ import {
   Paper,
   Checkbox,
   InputAdornment,
+  useTheme,
+  useMediaQuery,
+  Fab,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import {
@@ -71,6 +74,8 @@ const CategoryLabel = ({ label }: { label: string }) => (
 
 const CategoryManagement: React.FC = () => {
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [categories, setCategories] = useState<Category[]>([]);
   const [scripts, setScripts] = useState<Script[]>([]);
   const [loading, setLoading] = useState(false);
@@ -218,48 +223,60 @@ const CategoryManagement: React.FC = () => {
 
   return (
     <Stack spacing={3}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h5" fontWeight="500">
+      {/* 标题和操作栏 */}
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: isMobile ? 'flex-start' : 'center',
+        flexDirection: isMobile ? 'column' : 'row',
+        gap: isMobile ? 2 : 0
+      }}>
+        <Typography variant={isMobile ? 'h6' : 'h5'} fontWeight="500">
           分类管理
         </Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => handleOpenDialog()}
-          sx={{ textTransform: 'none' }}
-        >
-          创建分类
-        </Button>
-      </Box>
-
-      <Paper elevation={0} sx={{ p: 2 }}>
-        <Stack direction="row" spacing={2} alignItems="center">
-          <TextField
-            placeholder="搜索分类..."
-            size="small"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon sx={{ color: 'text.secondary' }} />
-                </InputAdornment>
-              ),
-            }}
-            sx={{ width: 300 }}
-          />
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
           {selectedCategories.length > 0 && (
             <Button
-              variant="contained"
+              variant="outlined"
               color="error"
               startIcon={<DeleteIcon />}
               onClick={handleDeleteCategories}
+              size={isMobile ? 'small' : 'medium'}
               sx={{ textTransform: 'none' }}
             >
-              删除选中 ({selectedCategories.length})
+              删除 ({selectedCategories.length})
             </Button>
           )}
-        </Stack>
+          {!isMobile && (
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => handleOpenDialog()}
+              sx={{ textTransform: 'none' }}
+            >
+              创建分类
+            </Button>
+          )}
+        </Box>
+      </Box>
+
+      {/* 搜索栏 */}
+      <Paper elevation={0} sx={{ p: 2 }}>
+        <TextField
+          placeholder="搜索分类..."
+          size="small"
+          fullWidth={isMobile}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon sx={{ color: 'text.secondary' }} />
+              </InputAdornment>
+            ),
+          }}
+          sx={{ width: isMobile ? '100%' : 300 }}
+        />
       </Paper>
 
       {categories.length === 0 ? (
@@ -276,8 +293,10 @@ const CategoryManagement: React.FC = () => {
       ) : (
         <Box sx={{ 
           display: 'grid', 
-          gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-          gap: 3,
+          gridTemplateColumns: isMobile 
+            ? '1fr' 
+            : 'repeat(auto-fill, minmax(300px, 1fr))',
+          gap: isMobile ? 2 : 3,
         }}>
           {categories.map((category) => {
             const categoryScripts = scripts.filter(script => 
@@ -381,6 +400,21 @@ const CategoryManagement: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* 移动端浮动创建按钮 */}
+      {isMobile && (
+        <Fab
+          color="primary"
+          sx={{
+            position: 'fixed',
+            bottom: 16,
+            right: 16,
+          }}
+          onClick={() => handleOpenDialog()}
+        >
+          <AddIcon />
+        </Fab>
+      )}
     </Stack>
   );
 };

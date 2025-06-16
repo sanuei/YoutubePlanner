@@ -22,7 +22,6 @@ import {
   InputLabel,
   Select,
   MenuItem,
-
   TextField,
   Pagination,
   InputAdornment,
@@ -34,6 +33,14 @@ import {
   TableHead,
   TableRow,
   Checkbox,
+  useTheme,
+  useMediaQuery,
+  Card,
+  CardContent,
+  CardActions,
+  Chip,
+  Collapse,
+  Fab,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -42,6 +49,9 @@ import {
   Sort as SortIcon,
   Star as StarIcon,
   Visibility as VisibilityIcon,
+  Edit as EditIcon,
+  FilterList as FilterListIcon,
+  ExpandLess as ExpandLessIcon,
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
@@ -50,10 +60,13 @@ import { format } from 'date-fns';
 
 const ScriptManagement: React.FC = () => {
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [scripts, setScripts] = useState<Script[]>([]);
   const [channels, setChannels] = useState<Channel[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
 
 
   // 分页和筛选状态
@@ -332,6 +345,89 @@ const ScriptManagement: React.FC = () => {
     </Box>
   );
 
+  // 移动端脚本卡片组件
+  const ScriptCard = ({ script }: { script: Script }) => (
+    <Card 
+      sx={{ 
+        mb: 2, 
+        cursor: 'pointer',
+        '&:hover': {
+          boxShadow: theme.shadows[4]
+        }
+      }}
+      onClick={() => navigate(`/scripts/${script.script_id}/edit`)}
+    >
+      <CardContent>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+          <Typography variant="h6" sx={{ flex: 1, mr: 1 }}>
+            {script.title}
+          </Typography>
+          <Checkbox
+            checked={selectedScripts.includes(script.script_id)}
+            onChange={(e) => {
+              e.stopPropagation();
+              handleRowSelect(script.script_id);
+            }}
+            onClick={(e) => e.stopPropagation()}
+          />
+        </Box>
+        
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
+          <Chip 
+            label={renderStars(script.difficulty || 0)} 
+            size="small" 
+            variant="outlined"
+          />
+          <Chip 
+            label={script.status || '未设置'} 
+            size="small" 
+            color="primary"
+            variant="outlined"
+          />
+          <Chip 
+            label={getChannelName(script)} 
+            size="small" 
+            variant="outlined"
+          />
+          <Chip 
+            label={getCategoryName(script)} 
+            size="small" 
+            variant="outlined"
+          />
+        </Box>
+        
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          最后修改: {script.updated_at
+            ? format(new Date(script.updated_at), 'yyyy-MM-dd HH:mm')
+            : '-'}
+        </Typography>
+      </CardContent>
+      
+      <CardActions sx={{ justifyContent: 'space-between', px: 2, pb: 2 }}>
+        <Button
+          size="small"
+          startIcon={<EditIcon />}
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(`/scripts/${script.script_id}/edit`);
+          }}
+        >
+          编辑
+        </Button>
+        <Button
+          size="small"
+          startIcon={<VisibilityIcon />}
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(`/scripts/${script.script_id}/preview`);
+          }}
+        >
+          提词器
+        </Button>
+      </CardActions>
+    </Card>
+  );
+
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
@@ -342,22 +438,55 @@ const ScriptManagement: React.FC = () => {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h5" fontWeight="500">
+      {/* 标题和操作栏 */}
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: isMobile ? 'flex-start' : 'center', 
+        mb: 3,
+        flexDirection: isMobile ? 'column' : 'row',
+        gap: isMobile ? 2 : 0
+      }}>
+        <Typography variant={isMobile ? 'h6' : 'h5'} fontWeight="500">
           影片脚本管理
         </Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => navigate('/scripts/create')}
-        >
-          创建脚本
-        </Button>
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+          {isMobile && (
+            <Button
+              variant="outlined"
+              startIcon={showFilters ? <ExpandLessIcon /> : <FilterListIcon />}
+              onClick={() => setShowFilters(!showFilters)}
+              size="small"
+            >
+              筛选
+            </Button>
+          )}
+          {selectedScripts.length > 0 && (
+            <Button
+              variant="outlined"
+              color="error"
+              startIcon={<DeleteIcon />}
+              onClick={handleBatchDelete}
+              size={isMobile ? 'small' : 'medium'}
+            >
+              删除 ({selectedScripts.length})
+            </Button>
+          )}
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => navigate('/scripts/create')}
+            size={isMobile ? 'small' : 'medium'}
+          >
+            {isMobile ? '创建' : '创建脚本'}
+          </Button>
+        </Box>
       </Box>
 
       {/* 筛选和搜索区域 */}
-      <Paper sx={{ p: 2, mb: 3 }}>
-        <Grid container spacing={2} alignItems="center">
+      <Collapse in={!isMobile || showFilters}>
+        <Paper sx={{ p: 2, mb: 3 }}>
+          <Grid container spacing={2} alignItems="center">
           <Grid size={{ xs: 12, sm: 6, md: 2 }}>
             <TextField
               fullWidth
@@ -481,10 +610,20 @@ const ScriptManagement: React.FC = () => {
             </Grid>
           )}
         </Grid>
-      </Paper>
+        </Paper>
+      </Collapse>
 
       {/* 脚本列表 */}
-      <TableContainer component={Paper}>
+      {isMobile ? (
+        // 移动端卡片视图
+        <Box>
+          {scripts.map((script) => (
+            <ScriptCard key={script.script_id} script={script} />
+          ))}
+        </Box>
+      ) : (
+        // 桌面端表格视图
+        <TableContainer component={Paper}>
         <Table>
           <TableHead>
             <TableRow>
@@ -571,7 +710,8 @@ const ScriptManagement: React.FC = () => {
             ))}
           </TableBody>
         </Table>
-      </TableContainer>
+        </TableContainer>
+      )}
 
       {/* 分页 */}
       {pagination.pages > 1 && (
@@ -585,7 +725,20 @@ const ScriptManagement: React.FC = () => {
         </Box>
       )}
 
-
+      {/* 移动端浮动创建按钮 */}
+      {isMobile && (
+        <Fab
+          color="primary"
+          sx={{
+            position: 'fixed',
+            bottom: 16,
+            right: 16,
+          }}
+          onClick={() => navigate('/scripts/create')}
+        >
+          <AddIcon />
+        </Fab>
+      )}
     </Box>
   );
 };

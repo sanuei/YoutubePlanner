@@ -39,7 +39,8 @@ const GlassContainer = styled(motion(Paper))(({ theme }) => ({
   border: '1px solid rgba(255, 255, 255, 0.18)',
   [theme.breakpoints.down('sm')]: {
     padding: theme.spacing(3),
-    margin: theme.spacing(2),
+    margin: '0 auto', // 水平居中
+    maxWidth: 'calc(100vw - 48px)', // 确保在移动端不会超出屏幕，留出更多边距
   },
 }));
 
@@ -235,27 +236,54 @@ const Register: React.FC = () => {
       }}
     >
       {/* Logo 区域 */}
-      <Box
-        sx={{
-          position: 'absolute',
-          top: theme.spacing(3),
-          left: theme.spacing(3),
-          display: 'flex',
-          alignItems: 'center',
-          cursor: 'pointer',
-          zIndex: 2,
-          '&:hover': {
-            opacity: 0.8,
-          },
-        }}
-        onClick={() => safeNavigate('/')}
-      >
-        <LogoComponent
-          size="medium"
-          showText={true}
-          color="white"
-        />
-      </Box>
+      {!isMobile ? (
+        // 桌面端：Logo在左上角
+        <Box
+          sx={{
+            position: 'absolute',
+            top: theme.spacing(3),
+            left: theme.spacing(3),
+            display: 'flex',
+            alignItems: 'center',
+            cursor: 'pointer',
+            zIndex: 2,
+            '&:hover': {
+              opacity: 0.8,
+            },
+          }}
+          onClick={() => safeNavigate('/')}
+        >
+          <LogoComponent
+            size="medium"
+            showText={true}
+            color="white"
+          />
+        </Box>
+      ) : (
+        // 移动端：Logo在表单上方，与主页保持一致
+        <Box
+          sx={{
+            position: 'absolute',
+            top: theme.spacing(3),
+            left: '50%',
+            transform: 'translateX(-50%)',
+            display: 'flex',
+            alignItems: 'center',
+            cursor: 'pointer',
+            zIndex: 2,
+            '&:hover': {
+              opacity: 0.8,
+            },
+          }}
+          onClick={() => safeNavigate('/')}
+        >
+          <LogoComponent
+            size="medium"
+            showText={false}
+            color="white"
+          />
+        </Box>
+      )}
 
       {/* 装饰性元素 */}
       <Box
@@ -290,10 +318,12 @@ const Register: React.FC = () => {
           alignItems: 'center',
           justifyContent: 'center',
           width: '100%',
-          maxWidth: '1200px',
-          gap: 4,
+          maxWidth: isMobile ? '100%' : '1200px',
+          gap: isMobile ? 2 : 4,
           zIndex: 1,
           flexDirection: isMobile ? 'column' : 'row',
+          px: isMobile ? 2 : 0,
+          pt: isMobile ? 8 : 0, // 移动端添加顶部内边距，避免与Logo重叠
         }}
       >
         {/* 左侧介绍区域 */}
@@ -347,7 +377,14 @@ const Register: React.FC = () => {
         )}
 
         {/* 右侧注册表单 */}
-        <Box sx={{ flex: isMobile ? 'none' : 1, width: isMobile ? '100%' : 'auto' }}>
+        <Box sx={{ 
+          flex: isMobile ? 'none' : 1, 
+          width: isMobile ? '100%' : 'auto',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: isMobile ? 'auto' : 'auto',
+        }}>
           <GlassContainer
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

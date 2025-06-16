@@ -17,6 +17,8 @@ import {
   ListItemIcon,
   IconButton,
   InputAdornment,
+  useTheme,
+  useMediaQuery,
 } from '@mui/material';
 import {
   Description as DescriptionIcon,
@@ -78,6 +80,8 @@ const StyledButton = styled(Button)(({ theme }: { theme: Theme }) => ({
 }));
 
 const UserManagement: React.FC = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const { enqueueSnackbar } = useSnackbar();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -254,20 +258,34 @@ const UserManagement: React.FC = () => {
 
   return (
     <Box sx={{ 
-      height: 'calc(100vh - 88px)', // 减去顶部导航栏和padding的高度
+      minHeight: isMobile ? 'auto' : 'calc(100vh - 88px)',
       display: 'flex',
       flexDirection: 'column',
       gap: 2
     }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h5" fontWeight="500">
+      {/* 标题和操作栏 */}
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: isMobile ? 'flex-start' : 'center',
+        flexDirection: isMobile ? 'column' : 'row',
+        gap: isMobile ? 2 : 0
+      }}>
+        <Typography variant={isMobile ? 'h6' : 'h5'} fontWeight="500">
           我的信息
         </Typography>
-        <Box sx={{ display: 'flex', gap: 1 }}>
+        <Box sx={{ 
+          display: 'flex', 
+          gap: 1,
+          flexDirection: isMobile ? 'column' : 'row',
+          width: isMobile ? '100%' : 'auto'
+        }}>
           <Button
             variant="outlined"
             onClick={() => setEditMode(true)}
             sx={{ textTransform: 'none' }}
+            fullWidth={isMobile}
+            size={isMobile ? 'small' : 'medium'}
           >
             编辑信息
           </Button>
@@ -275,6 +293,8 @@ const UserManagement: React.FC = () => {
             variant="outlined"
             onClick={() => setPasswordDialogOpen(true)}
             sx={{ textTransform: 'none' }}
+            fullWidth={isMobile}
+            size={isMobile ? 'small' : 'medium'}
           >
             修改密码
           </Button>
@@ -287,15 +307,26 @@ const UserManagement: React.FC = () => {
             <CircularProgress />
           </Box>
         ) : (
-          <Box sx={{ display: 'flex', gap: 4, flex: 1 }}>
-            <Box sx={{ width: 200, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+          <Box sx={{ 
+            display: 'flex', 
+            gap: isMobile ? 2 : 4, 
+            flex: 1,
+            flexDirection: isMobile ? 'column' : 'row'
+          }}>
+            <Box sx={{ 
+              width: isMobile ? '100%' : 200, 
+              display: 'flex', 
+              flexDirection: isMobile ? 'row' : 'column', 
+              alignItems: 'center', 
+              gap: 2 
+            }}>
               <Avatar
                 src={user?.avatar_url}
                 alt={user?.display_name}
                 sx={{ 
-                  width: 120, 
-                  height: 120,
-                  fontSize: '3rem',
+                  width: isMobile ? 80 : 120, 
+                  height: isMobile ? 80 : 120,
+                  fontSize: isMobile ? '2rem' : '3rem',
                   backgroundColor: 'primary.main',
                 }}
               >
@@ -383,8 +414,17 @@ const UserManagement: React.FC = () => {
         )}
       </Paper>
 
-      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3 }}>
-        <Card sx={{ flex: 1, height: '400px', display: 'flex', flexDirection: 'column' }}>
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: isMobile ? 'column' : 'row', 
+        gap: isMobile ? 2 : 3 
+      }}>
+        <Card sx={{ 
+          flex: 1, 
+          height: isMobile ? '300px' : '400px', 
+          display: 'flex', 
+          flexDirection: 'column' 
+        }}>
           <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
             <Typography variant="h6" sx={{ mb: 2 }}>
               脚本统计 ({statsData.scripts.length})
@@ -416,7 +456,12 @@ const UserManagement: React.FC = () => {
           </CardContent>
         </Card>
 
-        <Card sx={{ flex: 1, height: '400px', display: 'flex', flexDirection: 'column' }}>
+        <Card sx={{ 
+          flex: 1, 
+          height: isMobile ? '300px' : '400px', 
+          display: 'flex', 
+          flexDirection: 'column' 
+        }}>
           <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
             <Typography variant="h6" sx={{ mb: 2 }}>
               频道统计 ({statsData.channels.length})
@@ -448,7 +493,12 @@ const UserManagement: React.FC = () => {
           </CardContent>
         </Card>
 
-        <Card sx={{ flex: 1, height: '400px', display: 'flex', flexDirection: 'column' }}>
+        <Card sx={{ 
+          flex: 1, 
+          height: isMobile ? '300px' : '400px', 
+          display: 'flex', 
+          flexDirection: 'column' 
+        }}>
           <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
             <Typography variant="h6" sx={{ mb: 2 }}>
               分类统计 ({statsData.categories.length})

@@ -13,6 +13,13 @@ import {
   Avatar,
   Chip,
   Rating,
+  IconButton,
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  Divider,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { motion } from 'framer-motion';
@@ -28,6 +35,8 @@ import {
   GitHub as GitHubIcon,
   YouTube as YouTubeIcon,
   Instagram as InstagramIcon,
+  Menu as MenuIcon,
+  Close as CloseIcon,
 } from '@mui/icons-material';
 import LogoComponent from './LogoComponent';
 import { useAuth } from '../contexts/AuthContext';
@@ -40,6 +49,10 @@ const HeroSection = styled(Box)(({ theme }) => ({
   alignItems: 'center',
   position: 'relative',
   overflow: 'hidden',
+  paddingTop: '64px', // 为固定导航栏留出空间
+  [theme.breakpoints.down('sm')]: {
+    paddingTop: '86px', // 移动端导航栏高度稍小
+  },
   '&::before': {
     content: '""',
     position: 'absolute',
@@ -79,6 +92,7 @@ const HomePage: React.FC = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
   // 平滑滚动到指定区域
   const scrollToSection = (sectionId: string) => {
@@ -160,12 +174,12 @@ const HomePage: React.FC = () => {
           {/* Logo 区域 */}
           <LogoComponent
             size="medium"
-            showText={true}
+            showText={!isMobile}
             color={theme.palette.primary.main}
             onClick={() => safeNavigate('/')}
           />
           
-          {/* 中间导航按钮区域 */}
+          {/* 中间导航按钮区域 - 桌面端 */}
           {!isMobile && (
             <Box sx={{ display: 'flex', gap: 3, ml: 6 }}>
               <Button 
@@ -195,52 +209,176 @@ const HomePage: React.FC = () => {
           )}
           
           {/* 右侧按钮区域 */}
-          <Box sx={{ display: 'flex', gap: 1, ml: 'auto' }}>
-            {user ? (
-              <Button
-                variant="contained"
-                onClick={() => safeNavigate('/scripts')}
-                sx={{ 
-                  px: 3,
-                  color: 'white',
-                  '&:hover': {
-                    color: 'white'
-                  }
-                }}
-              >
-                进入应用
-              </Button>
-            ) : (
-              <>
-                <Button
-                  variant="outlined"
-                  startIcon={<LoginIcon />}
-                  onClick={() => safeNavigate('/login')}
-                  sx={{ color: theme.palette.primary.main }}
-                >
-                  登录
-                </Button>
+          <Box sx={{ display: 'flex', gap: 1, ml: 'auto', alignItems: 'center' }}>
+            {!isMobile ? (
+              // 桌面端按钮
+              user ? (
                 <Button
                   variant="contained"
-                  startIcon={<PersonAddIcon />}
-                  onClick={() => safeNavigate('/register')}
+                  onClick={() => safeNavigate('/scripts')}
                   sx={{ 
+                    px: 3,
                     color: 'white',
                     '&:hover': {
                       color: 'white'
                     }
                   }}
                 >
-                  注册
+                  进入应用
                 </Button>
-              </>
+              ) : (
+                <>
+                  <Button
+                    variant="outlined"
+                    startIcon={<LoginIcon />}
+                    onClick={() => safeNavigate('/login')}
+                    sx={{ color: theme.palette.primary.main }}
+                  >
+                    登录
+                  </Button>
+                  <Button
+                    variant="contained"
+                    startIcon={<PersonAddIcon />}
+                    onClick={() => safeNavigate('/register')}
+                    sx={{ 
+                      color: 'white',
+                      '&:hover': {
+                        color: 'white'
+                      }
+                    }}
+                  >
+                    注册
+                  </Button>
+                </>
+              )
+            ) : (
+              // 移动端菜单按钮
+              <IconButton
+                color="inherit"
+                onClick={() => setMobileMenuOpen(true)}
+                sx={{ color: 'text.primary' }}
+              >
+                <MenuIcon />
+              </IconButton>
             )}
           </Box>
         </Toolbar>
       </AppBar>
 
+      {/* 移动端侧边菜单 */}
+      <Drawer
+        anchor="right"
+        open={mobileMenuOpen}
+        onClose={() => setMobileMenuOpen(false)}
+        sx={{
+          '& .MuiDrawer-paper': {
+            width: 280,
+            backgroundColor: 'background.paper',
+          },
+        }}
+      >
+        <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <LogoComponent
+            size="medium"
+            showText={true}
+            color={theme.palette.primary.main}
+            onClick={() => {
+              safeNavigate('/');
+              setMobileMenuOpen(false);
+            }}
+          />
+          <IconButton onClick={() => setMobileMenuOpen(false)}>
+            <CloseIcon />
+          </IconButton>
+        </Box>
+        <Divider />
+        <List>
+          <ListItem disablePadding>
+            <ListItemButton onClick={() => {
+              scrollToSection('about');
+              setMobileMenuOpen(false);
+            }}>
+              <ListItemText primary="产品介绍" />
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton onClick={() => {
+              scrollToSection('features');
+              setMobileMenuOpen(false);
+            }}>
+              <ListItemText primary="功能特色" />
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton 
+              component="a"
+              href="https://github.com/sanuei/YoutubePlanner"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <ListItemText primary="联系我们" />
+            </ListItemButton>
+          </ListItem>
+        </List>
+        <Divider />
+        <Box sx={{ p: 2 }}>
+          {user ? (
+            <Button
+              variant="contained"
+              fullWidth
+              onClick={() => {
+                safeNavigate('/scripts');
+                setMobileMenuOpen(false);
+              }}
+              sx={{ 
+                mb: 1,
+                color: 'white',
+                '&:hover': {
+                  color: 'white'
+                }
+              }}
+            >
+              进入应用
+            </Button>
+          ) : (
+            <>
+              <Button
+                variant="outlined"
+                fullWidth
+                startIcon={<LoginIcon />}
+                onClick={() => {
+                  safeNavigate('/login');
+                  setMobileMenuOpen(false);
+                }}
+                sx={{ mb: 1, color: theme.palette.primary.main }}
+              >
+                登录
+              </Button>
+              <Button
+                variant="contained"
+                fullWidth
+                startIcon={<PersonAddIcon />}
+                onClick={() => {
+                  safeNavigate('/register');
+                  setMobileMenuOpen(false);
+                }}
+                sx={{ 
+                  color: 'white',
+                  '&:hover': {
+                    color: 'white'
+                  }
+                }}
+              >
+                注册
+              </Button>
+            </>
+          )}
+        </Box>
+      </Drawer>
+
       {/* Hero 区域 */}
-      <HeroSection id="about">
+      <HeroSection id="about" sx={{ scrollMarginTop: { xs: '56px', sm: '64px' } }}>
         <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
           <Box sx={{ 
             display: 'flex', 
@@ -255,35 +393,52 @@ const HomePage: React.FC = () => {
                 transition={{ duration: 0.8 }}
               >
                 <Typography
-                  variant={isMobile ? 'h3' : 'h2'}
+                  variant={isMobile ? 'h4' : 'h2'}
                   component="h1"
-                  sx={{ fontWeight: 'bold', mb: 2 }}
+                  sx={{ 
+                    fontWeight: 'bold', 
+                    mb: 2,
+                    textAlign: isMobile ? 'center' : 'left',
+                    fontSize: isMobile ? '1.8rem' : undefined
+                  }}
                 >
                   让 YouTube 内容创作
                   <br />
                   变得更简单
                 </Typography>
                 <Typography
-                  variant="h6"
-                  sx={{ mb: 4, opacity: 0.9, lineHeight: 1.6 }}
+                  variant={isMobile ? 'body1' : 'h6'}
+                  sx={{ 
+                    mb: 4, 
+                    opacity: 0.9, 
+                    lineHeight: 1.6,
+                    textAlign: isMobile ? 'center' : 'left'
+                  }}
                 >
                   专业的 YouTube 内容管理平台，帮助创作者高效管理频道、编辑脚本、规划发布，让您专注于创造优质内容。
                 </Typography>
-                <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                <Box sx={{ 
+                  display: 'flex', 
+                  gap: 2, 
+                  flexWrap: 'wrap',
+                  justifyContent: isMobile ? 'center' : 'flex-start',
+                  flexDirection: isMobile ? 'column' : 'row'
+                }}>
                   {user ? (
                     <Button
                       variant="contained"
-                      size="large"
+                      size={isMobile ? 'medium' : 'large'}
                       startIcon={<PlayArrowIcon />}
                       onClick={() => safeNavigate('/scripts')}
+                      fullWidth={isMobile}
                       sx={{
                         backgroundColor: 'white',
                         color: theme.palette.primary.main,
                         '&:hover': {
                           backgroundColor: 'rgba(255, 255, 255, 0.9)',
                         },
-                        px: 4,
-                        py: 1.5,
+                        px: isMobile ? 3 : 4,
+                        py: isMobile ? 1.2 : 1.5,
                       }}
                     >
                       进入应用
@@ -292,25 +447,27 @@ const HomePage: React.FC = () => {
                     <>
                       <Button
                         variant="contained"
-                        size="large"
+                        size={isMobile ? 'medium' : 'large'}
                         startIcon={<PlayArrowIcon />}
                         onClick={() => safeNavigate('/register')}
+                        fullWidth={isMobile}
                         sx={{
                           backgroundColor: 'white',
                           color: theme.palette.primary.main,
                           '&:hover': {
                             backgroundColor: 'rgba(255, 255, 255, 0.9)',
                           },
-                          px: 4,
-                          py: 1.5,
+                          px: isMobile ? 3 : 4,
+                          py: isMobile ? 1.2 : 1.5,
                         }}
                       >
                         立即开始
                       </Button>
                       <Button
                         variant="outlined"
-                        size="large"
+                        size={isMobile ? 'medium' : 'large'}
                         onClick={() => safeNavigate('/login')}
+                        fullWidth={isMobile}
                         sx={{
                           borderColor: 'white',
                           color: 'white',
@@ -318,8 +475,8 @@ const HomePage: React.FC = () => {
                             borderColor: 'white',
                             backgroundColor: 'rgba(255, 255, 255, 0.1)',
                           },
-                          px: 4,
-                          py: 1.5,
+                          px: isMobile ? 3 : 4,
+                          py: isMobile ? 1.2 : 1.5,
                         }}
                       >
                         查看演示
@@ -409,7 +566,11 @@ const HomePage: React.FC = () => {
       </Box>
 
       {/* 功能特色区域 */}
-      <Box id="features" sx={{ py: 8, backgroundColor: 'grey.50' }}>
+      <Box id="features" sx={{ 
+        py: 8, 
+        backgroundColor: 'grey.50', 
+        scrollMarginTop: { xs: '56px', sm: '64px' }
+      }}>
         <Container maxWidth="lg">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -555,26 +716,41 @@ const HomePage: React.FC = () => {
             viewport={{ once: true }}
           >
             <Box sx={{ textAlign: 'center' }}>
-              <Typography variant="h3" sx={{ mb: 2, fontWeight: 'bold' }}>
+              <Typography 
+                variant={isMobile ? 'h4' : 'h3'} 
+                sx={{ mb: 2, fontWeight: 'bold' }}
+              >
                 准备好开始了吗？
               </Typography>
-              <Typography variant="h6" sx={{ mb: 4, opacity: 0.9 }}>
+              <Typography 
+                variant={isMobile ? 'body1' : 'h6'} 
+                sx={{ mb: 4, opacity: 0.9 }}
+              >
                 加入数万名创作者，让内容创作变得更简单
               </Typography>
-              <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
+              <Box sx={{ 
+                display: 'flex', 
+                gap: 2, 
+                justifyContent: 'center', 
+                flexWrap: 'wrap',
+                flexDirection: isMobile ? 'column' : 'row',
+                alignItems: 'center'
+              }}>
                 {user ? (
                   <Button
                     variant="contained"
-                    size="large"
+                    size={isMobile ? 'medium' : 'large'}
                     onClick={() => safeNavigate('/scripts')}
+                    fullWidth={isMobile}
                     sx={{
                       backgroundColor: 'white',
                       color: theme.palette.primary.main,
                       '&:hover': {
                         backgroundColor: 'rgba(255, 255, 255, 0.9)',
                       },
-                      px: 4,
-                      py: 1.5,
+                      px: isMobile ? 3 : 4,
+                      py: isMobile ? 1.2 : 1.5,
+                      maxWidth: isMobile ? '300px' : 'none'
                     }}
                   >
                     进入应用
@@ -583,24 +759,27 @@ const HomePage: React.FC = () => {
                   <>
                     <Button
                       variant="contained"
-                      size="large"
+                      size={isMobile ? 'medium' : 'large'}
                       onClick={() => safeNavigate('/register')}
+                      fullWidth={isMobile}
                       sx={{
                         backgroundColor: 'white',
                         color: theme.palette.primary.main,
                         '&:hover': {
                           backgroundColor: 'rgba(255, 255, 255, 0.9)',
                         },
-                        px: 4,
-                        py: 1.5,
+                        px: isMobile ? 3 : 4,
+                        py: isMobile ? 1.2 : 1.5,
+                        maxWidth: isMobile ? '300px' : 'none'
                       }}
                     >
                       免费注册
                     </Button>
                     <Button
                       variant="outlined"
-                      size="large"
+                      size={isMobile ? 'medium' : 'large'}
                       onClick={() => safeNavigate('/login')}
+                      fullWidth={isMobile}
                       sx={{
                         borderColor: 'white',
                         color: 'white',
@@ -608,8 +787,9 @@ const HomePage: React.FC = () => {
                           borderColor: 'white',
                           backgroundColor: 'rgba(255, 255, 255, 0.1)',
                         },
-                        px: 4,
-                        py: 1.5,
+                        px: isMobile ? 3 : 4,
+                        py: isMobile ? 1.2 : 1.5,
+                        maxWidth: isMobile ? '300px' : 'none'
                       }}
                     >
                       立即登录
@@ -627,11 +807,16 @@ const HomePage: React.FC = () => {
         <Container maxWidth="lg">
           <Box sx={{ 
             display: 'flex', 
+            flexDirection: isMobile ? 'column' : 'row',
             flexWrap: 'wrap',
-            gap: 4,
-            justifyContent: 'space-between'
+            gap: isMobile ? 3 : 4,
+            justifyContent: isMobile ? 'flex-start' : 'space-between'
           }}>
-            <Box sx={{ minWidth: '250px', flex: 1 }}>
+            <Box sx={{ 
+              minWidth: isMobile ? '100%' : '250px', 
+              flex: 1,
+              textAlign: isMobile ? 'center' : 'left'
+            }}>
               <LogoComponent
                 size="medium"
                 showText={true}
@@ -641,7 +826,12 @@ const HomePage: React.FC = () => {
               <Typography variant="body2" sx={{ opacity: 0.8, mb: 2 }}>
                 专业的 YouTube 内容管理平台，让创作变得更简单。
               </Typography>
-              <Box sx={{ display: 'flex', gap: 1 }}>
+              <Box sx={{ 
+                display: 'flex', 
+                gap: 1,
+                justifyContent: isMobile ? 'center' : 'flex-start',
+                flexWrap: 'wrap'
+              }}>
                 <Chip 
                   label="专业" 
                   size="small" 
@@ -672,94 +862,196 @@ const HomePage: React.FC = () => {
               </Box>
             </Box>
             
-            <Box sx={{ minWidth: '120px' }}>
-              <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
-                产品
-              </Typography>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <Button color="inherit" sx={{ justifyContent: 'flex-start', p: 0 }}>
-                  功能特色
-                </Button>
-                <Button color="inherit" sx={{ justifyContent: 'flex-start', p: 0 }}>
-                  价格方案
-                </Button>
-                <Button color="inherit" sx={{ justifyContent: 'flex-start', p: 0 }}>
-                  更新日志
-                </Button>
+            {/* 移动端将链接分组显示 */}
+            {isMobile ? (
+              <Box sx={{ 
+                display: 'grid', 
+                gridTemplateColumns: 'repeat(2, 1fr)', 
+                gap: 3,
+                width: '100%'
+              }}>
+                <Box>
+                  <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
+                    产品
+                  </Typography>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Button color="inherit" sx={{ justifyContent: 'flex-start', p: 0 }}>
+                      功能特色
+                    </Button>
+                    <Button color="inherit" sx={{ justifyContent: 'flex-start', p: 0 }}>
+                      价格方案
+                    </Button>
+                    <Button color="inherit" sx={{ justifyContent: 'flex-start', p: 0 }}>
+                      更新日志
+                    </Button>
+                  </Box>
+                </Box>
+                
+                <Box>
+                  <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
+                    支持
+                  </Typography>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Button color="inherit" sx={{ justifyContent: 'flex-start', p: 0 }}>
+                      帮助中心
+                    </Button>
+                    <Button color="inherit" sx={{ justifyContent: 'flex-start', p: 0 }}>
+                      联系我们
+                    </Button>
+                    <Button color="inherit" sx={{ justifyContent: 'flex-start', p: 0 }}>
+                      反馈建议
+                    </Button>
+                  </Box>
+                </Box>
+                
+                <Box>
+                  <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
+                    公司
+                  </Typography>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Button color="inherit" sx={{ justifyContent: 'flex-start', p: 0 }}>
+                      关于我们
+                    </Button>
+                    <Button color="inherit" sx={{ justifyContent: 'flex-start', p: 0 }}>
+                      隐私政策
+                    </Button>
+                    <Button color="inherit" sx={{ justifyContent: 'flex-start', p: 0 }}>
+                      服务条款
+                    </Button>
+                  </Box>
+                </Box>
+                
+                <Box>
+                  <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
+                    联系我们
+                  </Typography>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Button 
+                      color="inherit" 
+                      sx={{ justifyContent: 'flex-start', p: 0 }}
+                      startIcon={<GitHubIcon />}
+                      href="https://github.com/sanuei/YoutubePlanner"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      GitHub
+                    </Button>
+                    <Button 
+                      color="inherit" 
+                      sx={{ justifyContent: 'flex-start', p: 0 }}
+                      startIcon={<YouTubeIcon />}
+                      href="https://www.youtube.com/@sonicyann"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      YouTube
+                    </Button>
+                    <Button 
+                      color="inherit" 
+                      sx={{ justifyContent: 'flex-start', p: 0 }}
+                      startIcon={<InstagramIcon />}
+                      href="https://www.instagram.com/sonic_yann/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Instagram
+                    </Button>
+                  </Box>
+                </Box>
               </Box>
-            </Box>
-            
-            <Box sx={{ minWidth: '120px' }}>
-              <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
-                支持
-              </Typography>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <Button color="inherit" sx={{ justifyContent: 'flex-start', p: 0 }}>
-                  帮助中心
-                </Button>
-                <Button color="inherit" sx={{ justifyContent: 'flex-start', p: 0 }}>
-                  联系我们
-                </Button>
-                <Button color="inherit" sx={{ justifyContent: 'flex-start', p: 0 }}>
-                  反馈建议
-                </Button>
-              </Box>
-            </Box>
-            
-            <Box sx={{ minWidth: '120px' }}>
-              <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
-                公司
-              </Typography>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <Button color="inherit" sx={{ justifyContent: 'flex-start', p: 0 }}>
-                  关于我们
-                </Button>
-                <Button color="inherit" sx={{ justifyContent: 'flex-start', p: 0 }}>
-                  隐私政策
-                </Button>
-                <Button color="inherit" sx={{ justifyContent: 'flex-start', p: 0 }}>
-                  服务条款
-                </Button>
-              </Box>
-            </Box>
-            
-            <Box sx={{ minWidth: '120px' }}>
-              <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
-                联系我们
-              </Typography>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <Button 
-                  color="inherit" 
-                  sx={{ justifyContent: 'flex-start', p: 0 }}
-                  startIcon={<GitHubIcon />}
-                  href="https://github.com/sanuei/YoutubePlanner"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  GitHub
-                </Button>
-                <Button 
-                  color="inherit" 
-                  sx={{ justifyContent: 'flex-start', p: 0 }}
-                  startIcon={<YouTubeIcon />}
-                  href="https://www.youtube.com/@sonicyann"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  YouTube
-                </Button>
-                <Button 
-                  color="inherit" 
-                  sx={{ justifyContent: 'flex-start', p: 0 }}
-                  startIcon={<InstagramIcon />}
-                  href="https://www.instagram.com/sonic_yann/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Instagram
-                </Button>
-              </Box>
-            </Box>
+            ) : (
+              // 桌面端保持原有布局
+              <>
+                <Box sx={{ minWidth: '120px' }}>
+                  <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
+                    产品
+                  </Typography>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Button color="inherit" sx={{ justifyContent: 'flex-start', p: 0 }}>
+                      功能特色
+                    </Button>
+                    <Button color="inherit" sx={{ justifyContent: 'flex-start', p: 0 }}>
+                      价格方案
+                    </Button>
+                    <Button color="inherit" sx={{ justifyContent: 'flex-start', p: 0 }}>
+                      更新日志
+                    </Button>
+                  </Box>
+                </Box>
+                
+                <Box sx={{ minWidth: '120px' }}>
+                  <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
+                    支持
+                  </Typography>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Button color="inherit" sx={{ justifyContent: 'flex-start', p: 0 }}>
+                      帮助中心
+                    </Button>
+                    <Button color="inherit" sx={{ justifyContent: 'flex-start', p: 0 }}>
+                      联系我们
+                    </Button>
+                    <Button color="inherit" sx={{ justifyContent: 'flex-start', p: 0 }}>
+                      反馈建议
+                    </Button>
+                  </Box>
+                </Box>
+                
+                <Box sx={{ minWidth: '120px' }}>
+                  <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
+                    公司
+                  </Typography>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Button color="inherit" sx={{ justifyContent: 'flex-start', p: 0 }}>
+                      关于我们
+                    </Button>
+                    <Button color="inherit" sx={{ justifyContent: 'flex-start', p: 0 }}>
+                      隐私政策
+                    </Button>
+                    <Button color="inherit" sx={{ justifyContent: 'flex-start', p: 0 }}>
+                      服务条款
+                    </Button>
+                  </Box>
+                </Box>
+                
+                <Box sx={{ minWidth: '120px' }}>
+                  <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
+                    联系我们
+                  </Typography>
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                    <Button 
+                      color="inherit" 
+                      sx={{ justifyContent: 'flex-start', p: 0 }}
+                      startIcon={<GitHubIcon />}
+                      href="https://github.com/sanuei/YoutubePlanner"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      GitHub
+                    </Button>
+                    <Button 
+                      color="inherit" 
+                      sx={{ justifyContent: 'flex-start', p: 0 }}
+                      startIcon={<YouTubeIcon />}
+                      href="https://www.youtube.com/@sonicyann"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      YouTube
+                    </Button>
+                    <Button 
+                      color="inherit" 
+                      sx={{ justifyContent: 'flex-start', p: 0 }}
+                      startIcon={<InstagramIcon />}
+                      href="https://www.instagram.com/sonic_yann/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Instagram
+                    </Button>
+                  </Box>
+                </Box>
+              </>
+            )}
           </Box>
           
           <Box
