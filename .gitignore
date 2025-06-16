@@ -63,4 +63,7 @@ coverage/
 
 # Large binary files
 *.dmg
-*.iso 
+*.iso
+
+# Documentation folder (本地文档，不上传到GitHub)
+docs/ 
