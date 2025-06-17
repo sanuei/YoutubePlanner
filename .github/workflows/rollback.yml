@@ -1,0 +1,161 @@
+name: 🔄 Rollback Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Rollback reason'
+        required: true
+        type: string
+      target_commit:
+        description: 'Target commit SHA (optional, defaults to previous commit)'
+        required: false
+        type: string
+
+jobs:
+  rollback:
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 10  # 获取最近10个提交
+        
+    - name: 🔍 Determine rollback target
+      id: target
+      run: |
+        if [ -n "${{ github.event.inputs.target_commit }}" ]; then
+          TARGET_COMMIT="${{ github.event.inputs.target_commit }}"
+        else
+          # 获取当前提交的前一个提交
+          TARGET_COMMIT=$(git rev-parse HEAD~1)
+        fi
+        
+        echo "target_commit=$TARGET_COMMIT" >> $GITHUB_OUTPUT
+        echo "🎯 Rollback target: $TARGET_COMMIT"
+        
+        # 验证目标提交是否存在
+        if ! git cat-file -e "$TARGET_COMMIT"; then
+          echo "❌ Target commit $TARGET_COMMIT does not exist"
+          exit 1
+        fi
+        
+    - name: 📋 Create rollback summary
+      run: |
+        echo "## 🔄 Rollback Information" >> $GITHUB_STEP_SUMMARY
+        echo "- **Reason**: ${{ github.event.inputs.reason }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Current commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Target commit**: ${{ steps.target.outputs.target_commit }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Initiated by**: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Time**: $(date -u)" >> $GITHUB_STEP_SUMMARY
+
+    - name: 🔄 Execute rollback on EC2
+      uses: appleboy/ssh-action@v0.1.10
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        timeout: 300s
+        script: |
+          set -e
+          cd /home/ec2-user/youtubeplanner
+          
+          echo "🔄 Starting rollback process..."
+          echo "Reason: ${{ github.event.inputs.reason }}"
+          echo "Target: ${{ steps.target.outputs.target_commit }}"
+          
+          # 检查是否有备份
+          BACKUP_FILE="deployment-backup-${{ steps.target.outputs.target_commit }}.log"
+          if [ ! -f "$BACKUP_FILE" ]; then
+            echo "⚠️ No backup found for target commit, proceeding with current containers..."
+          fi
+          
+          # 停止当前服务
+          echo "⏹️ Stopping current services..."
+          docker-compose -f docker-compose.prod.yml down --timeout 30 || true
+          
+          # 如果有旧镜像，尝试使用
+          echo "🔍 Looking for previous images..."
+          if docker images | grep -q "youtubeplanner.*${{ steps.target.outputs.target_commit }}"; then
+            echo "✅ Found previous images, using them..."
+            docker tag youtubeplanner-backend:${{ steps.target.outputs.target_commit }} youtubeplanner-backend:latest
+            docker tag youtubeplanner-frontend:${{ steps.target.outputs.target_commit }} youtubeplanner-frontend:latest
+          else
+            echo "⚠️ No previous images found, keeping current images..."
+          fi
+          
+          # 重启服务
+          echo "🚀 Starting services..."
+          docker-compose -f docker-compose.prod.yml up -d
+          
+          # 等待服务启动
+          echo "⏳ Waiting for services to start..."
+          sleep 30
+          
+          # 健康检查
+          echo "🏥 Performing health checks..."
+          
+          # 检查后端
+          for i in {1..5}; do
+            if curl -f -s http://localhost:8080/actuator/health > /dev/null; then
+              echo "✅ Backend health check passed"
+              break
+            fi
+            if [ $i -eq 5 ]; then
+              echo "❌ Backend health check failed"
+              docker-compose -f docker-compose.prod.yml logs backend --tail=20
+              exit 1
+            fi
+            echo "⏳ Backend health check attempt $i/5..."
+            sleep 10
+          done
+          
+          # 检查前端
+          for i in {1..3}; do
+            if curl -f -s http://localhost:3000 > /dev/null; then
+              echo "✅ Frontend health check passed"
+              break
+            fi
+            if [ $i -eq 3 ]; then
+              echo "❌ Frontend health check failed"
+              docker-compose -f docker-compose.prod.yml logs frontend --tail=20
+              exit 1
+            fi
+            echo "⏳ Frontend health check attempt $i/3..."
+            sleep 10
+          done
+          
+          echo "🎉 Rollback completed successfully!"
+          docker-compose -f docker-compose.prod.yml ps
+
+    - name: 🔍 Verify rollback
+      run: |
+        echo "🔍 Verifying rollback..."
+        
+        # 检查前端
+        if curl -f -s https://youtubeplanner.duckdns.org > /dev/null; then
+          echo "✅ Frontend is accessible after rollback"
+        else
+          echo "❌ Frontend verification failed after rollback"
+          exit 1
+        fi
+        
+        # 检查后端API
+        if curl -f -s https://youtubeplanner.duckdns.org/actuator/health > /dev/null; then
+          echo "✅ Backend API is accessible after rollback"
+        else
+          echo "❌ Backend API verification failed after rollback"
+          exit 1
+        fi
+        
+        echo "🎉 Rollback verification passed!"
+
+    - name: 📊 Update rollback summary
+      run: |
+        echo "## ✅ Rollback Completed" >> $GITHUB_STEP_SUMMARY
+        echo "- **Status**: Success" >> $GITHUB_STEP_SUMMARY
+        echo "- **Services**: All services are running normally" >> $GITHUB_STEP_SUMMARY
+        echo "- **Frontend**: https://youtubeplanner.duckdns.org" >> $GITHUB_STEP_SUMMARY
+        echo "- **Backend API**: https://youtubeplanner.duckdns.org/api/v1" >> $GITHUB_STEP_SUMMARY 

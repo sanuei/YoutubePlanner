@@ -56,7 +56,9 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => {
     // 对于认证相关请求的特殊处理 - 返回完整的响应对象
-    if (response.config.url?.includes('/auth/login') || response.config.url?.includes('/auth/register')) {
+    if (response.config.url?.includes('/auth/login') || 
+        response.config.url?.includes('/auth/register') || 
+        response.config.url?.includes('/auth/refresh')) {
       return response;
     }
 
@@ -106,7 +108,7 @@ api.interceptors.response.use(
         const refreshToken = localStorage.getItem('refreshToken');
         
         if (!refreshToken) {
-          throw new Error('No refresh token available');
+          throw new Error('No fresh token available');
         }
 
         logger.log('Attempting to refresh token');

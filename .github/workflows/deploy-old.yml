@@ -1,0 +1,91 @@
+name: Deploy to AWS EC2 (DISABLED - Old Version)
+
+# DISABLED: This workflow has been replaced by the optimized version
+# on:
+#   push:
+#     branches: [ main, master, clean-deploy ]
+#   pull_request:
+#     branches: [ main, master, clean-deploy ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: frontendytp/package-lock.json
+        
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+        
+    - name: Build Frontend
+      run: |
+        cd frontendytp
+        npm ci
+        CI=false REACT_APP_API_BASE_URL=https://youtubeplanner.duckdns.org/api/v1 npm run build
+        
+    - name: Build Backend
+      run: |
+        cd BackendYTP
+        mvn clean package -DskipTests
+        
+    - name: Build Docker Images
+      run: |
+        # 构建后端镜像
+        docker build -t youtubeplanner-backend:latest ./BackendYTP
+        
+        # 构建前端镜像，传递API URL参数
+        docker build --build-arg REACT_APP_API_BASE_URL=https://youtubeplanner.duckdns.org/api/v1 -t youtubeplanner-frontend:latest ./frontendytp
+        
+    - name: Save Docker Images
+      run: |
+        docker save youtubeplanner-backend:latest | gzip > backend.tar.gz
+        docker save youtubeplanner-frontend:latest | gzip > frontend.tar.gz
+        
+    - name: Copy files to EC2
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        source: "backend.tar.gz,frontend.tar.gz,docker-compose.prod.yml,deploy-scripts/"
+        target: "/home/ec2-user/youtubeplanner/"
+        
+    - name: Deploy to EC2
+      uses: appleboy/ssh-action@v0.1.10
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        script: |
+          cd /home/ec2-user/youtubeplanner
+
+          # 加载 Docker 镜像
+          docker load < backend.tar.gz
+          docker load < frontend.tar.gz
+
+          # 停止现有容器（避免失败中断）
+          docker-compose -f docker-compose.prod.yml down || true
+
+          # 清理无用镜像
+          docker image prune -f
+
+          # 启动容器
+          docker-compose -f docker-compose.prod.yml up -d
+
+          # 保留 tar.gz 备份，不删除
+          echo "Deployment complete. Archives retained."
+
+          # 检查容器状态
+          sleep 30
+          docker-compose -f docker-compose.prod.yml ps

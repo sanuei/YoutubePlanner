@@ -1,90 +1,292 @@
-name: Deploy to AWS EC2
+name: 🚀 Deploy to AWS EC2 (Optimized)
 
 on:
   push:
-    branches: [ main, master, clean-deploy ]
-  pull_request:
-    branches: [ main, master, clean-deploy ]
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+        - production
+        - staging
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME_BACKEND: ${{ github.repository }}/backend
+  IMAGE_NAME_FRONTEND: ${{ github.repository }}/frontend
+  API_BASE_URL: https://youtubeplanner.duckdns.org/api/v1
 
 jobs:
-  deploy:
+  # 构建作业 - 并行构建前后端
+  build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        component: [frontend, backend]
+    outputs:
+      frontend-image: ${{ steps.meta-frontend.outputs.tags }}
+      backend-image: ${{ steps.meta-backend.outputs.tags }}
     
     steps:
-    - name: Checkout code
+    - name: 📥 Checkout code
       uses: actions/checkout@v4
       
-    - name: Setup Node.js
+    - name: 🏷️ Extract metadata (Frontend)
+      if: matrix.component == 'frontend'
+      id: meta-frontend
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}
+        tags: |
+          type=ref,event=branch
+          type=sha,prefix={{branch}}-
+          type=raw,value=latest,enable={{is_default_branch}}
+          
+    - name: 🏷️ Extract metadata (Backend)
+      if: matrix.component == 'backend'
+      id: meta-backend
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BACKEND }}
+        tags: |
+          type=ref,event=branch
+          type=sha,prefix={{branch}}-
+          type=raw,value=latest,enable={{is_default_branch}}
+
+    # Frontend 构建
+    - name: 🟢 Setup Node.js
+      if: matrix.component == 'frontend'
       uses: actions/setup-node@v4
       with:
         node-version: '18'
         cache: 'npm'
         cache-dependency-path: frontendytp/package-lock.json
         
-    - name: Setup Java
+    - name: 🔨 Build Frontend
+      if: matrix.component == 'frontend'
+      run: |
+        cd frontendytp
+        npm ci --prefer-offline
+        CI=false REACT_APP_API_BASE_URL=${{ env.API_BASE_URL }} npm run build
+        
+    - name: 🐳 Build Frontend Docker Image
+      if: matrix.component == 'frontend'
+      run: |
+        docker build \
+          --build-arg REACT_APP_API_BASE_URL=${{ env.API_BASE_URL }} \
+          --tag youtubeplanner-frontend:latest \
+          --tag youtubeplanner-frontend:${{ github.sha }} \
+          ./frontendytp
+
+    # Backend 构建
+    - name: ☕ Setup Java
+      if: matrix.component == 'backend'
       uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
         java-version: '17'
+        cache: 'maven'
         
-    - name: Build Frontend
-      run: |
-        cd frontendytp
-        npm ci
-        CI=false REACT_APP_API_BASE_URL=https://youtubeplanner.duckdns.org/api/v1 npm run build
-        
-    - name: Build Backend
+    - name: 🔨 Build Backend
+      if: matrix.component == 'backend'
       run: |
         cd BackendYTP
-        mvn clean package -DskipTests
+        mvn clean package -DskipTests -B -q
         
-    - name: Build Docker Images
+    - name: 🐳 Build Backend Docker Image
+      if: matrix.component == 'backend'
       run: |
-        # 构建后端镜像
-        docker build -t youtubeplanner-backend:latest ./BackendYTP
-        
-        # 构建前端镜像，传递API URL参数
-        docker build --build-arg REACT_APP_API_BASE_URL=https://youtubeplanner.duckdns.org/api/v1 -t youtubeplanner-frontend:latest ./frontendytp
-        
-    - name: Save Docker Images
+        docker build \
+          --tag youtubeplanner-backend:latest \
+          --tag youtubeplanner-backend:${{ github.sha }} \
+          ./BackendYTP
+
+    # 保存镜像
+    - name: 💾 Save Docker Images
       run: |
-        docker save youtubeplanner-backend:latest | gzip > backend.tar.gz
-        docker save youtubeplanner-frontend:latest | gzip > frontend.tar.gz
+        if [ "${{ matrix.component }}" == "frontend" ]; then
+          docker save youtubeplanner-frontend:latest | gzip > frontend-${{ github.sha }}.tar.gz
+        else
+          docker save youtubeplanner-backend:latest | gzip > backend-${{ github.sha }}.tar.gz
+        fi
         
-    - name: Copy files to EC2
+    - name: 📤 Upload Docker Images
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.component }}-image
+        path: ${{ matrix.component }}-${{ github.sha }}.tar.gz
+        retention-days: 1
+
+  # 部署作业
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 📥 Download Frontend Image
+      uses: actions/download-artifact@v4
+      with:
+        name: frontend-image
+        
+    - name: 📥 Download Backend Image
+      uses: actions/download-artifact@v4
+      with:
+        name: backend-image
+
+    - name: 🔧 Prepare deployment files
+      run: |
+        # 创建部署目录
+        mkdir -p deployment
+        
+        # 复制必要文件
+        cp docker-compose.prod.yml deployment/
+        cp -r deploy-scripts deployment/
+        
+        # 移动镜像文件
+        mv frontend-${{ github.sha }}.tar.gz deployment/frontend.tar.gz
+        mv backend-${{ github.sha }}.tar.gz deployment/backend.tar.gz
+
+    - name: 🚀 Deploy to EC2
       uses: appleboy/scp-action@v0.1.7
       with:
         host: ${{ secrets.EC2_HOST }}
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_SSH_KEY }}
-        source: "backend.tar.gz,frontend.tar.gz,docker-compose.prod.yml,deploy-scripts/"
+        source: "deployment/*"
         target: "/home/ec2-user/youtubeplanner/"
+        strip_components: 1
+        timeout: 300s
         
-    - name: Deploy to EC2
+    - name: 🔄 Execute Deployment
       uses: appleboy/ssh-action@v0.1.10
       with:
         host: ${{ secrets.EC2_HOST }}
         username: ${{ secrets.EC2_USER }}
         key: ${{ secrets.EC2_SSH_KEY }}
+        timeout: 600s
         script: |
+          set -e
           cd /home/ec2-user/youtubeplanner
-
-          # 加载 Docker 镜像
+          
+          echo "🔄 Starting deployment process..."
+          
+          # 创建备份
+          if [ -f "docker-compose.prod.yml" ]; then
+            echo "📦 Creating backup..."
+            docker-compose -f docker-compose.prod.yml ps > deployment-backup-${{ github.sha }}.log || true
+          fi
+          
+          # 加载新镜像
+          echo "📥 Loading Docker images..."
           docker load < backend.tar.gz
           docker load < frontend.tar.gz
-
-          # 停止现有容器（避免失败中断）
-          docker-compose -f docker-compose.prod.yml down || true
-
-          # 清理无用镜像
+          
+          # 优雅停止现有服务
+          echo "⏹️ Stopping existing services..."
+          docker-compose -f docker-compose.prod.yml down --timeout 30 || true
+          
+          # 清理旧镜像
+          echo "🧹 Cleaning up old images..."
           docker image prune -f
-
-          # 启动容器
+          
+          # 启动新服务
+          echo "🚀 Starting new services..."
           docker-compose -f docker-compose.prod.yml up -d
-
-          # 保留 tar.gz 备份，不删除
-          echo "Deployment complete. Archives retained."
-
+          
+          # 等待服务启动
+          echo "⏳ Waiting for services to start..."
+          sleep 45
+          
+          # 健康检查
+          echo "🏥 Performing health checks..."
+          
           # 检查容器状态
-          sleep 30
+          if ! docker-compose -f docker-compose.prod.yml ps | grep -q "Up"; then
+            echo "❌ Some containers are not running!"
+            docker-compose -f docker-compose.prod.yml ps
+            docker-compose -f docker-compose.prod.yml logs --tail=50
+            exit 1
+          fi
+          
+          # 检查后端健康
+          for i in {1..10}; do
+            if curl -f -s http://localhost:8080/actuator/health > /dev/null; then
+              echo "✅ Backend health check passed"
+              break
+            fi
+            if [ $i -eq 10 ]; then
+              echo "❌ Backend health check failed after 10 attempts"
+              docker-compose -f docker-compose.prod.yml logs backend --tail=50
+              exit 1
+            fi
+            echo "⏳ Backend health check attempt $i/10..."
+            sleep 10
+          done
+          
+          # 检查前端
+          for i in {1..5}; do
+            if curl -f -s http://localhost:3000 > /dev/null; then
+              echo "✅ Frontend health check passed"
+              break
+            fi
+            if [ $i -eq 5 ]; then
+              echo "❌ Frontend health check failed after 5 attempts"
+              docker-compose -f docker-compose.prod.yml logs frontend --tail=50
+              exit 1
+            fi
+            echo "⏳ Frontend health check attempt $i/5..."
+            sleep 10
+          done
+          
+          echo "🎉 Deployment completed successfully!"
+          echo "📊 Final container status:"
           docker-compose -f docker-compose.prod.yml ps
+          
+          # 清理部署文件
+          rm -f backend.tar.gz frontend.tar.gz
+
+  # 部署后验证
+  verify:
+    needs: deploy
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 🔍 Verify Deployment
+      run: |
+        echo "🔍 Verifying deployment..."
+        
+        # 检查前端
+        if curl -f -s https://youtubeplanner.duckdns.org > /dev/null; then
+          echo "✅ Frontend is accessible"
+        else
+          echo "❌ Frontend verification failed"
+          exit 1
+        fi
+        
+        # 检查后端API
+        if curl -f -s https://youtubeplanner.duckdns.org/actuator/health > /dev/null; then
+          echo "✅ Backend API is accessible"
+        else
+          echo "❌ Backend API verification failed"
+          exit 1
+        fi
+        
+        echo "🎉 All verification checks passed!"
+
+    - name: 📊 Deployment Summary
+      run: |
+        echo "## 🚀 Deployment Summary" >> $GITHUB_STEP_SUMMARY
+        echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Deployed at**: $(date -u)" >> $GITHUB_STEP_SUMMARY
+        echo "- **Frontend**: https://youtubeplanner.duckdns.org" >> $GITHUB_STEP_SUMMARY
+        echo "- **Backend API**: https://youtubeplanner.duckdns.org/api/v1" >> $GITHUB_STEP_SUMMARY
+        echo "- **Health Check**: https://youtubeplanner.duckdns.org/actuator/health" >> $GITHUB_STEP_SUMMARY 
