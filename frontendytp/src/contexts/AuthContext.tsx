@@ -167,27 +167,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     initAuth();
   }, [navigate]);
 
-  // 添加响应拦截器
-  useEffect(() => {
-    const interceptor = api.interceptors.response.use(
-      (response) => response,
-      (error) => {
-        if (error.response?.status === 401 || error.response?.status === 403) {
-          // 清除认证信息
-          localStorage.removeItem('accessToken');
-          localStorage.removeItem('refreshToken');
-          delete api.defaults.headers.common.Authorization;
-          setUser(null);
-          navigate('/login');
-        }
-        return Promise.reject(error);
-      }
-    );
-
-    return () => {
-      api.interceptors.response.eject(interceptor);
-    };
-  }, [navigate]);
+  // 响应拦截器已在 api.ts 中处理，这里不需要重复添加
 
   const login = async (username: string, password: string) => {
     try {

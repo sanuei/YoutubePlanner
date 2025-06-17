@@ -98,7 +98,11 @@ const Login: React.FC = () => {
       const result = await login(formData.username, formData.password);
       console.log('Login result:', result);
       
-      if (!result.success) {
+      if (result.success) {
+        console.log('Login successful, showing success message');
+        enqueueSnackbar(result.message || '登录成功', { variant: 'success' });
+        // AuthContext 中的 login 函数会处理导航
+      } else {
         console.error('Login failed:', result.message);
         enqueueSnackbar(result.message || '登录失败，请重试', { variant: 'error' });
       }
