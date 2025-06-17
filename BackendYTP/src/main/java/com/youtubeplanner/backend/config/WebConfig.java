@@ -31,7 +31,8 @@ public class WebConfig implements WebMvcConfigurer {
                     "http://localhost:3001",    // 备用React端口
                     "http://localhost:8080",    // 本地后端
                     "http://127.0.0.1:3000",    // 本地IP
-                    "http://127.0.0.1:8080"     // 本地IP后端
+                    "http://127.0.0.1:8080",    // 本地IP后端
+                    "https://youtubeplanner.duckdns.org"  // 生产环境域名
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD")
                 .allowedHeaders("*")
