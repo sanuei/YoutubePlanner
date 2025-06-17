@@ -13,6 +13,10 @@ RUN npm ci
 # 复制源代码
 COPY . .
 
+# 设置构建参数
+ARG REACT_APP_API_BASE_URL=https://youtubeplanner.duckdns.org/api/v1
+ENV REACT_APP_API_BASE_URL=$REACT_APP_API_BASE_URL
+
 # 构建应用
 RUN npm run build
 
