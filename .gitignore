@@ -67,7 +67,7 @@ coverage/
 
 # 敏感配置文档 (包含密码、密钥等敏感信息)
 docs/*
-docs/04-配置文档/
+docs/04-配置文档/*
 docs/04-配置文档/*.md
 docs/04-配置文档/*.txt
 docs/04-配置文档/*.env
