@@ -65,5 +65,22 @@ coverage/
 *.dmg
 *.iso
 
-# Documentation folder (本地文档，不上传到GitHub)
-docs/ docs/04-配置文档/01-敏感信息配置.md
+# 敏感配置文档 (包含密码、密钥等敏感信息)
+docs/*
+docs/04-配置文档/
+docs/04-配置文档/*.md
+docs/04-配置文档/*.txt
+docs/04-配置文档/*.env
+docs/04-配置文档/*.yml
+docs/04-配置文档/*.yaml
+docs/04-配置文档/*.properties
+
+# 其他敏感文件
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+secrets/
+secrets.txt
+config.local.*
