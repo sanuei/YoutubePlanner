@@ -19,7 +19,6 @@ import com.youtubeplanner.backend.category.dto.CreateCategoryRequest;
 import com.youtubeplanner.backend.category.dto.CategoryResponse;
 import com.youtubeplanner.backend.common.ApiResponse;
 import com.youtubeplanner.backend.common.PageResponse;
-import com.youtubeplanner.backend.user.entity.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
