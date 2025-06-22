@@ -330,7 +330,7 @@ const Layout: React.FC = () => {
         component="main"
         sx={{
           flexGrow: 1,
-          p: isMobile ? 2 : 3,
+          p: (location.pathname.includes('/scripts/') && (location.pathname.includes('/edit') || location.pathname.includes('/create'))) ? 0 : (isMobile ? 2 : 3),
           backgroundColor: theme.palette.background.default,
           overflow: 'auto',
           position: 'relative',

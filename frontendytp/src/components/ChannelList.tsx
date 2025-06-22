@@ -265,7 +265,13 @@ const ChannelList: React.FC = () => {
               variant="contained"
               startIcon={<AddIcon />}
               onClick={() => handleOpenDialog()}
-              sx={{ textTransform: 'none' }}
+              sx={{ 
+                textTransform: 'none',
+                color: 'white',
+                '&:hover': {
+                  color: 'white'
+                }
+              }}
             >
               创建频道
             </Button>
@@ -382,7 +388,13 @@ const ChannelList: React.FC = () => {
           <Button
             onClick={editChannel ? handleUpdateChannel : handleCreateChannel}
             variant="contained"
-            sx={{ textTransform: 'none' }}
+            sx={{ 
+              textTransform: 'none',
+              color: 'white',
+              '&:hover': {
+                color: 'white'
+              }
+            }}
           >
             {editChannel ? '更新' : '创建'}
           </Button>

@@ -477,6 +477,12 @@ const ScriptManagement: React.FC = () => {
             startIcon={<AddIcon />}
             onClick={() => navigate('/scripts/create')}
             size={isMobile ? 'small' : 'medium'}
+            sx={{ 
+              color: 'white',
+              '&:hover': {
+                color: 'white'
+              }
+            }}
           >
             {isMobile ? '创建' : '创建脚本'}
           </Button>

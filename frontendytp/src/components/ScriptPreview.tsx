@@ -31,6 +31,7 @@ const ScriptPreview: React.FC = () => {
   const [isTeleprompterMode, setIsTeleprompterMode] = useState(false);
   const [scrollSpeed, setScrollSpeed] = useState(50);
   const [isScrolling, setIsScrolling] = useState(false);
+  const [fontSize, setFontSize] = useState(1.5); // 默认字体大小倍数
   const contentRef = useRef<HTMLDivElement>(null);
   const scrollInterval = useRef<NodeJS.Timeout | null>(null);
 
@@ -86,6 +87,10 @@ const ScriptPreview: React.FC = () => {
       stopScrolling();
       startScrolling();
     }
+  };
+
+  const handleFontSizeChange = (event: Event, newValue: number | number[]) => {
+    setFontSize(newValue as number);
   };
 
   const startScrolling = () => {
@@ -222,7 +227,13 @@ const ScriptPreview: React.FC = () => {
                 startIcon={<AutoStoriesIcon />}
                 onClick={handleTeleprompterToggle}
                 color="primary"
-                sx={{ textTransform: 'none' }}
+                sx={{ 
+                  textTransform: 'none',
+                  color: 'white',
+                  '&:hover': {
+                    color: 'white'
+                  }
+                }}
               >
                 提词器模式
         </Button>
@@ -230,7 +241,13 @@ const ScriptPreview: React.FC = () => {
           variant="contained"
           startIcon={<EditIcon />}
           onClick={() => navigate(`/scripts/${id}/edit`)}
-          sx={{ textTransform: 'none' }}
+          sx={{ 
+            textTransform: 'none',
+            color: 'white',
+            '&:hover': {
+              color: 'white'
+            }
+          }}
         >
           编辑脚本
         </Button>
@@ -279,13 +296,35 @@ const ScriptPreview: React.FC = () => {
                 sx={{ mx: 2 }}
               />
             </Box>
+            <Box sx={{ 
+              display: 'flex',
+              alignItems: 'center',
+              gap: 2,
+              minWidth: '200px'
+            }}>
+              <Typography variant="body1" sx={{ minWidth: '80px' }}>字体大小</Typography>
+              <Slider
+                value={fontSize}
+                onChange={handleFontSizeChange}
+                aria-labelledby="font-size-slider"
+                valueLabelDisplay="auto"
+                min={0.8}
+                max={3}
+                step={0.1}
+                sx={{ mx: 2 }}
+              />
+            </Box>
             <Button
               variant="contained"
               startIcon={isScrolling ? <PauseIcon /> : <PlayArrowIcon />}
               onClick={isScrolling ? stopScrolling : startScrolling}
               sx={{ 
                 minWidth: '120px',
-                height: '40px'
+                height: '40px',
+                color: 'white',
+                '&:hover': {
+                  color: 'white'
+                }
               }}
             >
               {isScrolling ? '暂停' : '开始'}
@@ -311,7 +350,6 @@ const ScriptPreview: React.FC = () => {
           boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
           transition: 'all 0.3s ease',
           ...(isTeleprompterMode && {
-            fontSize: '1.5rem',
             lineHeight: 2,
             maxHeight: 'calc(100vh - 200px)',
             overflow: 'auto',
@@ -416,7 +454,7 @@ const ScriptPreview: React.FC = () => {
                       gutterBottom 
                       sx={{ 
                         fontWeight: 'bold',
-                        ...(isTeleprompterMode && { fontSize: '1.8rem' })
+                        ...(isTeleprompterMode && { fontSize: `${fontSize * 1.2}rem` })
                       }}
                     >
                     第 {chapter.chapter_number} 章：{chapter.title}
@@ -427,7 +465,7 @@ const ScriptPreview: React.FC = () => {
                       whiteSpace: 'pre-wrap',
                       '& img': { maxWidth: '100%', height: 'auto' },
                         lineHeight: 1.8,
-                        fontSize: isTeleprompterMode ? '1.5rem' : '1.1rem'
+                        fontSize: isTeleprompterMode ? `${fontSize}rem` : '1.1rem'
                     }}
                     dangerouslySetInnerHTML={{ __html: chapter.content }}
                   />

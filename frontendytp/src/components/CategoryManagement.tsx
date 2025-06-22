@@ -252,7 +252,13 @@ const CategoryManagement: React.FC = () => {
               variant="contained"
               startIcon={<AddIcon />}
               onClick={() => handleOpenDialog()}
-              sx={{ textTransform: 'none' }}
+              sx={{ 
+                textTransform: 'none',
+                color: 'white',
+                '&:hover': {
+                  color: 'white'
+                }
+              }}
             >
               创建分类
             </Button>
@@ -295,7 +301,7 @@ const CategoryManagement: React.FC = () => {
           display: 'grid', 
           gridTemplateColumns: isMobile 
             ? '1fr' 
-            : 'repeat(auto-fill, minmax(300px, 1fr))',
+            : 'repeat(auto-fill, minmax(400px, 1fr))',
           gap: isMobile ? 2 : 3,
         }}>
           {categories.map((category) => {
@@ -394,7 +400,13 @@ const CategoryManagement: React.FC = () => {
           <Button
             onClick={editCategory ? handleUpdateCategory : handleCreateCategory}
             variant="contained"
-            sx={{ textTransform: 'none' }}
+            sx={{ 
+              textTransform: 'none',
+              color: 'white',
+              '&:hover': {
+                color: 'white'
+              }
+            }}
           >
             {editCategory ? '更新' : '创建'}
           </Button>

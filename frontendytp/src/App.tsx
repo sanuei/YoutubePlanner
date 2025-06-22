@@ -16,7 +16,6 @@ const ChannelList = lazy(() => import('./components/ChannelList'));
 const UserManagement = lazy(() => import('./components/UserManagement'));
 const CategoryManagement = lazy(() => import('./components/CategoryManagement'));
 const ScriptManagement = lazy(() => import('./components/ScriptManagement'));
-const ScriptCreate = lazy(() => import('./components/ScriptCreate'));
 const ScriptEdit = lazy(() => import('./components/ScriptEdit'));
 const ScriptPreview = lazy(() => import('./components/ScriptPreview'));
 
@@ -49,7 +48,7 @@ function App() {
                 <Route path="channels" element={<ChannelList />} />
                 <Route path="categories" element={<CategoryManagement />} />
                 <Route path="scripts" element={<ScriptManagement />} />
-                <Route path="scripts/create" element={<ScriptCreate />} />
+                <Route path="scripts/create" element={<ScriptEdit />} />
                 <Route path="scripts/:scriptId/edit" element={<ScriptEdit />} />
                 <Route path="scripts/:id/preview" element={<ScriptPreview />} />
               </Route>
