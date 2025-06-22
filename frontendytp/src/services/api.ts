@@ -164,6 +164,7 @@ export interface Script {
   script_id: number;
   title: string;
   alternative_title1?: string;
+  alternative_title2?: string;
   description?: string;
   difficulty?: number;
   status?: string;
@@ -258,16 +259,23 @@ export const scriptsApi = {
   },
 
   getList: (params: ScriptListParams): Promise<ApiResponse<PaginatedData<Script>>> => {
-    const queryParams = {
+    const queryParams: any = {
       ...params,
       page: params.page?.toString(),
       limit: params.limit?.toString(),
-      channel_id: params.channel_id?.toString(),
-      category_id: params.category_id?.toString(),
-      difficulty: params.difficulty?.toString(),
+      channel_id: params.channel_id && params.channel_id !== '' ? parseInt(params.channel_id) : undefined,
+      category_id: params.category_id && params.category_id !== '' ? parseInt(params.category_id) : undefined,
+      difficulty: params.difficulty && params.difficulty !== '' ? parseInt(params.difficulty) : undefined,
     };
 
-    console.log('API Request params:', queryParams);
+    // 移除空值和undefined值
+    Object.keys(queryParams).forEach(key => {
+      if (queryParams[key] === undefined || queryParams[key] === '' || queryParams[key] === null) {
+        delete queryParams[key];
+      }
+    });
+
+    console.log('API Request params (after processing):', queryParams);
     return api.get('/scripts', { params: queryParams });
   },
 
@@ -327,7 +335,9 @@ export interface User {
   updated_at: string;
   avatar_url: string;
   display_name: string;
+  role?: string;
   stats: UserStats;
+  apiConfig?: ApiConfig;
 }
 
 export interface UpdateUserData {
@@ -341,6 +351,38 @@ export interface ChangePasswordData {
   new_password: string;
 }
 
+export interface ApiConfig {
+  apiProvider?: string;
+  apiBaseUrl?: string;
+  apiModel?: string;
+  hasApiKey?: boolean;
+}
+
+export interface ApiConfigRequest {
+  apiProvider?: string;
+  apiKey?: string;
+  apiBaseUrl?: string;
+  apiModel?: string;
+}
+
+// 管理员用户管理相关接口
+export interface AdminUser {
+  userId: number;
+  username: string;
+  email: string;
+  displayName: string;
+  role: string;
+  createdAt: string;
+  updatedAt: string;
+  stats?: UserStats;
+}
+
+export interface AdminUpdateUserRequest {
+  email?: string;
+  displayName?: string;
+  role?: string;
+}
+
 export const usersApi = {
   getCurrentUser: (): Promise<ApiResponse<User>> => {
     return api.get('/users/me');
@@ -352,6 +394,117 @@ export const usersApi = {
 
   changePassword: (data: ChangePasswordData): Promise<ApiResponse<void>> => {
     return api.put('/users/me/password', data);
+  },
+
+  getApiConfig: (): Promise<ApiResponse<ApiConfig>> => {
+    return api.get('/users/me/api-config');
+  },
+
+  updateApiConfig: (data: ApiConfigRequest): Promise<ApiResponse<ApiConfig>> => {
+    return api.put('/users/me/api-config', data);
+  },
+
+  getFullApiConfig: (): Promise<ApiResponse<ApiConfigRequest>> => {
+    return api.get('/users/me/api-config/full');
+  },
+};
+
+// 管理员用户管理API
+export const adminUsersApi = {
+  getAllUsers: (params: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    sortBy?: string;
+    order?: 'asc' | 'desc';
+  }): Promise<ApiResponse<PaginatedData<AdminUser>>> => {
+    return api.get('/admin/users', { params });
+  },
+
+  getUserById: (userId: number): Promise<ApiResponse<AdminUser>> => {
+    return api.get(`/admin/users/${userId}`);
+  },
+
+  updateUser: (userId: number, data: AdminUpdateUserRequest): Promise<ApiResponse<AdminUser>> => {
+    return api.put(`/admin/users/${userId}`, data);
+  },
+
+  deleteUser: (userId: number): Promise<ApiResponse<void>> => {
+    return api.delete(`/admin/users/${userId}`);
+  },
+
+  updateUserRole: (userId: number, role: string): Promise<ApiResponse<AdminUser>> => {
+    return api.put(`/admin/users/${userId}/role`, null, { params: { role } });
+  },
+};
+
+// 思维导图相关接口
+export interface MindMapNode {
+  id: string;
+  type: string;
+  position: { x: number; y: number };
+  data: any;
+}
+
+export interface MindMapEdge {
+  id: string;
+  source: string;
+  target: string;
+  type?: string;
+  style?: any;
+}
+
+export interface MindMapRequest {
+  title: string;
+  description?: string;
+  nodesData?: string; // JSON字符串
+  edgesData?: string; // JSON字符串
+}
+
+export interface MindMapResponse {
+  mindMapId: number;
+  title: string;
+  description?: string;
+  nodesData?: string;
+  edgesData?: string;
+  userId: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MindMapListResponse {
+  mindMapId: number;
+  title: string;
+  description?: string;
+  userId: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// 思维导图API接口定义
+export const mindMapsApi = {
+  create: (data: MindMapRequest): Promise<ApiResponse<MindMapResponse>> => {
+    return api.post('/mindmaps', data);
+  },
+
+  getById: (id: number): Promise<ApiResponse<MindMapResponse>> => {
+    return api.get(`/mindmaps/${id}`);
+  },
+
+  update: (id: number, data: MindMapRequest): Promise<ApiResponse<MindMapResponse>> => {
+    return api.put(`/mindmaps/${id}`, data);
+  },
+
+  delete: (id: number): Promise<ApiResponse<void>> => {
+    return api.delete(`/mindmaps/${id}`);
+  },
+
+  getUserMindMaps: (params?: { 
+    page?: number; 
+    limit?: number; 
+    search?: string; 
+  }): Promise<ApiResponse<PaginatedData<MindMapListResponse>>> => {
+    return api.get('/mindmaps', { params });
   },
 };
 

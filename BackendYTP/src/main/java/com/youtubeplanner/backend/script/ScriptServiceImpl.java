@@ -1,42 +1,33 @@
-package com.youtubeplanner.backend.script.service;
+package com.youtubeplanner.backend.script;
 
 import com.youtubeplanner.backend.channel.ChannelService;
 import com.youtubeplanner.backend.category.CategoryService;
 import com.youtubeplanner.backend.common.ApiResponse;
 import com.youtubeplanner.backend.common.PageResponse;
-import com.youtubeplanner.backend.common.PaginationInfo;
 import com.youtubeplanner.backend.script.dto.CreateScriptRequest;
 import com.youtubeplanner.backend.script.dto.GetScriptsRequest;
 import com.youtubeplanner.backend.script.dto.ScriptListItemResponse;
 import com.youtubeplanner.backend.script.dto.ScriptResponse;
 import com.youtubeplanner.backend.script.entity.Script;
 import com.youtubeplanner.backend.script.entity.ScriptChapter;
-import com.youtubeplanner.backend.script.mapper.ScriptMapper;
+import com.youtubeplanner.backend.script.repository.ScriptRepository;
+import com.youtubeplanner.backend.script.service.ScriptService;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ScriptServiceImpl implements ScriptService {
-    private static final Logger logger = LoggerFactory.getLogger(ScriptServiceImpl.class);
-    private final ScriptMapper scriptMapper;
+    private final ScriptRepository scriptRepository;
     private final ChannelService channelService;
     private final CategoryService categoryService;
-
-    public ScriptServiceImpl(ScriptMapper scriptMapper, ChannelService channelService, CategoryService categoryService) {
-        this.scriptMapper = scriptMapper;
-        this.channelService = channelService;
-        this.categoryService = categoryService;
-        logger.error("=== TEST LOG MESSAGE ===");  // 使用 ERROR 级别确保一定会显示
-    }
 
     @Override
     @Transactional
@@ -82,29 +73,14 @@ public class ScriptServiceImpl implements ScriptService {
                     .collect(Collectors.toList()));
         }
 
-        // TODO: 实现保存逻辑
-        return ApiResponse.created(convertToResponse(script));
+        Script savedScript = scriptRepository.save(script);
+        return ApiResponse.created(convertToResponse(savedScript));
     }
 
     @Override
     @Transactional(readOnly = true)
     public ApiResponse<PageResponse<ScriptListItemResponse>> getScripts(GetScriptsRequest request, Long userId) {
-        // 将页码转换为从0开始
-        int offset = (request.getPage() - 1) * request.getSize();
-        
-        // 使用更明确的日志级别
-        logger.error("=== Script Query Debug Info ===");
-        logger.error("Query Parameters:");
-        logger.error("channelId: {}", request.getChannelId());
-        logger.error("categoryId: {}", request.getCategoryId());
-        logger.error("status: {}", request.getStatus());
-        logger.error("difficulty: {}", request.getDifficulty());
-        logger.error("search: {}", request.getSearch());
-        logger.error("page: {}", request.getPage());
-        logger.error("size: {}", request.getSize());
-        logger.error("userId: {}", userId);
-        
-        List<Script> scripts = scriptMapper.findByUserIdAndFilters(
+        Page<Script> scriptPage = scriptRepository.findByUserIdAndFilters(
                 userId,
                 request.getChannelId(),
                 request.getCategoryId(),
@@ -113,70 +89,117 @@ public class ScriptServiceImpl implements ScriptService {
                 request.getDateFrom(),
                 request.getDateTo(),
                 request.getSearch(),
-                offset,
-                request.getSize()
+                request.toPageRequest()
         );
 
-        logger.error("Query Results:");
-        logger.error("Total scripts found: {}", scripts.size());
-        for (Script script : scripts) {
-            logger.error("Script Details:");
-            logger.error("  ID: {}", script.getScriptId());
-            logger.error("  Title: {}", script.getTitle());
-            logger.error("  Channel ID: {}", script.getChannelId());
-            logger.error("  Category ID: {}", script.getCategoryId());
-            logger.error("  Status: {}", script.getStatus());
-        }
-
-        long total = scriptMapper.countByUserIdAndFilters(
-                userId,
-                request.getChannelId(),
-                request.getCategoryId(),
-                request.getStatus(),
-                request.getDifficulty(),
-                request.getDateFrom(),
-                request.getDateTo(),
-                request.getSearch()
-        );
-
-        List<ScriptListItemResponse> responseList = scripts.stream()
-                .map(script -> convertToListItemResponse(script, userId, request.getIncludeFields()))
-                .collect(Collectors.toList());
-
-        PageResponse<ScriptListItemResponse> pageResponse = new PageResponse<>();
-        pageResponse.setItems(responseList);
-        
-        PaginationInfo paginationInfo = new PaginationInfo();
-        paginationInfo.setPage(request.getPage()); // 使用原始页码（从1开始）
-        paginationInfo.setLimit(request.getSize());
-        paginationInfo.setTotal(total);
-        paginationInfo.setPages((int) Math.ceil((double) total / request.getSize()));
-        paginationInfo.setHasNext(request.getPage() < paginationInfo.getPages());
-        paginationInfo.setHasPrev(request.getPage() > 1);
-        
-        pageResponse.setPagination(paginationInfo);
-
-        return ApiResponse.success(pageResponse);
+        Page<ScriptListItemResponse> responsePage = scriptPage.map(script -> 
+            convertToListItemResponse(script, userId, request.getIncludeFields()));
+        return ApiResponse.success(PageResponse.of(responsePage));
     }
 
     @Override
     @Transactional(readOnly = true)
     public ApiResponse<ScriptResponse> getScriptDetail(Long scriptId, Long userId) {
-        // TODO: 实现获取脚本详情的逻辑
-        return null;
+        Script script = scriptRepository.findById(scriptId)
+                .orElse(null);
+
+        if (script == null) {
+            return ApiResponse.error(404, "脚本不存在");
+        }
+
+        if (!script.getUserId().equals(userId)) {
+            return ApiResponse.error(403, "无权限访问该脚本");
+        }
+
+        return ApiResponse.success(convertToResponse(script));
     }
 
     @Override
     @Transactional
     public ApiResponse<ScriptResponse> updateScript(Long scriptId, CreateScriptRequest request, Long userId) {
-        // TODO: 实现更新脚本的逻辑
-        return null;
+        Script script = scriptRepository.findById(scriptId)
+                .orElse(null);
+
+        if (script == null) {
+            return ApiResponse.error(404, "脚本不存在");
+        }
+
+        if (!script.getUserId().equals(userId)) {
+            return ApiResponse.error(403, "无权限访问该脚本");
+        }
+
+        // 验证频道权限
+        if (request.getChannelId() != null) {
+            var channelResponse = channelService.getChannelDetail(request.getChannelId(), userId);
+            if (!channelResponse.isSuccess()) {
+                return ApiResponse.error(403, "无权限访问该频道");
+            }
+        }
+
+        // 更新基本信息
+        if (request.getTitle() != null) script.setTitle(request.getTitle());
+        if (request.getAlternativeTitle1() != null) script.setAlternativeTitle1(request.getAlternativeTitle1());
+        if (request.getDescription() != null) script.setDescription(request.getDescription());
+        if (request.getDifficulty() != null) script.setDifficulty(request.getDifficulty());
+        if (request.getStatus() != null) script.setStatus(request.getStatus());
+        if (request.getReleaseDate() != null) script.setReleaseDate(request.getReleaseDate());
+        if (request.getChannelId() != null) script.setChannelId(request.getChannelId());
+        if (request.getCategoryId() != null) script.setCategoryId(request.getCategoryId());
+
+        // 处理章节更新
+        if (request.getChapters() != null) {
+            // 获取现有章节
+            Map<Integer, ScriptChapter> existingChapters = script.getChapters().stream()
+                    .collect(Collectors.toMap(ScriptChapter::getChapterNumber, chapter -> chapter));
+
+            // 验证章节编号唯一性
+            Set<Integer> chapterNumbers = new HashSet<>();
+            for (var chapter : request.getChapters()) {
+                if (!chapterNumbers.add(chapter.getChapterNumber())) {
+                    return ApiResponse.error(409, "章节编号重复");
+                }
+            }
+
+            // 更新或创建章节
+            Set<ScriptChapter> updatedChapters = request.getChapters().stream()
+                    .map(chapterRequest -> {
+                        ScriptChapter chapter = existingChapters.get(chapterRequest.getChapterNumber());
+                        if (chapter == null) {
+                            // 创建新章节
+                            chapter = new ScriptChapter()
+                                    .setScript(script)
+                                    .setChapterNumber(chapterRequest.getChapterNumber());
+                        }
+                        if (chapterRequest.getTitle() != null) chapter.setTitle(chapterRequest.getTitle());
+                        if (chapterRequest.getContent() != null) chapter.setContent(chapterRequest.getContent());
+                        return chapter;
+                    })
+                    .collect(Collectors.toSet());
+
+            // 清除原有章节集合并添加新章节
+            script.getChapters().clear();
+            script.getChapters().addAll(updatedChapters);
+        }
+
+        Script updatedScript = scriptRepository.save(script);
+        return ApiResponse.success(convertToResponse(updatedScript));
     }
 
     @Override
     @Transactional
     public void deleteScript(Long scriptId, Long userId) {
-        // TODO: 实现删除脚本的逻辑
+        Script script = scriptRepository.findById(scriptId)
+                .orElse(null);
+
+        if (script == null) {
+            throw new RuntimeException("脚本不存在");
+        }
+
+        if (!script.getUserId().equals(userId)) {
+            throw new RuntimeException("无权限删除该脚本");
+        }
+
+        scriptRepository.delete(script);
     }
 
     private ScriptResponse convertToResponse(Script script) {
@@ -221,7 +244,7 @@ public class ScriptServiceImpl implements ScriptService {
                 .setCreatedAt(script.getCreatedAt())
                 .setUpdatedAt(script.getUpdatedAt());
 
-        // 添加频道信息
+        // 添加频道信息（总是包含）
         if (script.getChannelId() != null) {
             var channelResponse = channelService.getChannelDetail(script.getChannelId(), userId);
             if (channelResponse.isSuccess()) {
@@ -232,8 +255,8 @@ public class ScriptServiceImpl implements ScriptService {
             }
         }
 
-        // 添加分类信息
-        if (script.getCategoryId() != null && (includeFields.isEmpty() || includeFields.contains("category"))) {
+        // 添加分类信息（总是包含）
+        if (script.getCategoryId() != null) {
             var categoryResponse = categoryService.getCategoryDetail(script.getCategoryId(), userId);
             if (categoryResponse.isSuccess()) {
                 var categoryData = categoryResponse.getData();

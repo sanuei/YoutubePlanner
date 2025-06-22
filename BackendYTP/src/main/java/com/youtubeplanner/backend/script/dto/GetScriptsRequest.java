@@ -19,13 +19,24 @@ public class GetScriptsRequest {
     private int page = 1;
 
     @Min(1)
+    @JsonProperty("limit")
     private int size = 10;
 
     @JsonProperty("channel_id")
     private Long channelId;
+    
+    // 为URL参数绑定添加setter方法
+    public void setChannel_id(Long channelId) {
+        this.channelId = channelId;
+    }
 
     @JsonProperty("category_id")
     private Long categoryId;
+    
+    // 为URL参数绑定添加setter方法
+    public void setCategory_id(Long categoryId) {
+        this.categoryId = categoryId;
+    }
 
     private String status;
 
@@ -37,24 +48,49 @@ public class GetScriptsRequest {
 
     @JsonProperty("date_from")
     private LocalDate dateFrom;
+    
+    // 为URL参数绑定添加setter方法
+    public void setDate_from(LocalDate dateFrom) {
+        this.dateFrom = dateFrom;
+    }
 
     @JsonProperty("date_to")
     private LocalDate dateTo;
+    
+    // 为URL参数绑定添加setter方法
+    public void setDate_to(LocalDate dateTo) {
+        this.dateTo = dateTo;
+    }
 
     @JsonProperty("sort_by")
-    @Pattern(regexp = "^(title|created_at|updated_at|release_date)?$", message = "排序字段必须是 title、created_at、updated_at 或 release_date")
-    private String sortBy = "created_at";
+    @Pattern(regexp = "^(title|created_at|updated_at|release_date|difficulty)?$", message = "排序字段必须是 title、created_at、updated_at、release_date 或 difficulty")
+    private String sortBy = "difficulty";
+    
+    // 为URL参数绑定添加setter方法
+    public void setSort_by(String sortBy) {
+        this.sortBy = sortBy;
+    }
 
     @Pattern(regexp = "^(asc|desc)?$", message = "排序方向必须是 asc 或 desc")
     private String order = "desc";
 
     private Set<String> includeFields = new HashSet<>();
+    
+    private String include;
 
     public Set<String> getIncludeFields() {
-        if (includeFields.isEmpty()) {
-            return new HashSet<>();
+        if (include != null && !include.trim().isEmpty()) {
+            Set<String> fields = new HashSet<>();
+            String[] parts = include.split(",");
+            for (String part : parts) {
+                String trimmed = part.trim();
+                if (!trimmed.isEmpty()) {
+                    fields.add(trimmed);
+                }
+            }
+            return fields;
         }
-        return includeFields;
+        return includeFields.isEmpty() ? new HashSet<>() : includeFields;
     }
 
     public PageRequest toPageRequest() {
@@ -67,6 +103,7 @@ public class GetScriptsRequest {
             case "created_at" -> "createdAt";
             case "updated_at" -> "updatedAt";
             case "release_date" -> "releaseDate";
+            case "difficulty" -> "difficulty";
             default -> "createdAt";
         };
 

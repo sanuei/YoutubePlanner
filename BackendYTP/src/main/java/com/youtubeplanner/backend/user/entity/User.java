@@ -64,6 +64,19 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Role role = Role.USER;
 
+    // API配置相关字段
+    @Column(name = "api_provider")
+    private String apiProvider; // 'openai', 'claude', 'custom'
+
+    @Column(name = "api_key", length = 500)
+    private String apiKey;
+
+    @Column(name = "api_base_url", length = 500)
+    private String apiBaseUrl;
+
+    @Column(name = "api_model", length = 100)
+    private String apiModel;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));

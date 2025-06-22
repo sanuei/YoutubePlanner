@@ -39,7 +39,7 @@ import {
   Visibility as VisibilityIcon,
   Star as StarIcon,
 } from '@mui/icons-material';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
 import { scriptsApi, channelsApi, categoriesApi, Script, Chapter } from '../services/api';
 
@@ -83,6 +83,7 @@ const renderStars = (difficulty: number, onClick?: (value: number) => void) => {
 const ScriptEdit: React.FC = () => {
   const { scriptId } = useParams<{ scriptId: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { enqueueSnackbar } = useSnackbar();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -95,15 +96,60 @@ const ScriptEdit: React.FC = () => {
   // 判断是否为创建模式
   const isCreateMode = !scriptId || scriptId === 'create';
   
-  const [formData, setFormData] = useState<Partial<Script>>({
-    title: '',
-    alternative_title1: '',
-    description: '',
-    difficulty: 1,
-    status: 'Scripting',
-    channel_id: undefined,
-    category_id: undefined,
-    chapters: [{ chapter_number: 1, title: '', content: '' }],
+  // 处理从思维导图传递的数据
+  const mindMapData = location.state as { 
+    title?: string; 
+    alternativeTitle1?: string;
+    alternativeTitle2?: string;
+    description?: string;
+    content?: string; 
+    chapters?: Chapter[];
+    rawContent?: string;
+    fromMindMap?: boolean;
+    mindMapId?: number;
+    mindMapTitle?: string;
+  } | null;
+  
+  const [formData, setFormData] = useState<Partial<Script>>(() => {
+    const baseData = {
+      title: '',
+      alternative_title1: '',
+      alternative_title2: '',
+      description: '',
+      difficulty: 1,
+      status: 'Scripting' as const,
+      channel_id: undefined,
+      category_id: undefined,
+      chapters: [{ chapter_number: 1, title: '', content: '' }],
+    };
+
+    // 如果是从思维导图传递的数据，则使用传递的数据
+    if (mindMapData?.fromMindMap && isCreateMode) {
+      console.log('=== ScriptEdit 接收到思维导图数据 ===');
+      console.log('mindMapData:', mindMapData);
+      
+      const result = {
+        ...baseData,
+        title: mindMapData.title || '',
+        alternative_title1: mindMapData.alternativeTitle1 || '',
+        alternative_title2: mindMapData.alternativeTitle2 || '',
+        description: mindMapData.description || '',
+        chapters: mindMapData.chapters && mindMapData.chapters.length > 0 
+          ? mindMapData.chapters 
+          : [{ 
+              chapter_number: 1, 
+              title: '脚本内容', 
+              content: mindMapData.content || mindMapData.rawContent || '' 
+            }],
+      };
+      
+      console.log('初始化后的formData:', result);
+      console.log('章节数据:', result.chapters);
+      
+      return result;
+    }
+
+    return baseData;
   });
 
   // 添加字数统计状态
@@ -286,27 +332,33 @@ const ScriptEdit: React.FC = () => {
   };
 
   const addChapter = () => {
-    setFormData(prev => ({
-      ...prev,
-      chapters: [
-        ...(prev.chapters || []),
-        {
-          chapter_number: (prev.chapters?.length || 0) + 1,
-          title: '',
-          content: '',
-        },
-      ],
-    }));
+    setFormData(prev => {
+      const currentChapters = prev.chapters || [];
+      const newChapter = {
+        chapter_number: currentChapters.length + 1,
+        title: '',
+        content: '',
+      };
+      return {
+        ...prev,
+        chapters: [...currentChapters, newChapter],
+      };
+    });
   };
 
   const removeChapter = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      chapters: prev.chapters?.filter((_, i) => i !== index).map((chapter, i) => ({
+    setFormData(prev => {
+      const newChapters = prev.chapters?.filter((_, i) => i !== index) || [];
+      // 重新排序章节编号
+      const reorderedChapters = newChapters.map((chapter, i) => ({
         ...chapter,
         chapter_number: i + 1,
-      })),
-    }));
+      }));
+      return {
+        ...prev,
+        chapters: reorderedChapters,
+      };
+    });
   };
 
   if (loading) {
@@ -469,11 +521,38 @@ const ScriptEdit: React.FC = () => {
                sx={{ mb: 3 }}
              />
 
-             {/* 备选标题 */}
+             {/* 备选标题1 */}
              <TextField
-               placeholder="备选标题"
+               placeholder="备选标题1"
                value={formData.alternative_title1}
                onChange={(e) => setFormData(prev => ({ ...prev, alternative_title1: e.target.value }))}
+               variant="standard"
+               fullWidth
+               multiline
+               InputProps={{
+                 disableUnderline: true,
+                 sx: {
+                   fontSize: '1.2rem',
+                   color: 'text.secondary',
+                   '& textarea': {
+                     padding: 0,
+                     resize: 'none',
+                     lineHeight: 1.4,
+                     '&::placeholder': {
+                       color: '#d0d0d0',
+                       opacity: 1,
+                     }
+                   }
+                 }
+               }}
+               sx={{ mb: 2 }}
+             />
+
+             {/* 备选标题2 */}
+             <TextField
+               placeholder="备选标题2"
+               value={formData.alternative_title2}
+               onChange={(e) => setFormData(prev => ({ ...prev, alternative_title2: e.target.value }))}
                variant="standard"
                fullWidth
                multiline

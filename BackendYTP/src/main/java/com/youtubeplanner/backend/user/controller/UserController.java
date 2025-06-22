@@ -19,6 +19,8 @@ import com.youtubeplanner.backend.common.response.ApiResponse;
 import com.youtubeplanner.backend.user.dto.ChangePasswordRequest;
 import com.youtubeplanner.backend.user.dto.UpdateUserRequest;
 import com.youtubeplanner.backend.user.dto.UserDetailResponse;
+import com.youtubeplanner.backend.user.dto.ApiConfigRequest;
+import com.youtubeplanner.backend.user.dto.ApiConfigResponse;
 import com.youtubeplanner.backend.user.entity.User;
 import com.youtubeplanner.backend.user.service.UserService;
 import jakarta.validation.Valid;
@@ -66,5 +68,37 @@ public class UserController {
         }
         userService.changePassword(user, request);
         return ApiResponse.success("密码修改成功", null);
+    }
+
+    @GetMapping("/me/api-config")
+    public ApiResponse<ApiConfigResponse> getApiConfig(@AuthenticationPrincipal User user) {
+        log.debug("获取API配置，用户ID: {}", user != null ? user.getUserId() : "null");
+        if (user == null) {
+            return ApiResponse.error(401, "用户未认证");
+        }
+        ApiConfigResponse apiConfig = userService.getApiConfig(user);
+        return ApiResponse.success(apiConfig);
+    }
+
+    @PutMapping("/me/api-config")
+    public ApiResponse<ApiConfigResponse> updateApiConfig(
+            @AuthenticationPrincipal User user,
+            @Valid @RequestBody ApiConfigRequest request) {
+        log.debug("更新API配置，用户ID: {}", user != null ? user.getUserId() : "null");
+        if (user == null) {
+            return ApiResponse.error(401, "用户未认证");
+        }
+        ApiConfigResponse apiConfig = userService.updateApiConfig(user, request);
+        return ApiResponse.success("API配置更新成功", apiConfig);
+    }
+
+    @GetMapping("/me/api-config/full")
+    public ApiResponse<ApiConfigRequest> getFullApiConfig(@AuthenticationPrincipal User user) {
+        log.debug("获取完整API配置，用户ID: {}", user != null ? user.getUserId() : "null");
+        if (user == null) {
+            return ApiResponse.error(401, "用户未认证");
+        }
+        ApiConfigRequest fullConfig = userService.getFullApiConfig(user);
+        return ApiResponse.success(fullConfig);
     }
 } 

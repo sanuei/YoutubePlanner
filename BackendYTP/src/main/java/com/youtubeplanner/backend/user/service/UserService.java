@@ -18,10 +18,15 @@ package com.youtubeplanner.backend.user.service;
 import com.youtubeplanner.backend.user.dto.ChangePasswordRequest;
 import com.youtubeplanner.backend.user.dto.UpdateUserRequest;
 import com.youtubeplanner.backend.user.dto.UserDetailResponse;
+import com.youtubeplanner.backend.user.dto.ApiConfigRequest;
+import com.youtubeplanner.backend.user.dto.ApiConfigResponse;
 import com.youtubeplanner.backend.user.entity.User;
 
 public interface UserService {
     UserDetailResponse getCurrentUserInfo(User user);
     UserDetailResponse updateUserInfo(User user, UpdateUserRequest request);
     void changePassword(User user, ChangePasswordRequest request);
+    ApiConfigResponse updateApiConfig(User user, ApiConfigRequest request);
+    ApiConfigResponse getApiConfig(User user);
+    ApiConfigRequest getFullApiConfig(User user);
 } 

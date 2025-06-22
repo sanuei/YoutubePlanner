@@ -16,6 +16,9 @@
 package com.youtubeplanner.backend.user.repository;
 
 import com.youtubeplanner.backend.user.entity.User;
+import com.youtubeplanner.backend.user.entity.Role;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -26,4 +29,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByUsername(String username);
     boolean existsByUsername(String username);
     boolean existsByEmail(String email);
+    
+    // 管理员功能相关方法
+    Page<User> findByUsernameContainingIgnoreCaseOrEmailContainingIgnoreCase(
+        String username, String email, Pageable pageable);
+    long countByRole(Role role);
 } 

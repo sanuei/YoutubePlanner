@@ -26,6 +26,9 @@ import {
   ChevronRight as ChevronRightIcon,
   Logout as LogoutIcon,
   Menu as MenuIcon,
+  AccountTree as AccountTreeIcon,
+  History as HistoryIcon,
+  AdminPanelSettings as AdminIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 import LogoComponent from './LogoComponent';
@@ -34,11 +37,17 @@ const drawerWidth = 240;
 const collapsedWidth = 65;
 const transitionDuration = 200;
 
-const menuItems = [
+const baseMenuItems = [
   { text: '影片脚本管理', icon: <DescriptionIcon />, path: '/scripts' },
+  { text: '思维导图', icon: <AccountTreeIcon />, path: '/mindmap' },
+  { text: '思维导图历史', icon: <HistoryIcon />, path: '/mindmap/history' },
   { text: '分类管理', icon: <CategoryIcon />, path: '/categories' },
   { text: '频道管理', icon: <YouTubeIcon />, path: '/channels' },
   { text: '我的信息', icon: <PeopleIcon />, path: '/users' },
+];
+
+const adminMenuItems = [
+  { text: '用户管理', icon: <AdminIcon />, path: '/admin/users' },
 ];
 
 // Loading 占位组件
@@ -109,11 +118,21 @@ const Layout: React.FC = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isDrawerCollapsed, setIsDrawerCollapsed] = useState(false);
   const [showText, setShowText] = useState(true);
+
+  // 动态生成菜单项
+  const menuItems = React.useMemo(() => {
+    const items = [...baseMenuItems];
+    // 如果是管理员，添加管理员菜单
+    if (user?.role === 'ADMIN') {
+      items.push(...adminMenuItems);
+    }
+    return items;
+  }, [user?.role]);
 
   const handleDrawerToggle = () => {
     if (isMobile) {

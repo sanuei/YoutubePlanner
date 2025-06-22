@@ -12,50 +12,51 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
+  Card,
+  CardContent,
+  CardActions,
   Typography,
-  Paper,
   Button,
-  IconButton,
-  Stack,
+  TextField,
   CircularProgress,
-  FormControl,
-  InputLabel,
+  Stack,
+  Paper,
   Select,
   MenuItem,
-  TextField,
-  Pagination,
+  FormControl,
+  InputLabel,
+  Chip,
   InputAdornment,
-  Table,
+  useTheme,
+  useMediaQuery,
+  Fab,
   Grid,
+  Pagination,
+  Checkbox,
+  IconButton,
+  Collapse,
+  Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
-  TableRow,
-  Checkbox,
-  useTheme,
-  useMediaQuery,
-  Card,
-  CardContent,
-  CardActions,
-  Chip,
-  Collapse,
-  Fab,
+  TableRow
 } from '@mui/material';
 import {
   Add as AddIcon,
-  Delete as DeleteIcon,
   Search as SearchIcon,
-  Sort as SortIcon,
-  Star as StarIcon,
-  Visibility as VisibilityIcon,
+  FilterList as FilterIcon,
+  Visibility as ViewIcon,
   Edit as EditIcon,
-  FilterList as FilterListIcon,
+  Delete as DeleteIcon,
+  Star as StarIcon,
   ExpandLess as ExpandLessIcon,
+  AccountTree as AccountTreeIcon,
+  Sort as SortIcon,
 } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
 import { useSnackbar } from 'notistack';
-import { scriptsApi, channelsApi, categoriesApi, Script, Channel, Category, ScriptListParams } from '../services/api';
+import { scriptsApi, categoriesApi, channelsApi, Script, Category, Channel } from '../services/api';
+import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 
 const ScriptManagement: React.FC = () => {
@@ -65,9 +66,9 @@ const ScriptManagement: React.FC = () => {
   const [scripts, setScripts] = useState<Script[]>([]);
   const [channels, setChannels] = useState<Channel[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
-
 
   // 分页和筛选状态
   const [pagination, setPagination] = useState({
@@ -85,7 +86,7 @@ const ScriptManagement: React.FC = () => {
     date_from: '',
     date_to: '',
   });
-  const [sortBy, setSortBy] = useState('created_at');
+  const [sortBy, setSortBy] = useState('difficulty');
   const [order, setOrder] = useState<'asc' | 'desc'>('desc');
   const [selectedScripts, setSelectedScripts] = useState<number[]>([]);
 
@@ -94,71 +95,40 @@ const ScriptManagement: React.FC = () => {
   const fetchScripts = useCallback(async () => {
     try {
       setLoading(true);
-      const params: ScriptListParams = {
+      const params = {
         page: pagination.page,
         limit: pagination.limit,
         search: filters.search,
+        channel_id: filters.channel_id || undefined,
+        category_id: filters.category_id || undefined,
+        difficulty: filters.difficulty || undefined,
+        status: filters.status || undefined,
         sort_by: sortBy,
         order,
-        include: 'category,channel'
+        include: 'category'
       };
 
-      // 只有当值不为空字符串时才添加筛选参数
-      if (filters.channel_id) {
-        params.channel_id = filters.channel_id;
-      }
-      if (filters.category_id && filters.category_id !== '') {
-        params.category_id = filters.category_id;
-      }
-      if (filters.status) {
-        params.status = filters.status;
-      }
-      if (filters.difficulty) {
-        params.difficulty = filters.difficulty;
-      }
-
-      console.log('Fetching scripts with params:', params);
-
+      console.log('Frontend API Request params:', params);
       const response = await scriptsApi.getList(params);
       
-      if (response.success) {
-        console.log('Scripts response:', response.data);
-        // 在前端进行额外的筛选，以防后端筛选不生效
-        const filteredItems = response.data.items.filter(script => {
-          // 检查频道筛选
-          if (filters.channel_id) {
-            const scriptChannelId = script.channel?.channel_id || script.channel_id;
-            if (scriptChannelId?.toString() !== filters.channel_id) {
-              return false;
-            }
-          }
-          
-          // 检查分类筛选
-          if (filters.category_id && filters.category_id !== '') {
-            const scriptCategoryId = script.category?.category_id || script.category_id;
-            if (scriptCategoryId?.toString() !== filters.category_id) {
-              return false;
-            }
-          }
-          
-          return true;
-        });
-        
-        setScripts(filteredItems);
-        // 保持使用后端返回的分页信息
-        setPagination(prev => ({
-          ...prev,
-          total: response.data.pagination.total,
-          pages: response.data.pagination.pages,
-        }));
+      if (response.success && response.data) {
+        setScripts(response.data.items || []);
+        if (response.data.pagination) {
+          setPagination(prev => ({
+            ...prev,
+            total: response.data.pagination.total || 0,
+            pages: Math.ceil((response.data.pagination.total || 0) / pagination.limit),
+          }));
+        }
       } else {
         enqueueSnackbar(response.message || '获取脚本列表失败', { variant: 'error' });
       }
     } catch (error: any) {
-      console.error('Error fetching scripts:', error);
+      console.error('API Error:', error);
       enqueueSnackbar(error.message || '获取脚本列表失败', { variant: 'error' });
     } finally {
       setLoading(false);
+      setInitialLoading(false);
     }
   }, [pagination.page, pagination.limit, filters, sortBy, order, enqueueSnackbar]);
 
@@ -186,14 +156,11 @@ const ScriptManagement: React.FC = () => {
       });
       
       if (response.success) {
-        console.log('Categories loaded:', response.data.items);
         setCategories(response.data.items);
       } else {
-        console.error('Failed to load categories:', response.message);
         enqueueSnackbar(response.message || '获取分类列表失败', { variant: 'error' });
       }
     } catch (error: any) {
-      console.error('Error fetching categories:', error);
       enqueueSnackbar(error.message || '获取分类列表失败', { variant: 'error' });
     }
   }, [enqueueSnackbar]);
@@ -203,27 +170,17 @@ const ScriptManagement: React.FC = () => {
     fetchCategories();
   }, [fetchChannels, fetchCategories]);
 
-
-
-
-
-
-
   const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
     setPagination(prev => ({ ...prev, page: value }));
   };
 
   const handleFilterChange = (field: string, value: string) => {
-    console.log('Filter changed:', field, value);
     setFilters(prev => {
       const newFilters = { ...prev, [field]: value };
-      console.log('New filters:', newFilters);
       return newFilters;
     });
     setPagination(prev => ({ ...prev, page: 1 })); // 重置页码
   };
-
-
 
   // 渲染星级
   const renderStars = (difficulty: number) => {
@@ -416,7 +373,7 @@ const ScriptManagement: React.FC = () => {
         </Button>
         <Button
           size="small"
-          startIcon={<VisibilityIcon />}
+          startIcon={<ViewIcon />}
           onClick={(e) => {
             e.stopPropagation();
             navigate(`/scripts/${script.script_id}/preview`);
@@ -428,7 +385,7 @@ const ScriptManagement: React.FC = () => {
     </Card>
   );
 
-  if (loading) {
+  if (initialLoading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
         <CircularProgress />
@@ -454,7 +411,7 @@ const ScriptManagement: React.FC = () => {
           {isMobile && (
             <Button
               variant="outlined"
-              startIcon={showFilters ? <ExpandLessIcon /> : <FilterListIcon />}
+              startIcon={showFilters ? <ExpandLessIcon /> : <FilterIcon />}
               onClick={() => setShowFilters(!showFilters)}
               size="small"
             >
@@ -472,6 +429,14 @@ const ScriptManagement: React.FC = () => {
               删除 ({selectedScripts.length})
             </Button>
           )}
+          <Button
+            variant="outlined"
+            startIcon={<AccountTreeIcon />}
+            onClick={() => navigate('/mindmap')}
+            size={isMobile ? 'small' : 'medium'}
+          >
+            {isMobile ? '思维导图' : '思维导图'}
+          </Button>
           <Button
             variant="contained"
             startIcon={<AddIcon />}
@@ -519,7 +484,7 @@ const ScriptManagement: React.FC = () => {
               >
                 <MenuItem value="">全部</MenuItem>
                 {channels.map((channel) => (
-                  <MenuItem key={channel.channel_id} value={channel.channel_id}>
+                  <MenuItem key={channel.channel_id} value={channel.channel_id.toString()}>
                     {channel.channel_name}
                   </MenuItem>
                 ))}
@@ -533,7 +498,6 @@ const ScriptManagement: React.FC = () => {
                 value={filters.category_id}
                 label="分类"
                 onChange={(e) => {
-                  console.log('Category select changed:', e.target.value);
                   handleFilterChange('category_id', e.target.value);
                 }}
               >
@@ -571,7 +535,7 @@ const ScriptManagement: React.FC = () => {
               >
                 <MenuItem value="">全部</MenuItem>
                 {[1, 2, 3, 4, 5].map((value) => (
-                  <MenuItem key={value} value={value}>
+                  <MenuItem key={value} value={value.toString()}>
                     {renderStars(value)}
                   </MenuItem>
                 ))}
@@ -591,6 +555,7 @@ const ScriptManagement: React.FC = () => {
                   <MenuItem value="created_at">创建时间</MenuItem>
                   <MenuItem value="updated_at">最后修改</MenuItem>
                   <MenuItem value="title">标题</MenuItem>
+                  <MenuItem value="difficulty">星级</MenuItem>
                 </Select>
               </FormControl>
               <IconButton onClick={() => setOrder(order === 'asc' ? 'desc' : 'asc')}>
@@ -620,7 +585,29 @@ const ScriptManagement: React.FC = () => {
       </Collapse>
 
       {/* 脚本列表 */}
-      {isMobile ? (
+      {scripts.length === 0 && !loading ? (
+        <Paper sx={{ p: 4, textAlign: 'center' }}>
+          <Typography variant="h6" color="text.secondary" gutterBottom>
+            暂无脚本数据
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            您还没有创建任何脚本，点击下方按钮开始创建
+          </Typography>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => navigate('/scripts/create')}
+            sx={{ 
+              color: 'white',
+              '&:hover': {
+                color: 'white'
+              }
+            }}
+          >
+            创建第一个脚本
+          </Button>
+        </Paper>
+      ) : isMobile ? (
         // 移动端卡片视图
         <Box>
           {scripts.map((script) => (
@@ -709,7 +696,7 @@ const ScriptManagement: React.FC = () => {
                       navigate(`/scripts/${script.script_id}/preview`);
                     }}
                   >
-                    <VisibilityIcon fontSize="small" />
+                    <ViewIcon />
                   </IconButton>
                 </TableCell>
               </TableRow>

@@ -162,17 +162,14 @@ const Register: React.FC = () => {
 
     setLoading(true);
     
-    try {
-      const result = await register(formData.username, formData.password, formData.email);
-      console.log('Registration result:', result);
-      
-      if (result.success) {
-        enqueueSnackbar(result.message || '注册成功，请登录', { 
-          variant: 'success',
-          autoHideDuration: 2000
-        });
-      } else {
-        enqueueSnackbar(result.message || '注册失败，请重试', { 
+          try {
+        const result = await register(formData.username, formData.password, formData.email);
+        
+        if (result.success) {
+          enqueueSnackbar('注册成功！请登录', { variant: 'success' });
+          navigate('/login');
+        } else {
+          enqueueSnackbar(result.message || '注册失败，请重试', { 
           variant: 'error',
           autoHideDuration: 3000
         });

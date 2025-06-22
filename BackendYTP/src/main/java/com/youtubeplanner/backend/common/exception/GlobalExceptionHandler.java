@@ -16,9 +16,11 @@
 package com.youtubeplanner.backend.common.exception;
 
 import com.youtubeplanner.backend.common.response.ApiResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -30,69 +32,55 @@ import java.util.List;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
     /**
      * 处理业务异常（RuntimeException）
      */
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<ApiResponse<Void>> handleRuntimeException(RuntimeException e) {
-        System.out.println("业务异常: " + e.getMessage());
-        
-        // 根据异常消息判断具体的错误类型
-        String message = e.getMessage();
-        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
-        int code = 500;
-        
-        if (message != null) {
-            if (message.contains("用户名已存在") || message.contains("邮箱已存在")) {
-                status = HttpStatus.CONFLICT;
-                code = 409;
-            } else if (message.contains("用户不存在") || message.contains("用户未认证")) {
-                status = HttpStatus.UNAUTHORIZED;
-                code = 401;
-            } else if (message.contains("无效的") || message.contains("令牌")) {
-                status = HttpStatus.UNAUTHORIZED;
-                code = 401;
-            }
-        }
-        
-        return ResponseEntity.status(status)
-                .body(ApiResponse.error(code, message != null ? message : "系统内部错误"));
+    public ResponseEntity<ApiResponse<Object>> handleRuntimeException(RuntimeException e) {
+        log.error("业务异常: {}", e.getMessage(), e);
+        return ResponseEntity.badRequest()
+                .body(ApiResponse.error(400, e.getMessage()));
     }
 
     /**
      * 处理参数验证异常
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<Void>> handleValidationException(MethodArgumentNotValidException e) {
-        System.out.println("参数验证异常: " + e.getMessage());
+    public ResponseEntity<ApiResponse<Object>> handleValidationException(MethodArgumentNotValidException e) {
+        log.error("参数验证异常: {}", e.getMessage(), e);
         
-        List<ApiResponse.ValidationError> errors = new ArrayList<>();
-        for (FieldError fieldError : e.getBindingResult().getFieldErrors()) {
-            errors.add(new ApiResponse.ValidationError(fieldError.getField(), fieldError.getDefaultMessage()));
-        }
-        
+        // 收集所有验证错误信息
+        StringBuilder errorMessage = new StringBuilder();
+        e.getBindingResult().getFieldErrors().forEach(error -> {
+            if (errorMessage.length() > 0) {
+                errorMessage.append("; ");
+            }
+            errorMessage.append(error.getField()).append(": ").append(error.getDefaultMessage());
+        });
+
         return ResponseEntity.badRequest()
-                .body(ApiResponse.error(400, "请求参数验证失败", errors));
+                .body(ApiResponse.error(400, "参数验证失败: " + errorMessage.toString()));
     }
 
     /**
      * 处理认证异常
      */
-    @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<ApiResponse<Void>> handleBadCredentialsException(BadCredentialsException e) {
-        System.out.println("认证异常: " + e.getMessage());
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ApiResponse<Object>> handleAuthenticationException(AuthenticationException e) {
+        log.error("认证异常: {}", e.getMessage(), e);
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(ApiResponse.error(401, "用户名或密码错误"));
+                .body(ApiResponse.error(401, "认证失败"));
     }
 
     /**
-     * 处理其他未捕获的异常
+     * 处理所有未捕获的异常
      */
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<Void>> handleGenericException(Exception e) {
-        System.out.println("未处理的异常: " + e.getMessage());
-        e.printStackTrace();
+    public ResponseEntity<ApiResponse<Object>> handleGenericException(Exception e) {
+        log.error("未处理的异常: {}", e.getMessage(), e);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error(500, "系统内部错误，请稍后重试"));
+                .body(ApiResponse.error(500, "服务器内部错误"));
     }
 } 

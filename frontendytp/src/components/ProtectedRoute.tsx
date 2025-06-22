@@ -10,8 +10,6 @@ interface ProtectedRouteProps {
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { user, loading } = useAuth();
 
-  console.log('ProtectedRoute check:', { user, loading });
-
   // 如果还在加载中，显示加载指示器
   if (loading) {
     return (
@@ -30,11 +28,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 
   // 如果用户未登录，重定向到登录页面
   if (!user) {
-    console.log('User not authenticated, redirecting to login');
     return <Navigate to="/login" replace />;
   }
-
-  console.log('User authenticated, rendering protected content');
   return <>{children}</>;
 };
 

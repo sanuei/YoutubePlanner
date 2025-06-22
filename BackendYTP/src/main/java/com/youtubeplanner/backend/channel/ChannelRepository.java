@@ -26,7 +26,8 @@ public interface ChannelRepository extends JpaRepository<Channel, Long> {
     boolean existsByUserIdAndChannelName(Long userId, String channelName);
     
     @Query("SELECT c FROM Channel c WHERE c.userId = :userId " +
-           "AND (:search IS NULL OR CAST(c.channelName AS string) LIKE CONCAT('%', CAST(:search AS string), '%'))")
+           "AND (:search IS NULL OR :search = '' OR " +
+           "LOWER(c.channelName) LIKE LOWER(CONCAT('%', :search, '%')))")
     Page<Channel> findByUserIdAndSearch(
             @Param("userId") Long userId,
             @Param("search") String search,

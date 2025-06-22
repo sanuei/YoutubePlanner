@@ -81,6 +81,7 @@ const Login: React.FC = () => {
   });
   const { login } = useAuth();
   const { enqueueSnackbar } = useSnackbar();
+  const [error, setError] = useState('');
 
   // 安全的导航函数，使用 startTransition 避免 Suspense 错误
   const safeNavigate = (path: string) => {
@@ -91,25 +92,26 @@ const Login: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!formData.username.trim() || !formData.password.trim()) {
+      setError('请输入用户名和密码');
+      return;
+    }
+
     setLoading(true);
+    setError('');
     
     try {
-      console.log('Submitting login form with username:', formData.username);
       const result = await login(formData.username, formData.password);
-      console.log('Login result:', result);
       
       if (result.success) {
-        console.log('Login successful, showing success message');
-        enqueueSnackbar(result.message || '登录成功', { variant: 'success' });
-        // AuthContext 中的 login 函数会处理导航
+        enqueueSnackbar('登录成功！', { variant: 'success' });
+        navigate('/scripts');
       } else {
-        console.error('Login failed:', result.message);
-        enqueueSnackbar(result.message || '登录失败，请重试', { variant: 'error' });
+        setError(result.message || '登录失败');
       }
     } catch (error: any) {
-      console.error('Login error in component:', error);
-      const errorMessage = error.response?.data?.message || error.message || '登录失败，请重试';
-      enqueueSnackbar(errorMessage, { variant: 'error' });
+      setError(error.message || '登录失败，请稍后重试');
     } finally {
       setLoading(false);
     }

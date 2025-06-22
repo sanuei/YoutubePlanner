@@ -21,6 +21,7 @@ import com.youtubeplanner.backend.script.dto.CreateScriptRequest;
 import com.youtubeplanner.backend.script.dto.GetScriptsRequest;
 import com.youtubeplanner.backend.script.dto.ScriptListItemResponse;
 import com.youtubeplanner.backend.script.dto.ScriptResponse;
+import com.youtubeplanner.backend.script.service.ScriptService;
 import com.youtubeplanner.backend.user.entity.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/scripts")
@@ -46,6 +50,15 @@ public class ScriptController {
     public ApiResponse<PageResponse<ScriptListItemResponse>> getScripts(
             @ModelAttribute @Valid GetScriptsRequest request) {
         return scriptService.getScripts(request, getUserIdFromContext());
+    }
+
+    @GetMapping("/test")
+    public ApiResponse<Map<String, Object>> testDatabase() {
+        Map<String, Object> testResult = new HashMap<>();
+        testResult.put("userId", getUserIdFromContext());
+        testResult.put("message", "数据库连接测试");
+        testResult.put("timestamp", System.currentTimeMillis());
+        return ApiResponse.success(testResult);
     }
 
     @GetMapping("/{scriptId}")

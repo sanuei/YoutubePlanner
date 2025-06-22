@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, startTransition } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 
@@ -7,6 +7,7 @@ interface User {
   userId?: number;
   username: string;
   email: string;
+  role?: string;
 }
 
 interface LoginResponse {
@@ -44,6 +45,7 @@ interface AuthContextType {
   login: (username: string, password: string) => Promise<{ success: boolean; message?: string }>;
   register: (username: string, password: string, email: string) => Promise<{ success: boolean; message?: string }>;
   logout: () => void;
+  refreshUserInfo: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -64,7 +66,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const initAuth = async () => {
       const token = localStorage.getItem('accessToken');
-      console.log('Initial token check:', token);
+
       
       // 获取当前路径
       const currentPath = window.location.pathname;
@@ -82,55 +84,140 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const tokenData = JSON.parse(atob(tokenParts[1]));
           const expirationTime = tokenData.exp * 1000; // 转换为毫秒
           
-          console.log('Token data:', tokenData);
-          console.log('Token expiration:', new Date(expirationTime));
-          console.log('Current time:', new Date());
+
           
           if (Date.now() < expirationTime) {
-            // token未过期，设置用户信息和请求头
-            setUser({
-              id: tokenData.userId || tokenData.sub,
-              username: tokenData.username || tokenData.sub,
-              email: ''
-            });
+            // token未过期，设置请求头并获取完整用户信息
             api.defaults.headers.common.Authorization = `Bearer ${token}`;
-            console.log('Token is valid, user set:', tokenData.username);
+            
+            try {
+              // 获取完整的用户信息（包括role）
+              const userInfoResponse = await api.get('/users/me');
+              if (userInfoResponse && userInfoResponse.data) {
+                const userData = {
+                  id: userInfoResponse.data.userId || tokenData.userId || tokenData.sub,
+                  userId: userInfoResponse.data.userId,
+                  username: userInfoResponse.data.username,
+                  email: userInfoResponse.data.email || '',
+                  role: userInfoResponse.data.role || 'USER'
+                };
+
+                startTransition(() => {
+                  setUser(userData);
+                  setLoading(false);
+                });
+              } else {
+                // 如果获取用户信息失败，使用token中的基本信息
+                const userData = {
+                  id: tokenData.userId || tokenData.sub,
+                  username: tokenData.username || tokenData.sub,
+                  email: '',
+                  role: 'USER'
+                };
+
+                startTransition(() => {
+                  setUser(userData);
+                  setLoading(false);
+                });
+              }
+            } catch (userInfoError) {
+              console.error('Failed to fetch user info on init:', userInfoError);
+              // 如果获取用户信息失败，使用token中的基本信息
+              const userData = {
+                id: tokenData.userId || tokenData.sub,
+                username: tokenData.username || tokenData.sub,
+                email: '',
+                role: 'USER'
+              };
+
+              startTransition(() => {
+                setUser(userData);
+                setLoading(false);
+              });
+            }
+            
+
             
             // 如果用户已登录且在登录/注册页面，重定向到脚本管理页面
             if (currentPath === '/login' || currentPath === '/register') {
-              navigate('/scripts');
+              startTransition(() => {
+                navigate('/scripts');
+              });
             }
           } else {
             // token已过期，尝试刷新token
-            console.log('Token expired, attempting refresh');
             const refreshToken = localStorage.getItem('refreshToken');
             if (refreshToken) {
               try {
-                console.log('Attempting to refresh token on init');
                 const response = await api.post('/auth/refresh', { refreshToken });
                 const { accessToken } = response.data.data;
                 
                 localStorage.setItem('accessToken', accessToken);
                 api.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
                 
-                // 重新解析新token
+                // 重新解析新token并获取完整用户信息
                 const newTokenData = JSON.parse(atob(accessToken.split('.')[1]));
-                setUser({
-                  id: newTokenData.userId || newTokenData.sub,
-                  username: newTokenData.username || newTokenData.sub,
-                  email: ''
-                });
-                console.log('Token refreshed successfully on init');
+                
+                try {
+                  // 获取完整的用户信息（包括role）
+                  const userInfoResponse = await api.get('/users/me');
+                  if (userInfoResponse && userInfoResponse.data) {
+                    const userData = {
+                      id: userInfoResponse.data.userId || newTokenData.userId || newTokenData.sub,
+                      userId: userInfoResponse.data.userId,
+                      username: userInfoResponse.data.username,
+                      email: userInfoResponse.data.email || '',
+                      role: userInfoResponse.data.role || 'USER'
+                    };
+
+                    startTransition(() => {
+                      setUser(userData);
+                      setLoading(false);
+                    });
+                  } else {
+                    // 如果获取用户信息失败，使用token中的基本信息
+                    const userData = {
+                      id: newTokenData.userId || newTokenData.sub,
+                      username: newTokenData.username || newTokenData.sub,
+                      email: '',
+                      role: 'USER'
+                    };
+
+                    startTransition(() => {
+                      setUser(userData);
+                      setLoading(false);
+                    });
+                  }
+                } catch (userInfoError) {
+                  console.error('Failed to fetch user info after refresh:', userInfoError);
+                  // 如果获取用户信息失败，使用token中的基本信息
+                  const userData = {
+                    id: newTokenData.userId || newTokenData.sub,
+                    username: newTokenData.username || newTokenData.sub,
+                    email: '',
+                    role: 'USER'
+                  };
+
+                  startTransition(() => {
+                    setUser(userData);
+                    setLoading(false);
+                  });
+                }
+                
+
               } catch (refreshError) {
-                console.error('Token refresh failed on init:', refreshError);
+
                 // 刷新失败，清除存储
                 localStorage.removeItem('accessToken');
                 localStorage.removeItem('refreshToken');
                 delete api.defaults.headers.common.Authorization;
                 
                 if (!isPublicRoute) {
-                  navigate('/login');
+                  startTransition(() => {
+                    navigate('/login');
+                  });
                 }
+                setLoading(false);
               }
             } else {
               // 没有refresh token，清除存储
@@ -139,12 +226,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               delete api.defaults.headers.common.Authorization;
               
               if (!isPublicRoute) {
-                navigate('/login');
+                startTransition(() => {
+                  navigate('/login');
+                });
               }
+              setLoading(false);
             }
           }
         } catch (error) {
-          console.error('Token validation failed:', error);
           // token解析失败，清除存储
           localStorage.removeItem('accessToken');
           localStorage.removeItem('refreshToken');
@@ -152,71 +241,122 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           
           // 只有在非公共路由时才重定向到登录页
           if (!isPublicRoute) {
-            navigate('/login');
+            startTransition(() => {
+              navigate('/login');
+            });
           }
+          setLoading(false);
         }
       } else {
         // 没有token，只有在非公共路由时才重定向到登录页
         if (!isPublicRoute) {
           navigate('/login');
         }
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     initAuth();
   }, [navigate]);
 
+  // 强制刷新用户信息的函数
+  const refreshUserInfo = useCallback(async () => {
+    const token = localStorage.getItem('accessToken');
+    if (!token) return;
+
+    try {
+      api.defaults.headers.common.Authorization = `Bearer ${token}`;
+      const userInfoResponse = await api.get('/users/me');
+      
+      if (userInfoResponse && userInfoResponse.data) {
+        const userData = {
+          id: userInfoResponse.data.userId || 0,
+          userId: userInfoResponse.data.userId,
+          username: userInfoResponse.data.username,
+          email: userInfoResponse.data.email || '',
+          role: userInfoResponse.data.role || 'USER'
+        };
+
+        startTransition(() => {
+          setUser(userData);
+        });
+      }
+    } catch (error) {
+      // 静默处理错误
+    }
+  }, []);
+
   // 响应拦截器已在 api.ts 中处理，这里不需要重复添加
 
   const login = async (username: string, password: string) => {
     try {
-      console.log('Attempting login for user:', username);
-      console.log('API base URL:', process.env.REACT_APP_API_BASE_URL);
       
       const response = await api.post<LoginResponse>('/auth/login', { username, password });
-      console.log('Login response status:', response.status);
-      console.log('Login response headers:', response.headers);
-      console.log('Login response data:', response.data);
 
       // 检查响应是否成功
       if (response.data && response.data.success && response.data.data) {
         const { accessToken, refreshToken, user } = response.data.data;
-        console.log('Extracted tokens and user:', { 
-          accessToken: accessToken ? 'present' : 'missing', 
-          refreshToken: refreshToken ? 'present' : 'missing', 
-          user 
-        });
         
         if (accessToken && refreshToken && user) {
-          localStorage.setItem('accessToken', accessToken);
-          localStorage.setItem('refreshToken', refreshToken);
-          api.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
-          console.log('Tokens stored and Authorization header set');
+                  localStorage.setItem('accessToken', accessToken);
+        localStorage.setItem('refreshToken', refreshToken);
+        api.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
           
-          const userData = {
-            id: user.userId || 0,
-            username: user.username,
-            email: ''
-          };
-          console.log('Setting user data:', userData);
-          setUser(userData);
+          // 获取完整的用户信息（包括role）
+          try {
+            const userInfoResponse = await api.get('/users/me');
+            if (userInfoResponse && userInfoResponse.data) {
+              const userData = {
+                id: userInfoResponse.data.userId || user.userId || 0,
+                userId: userInfoResponse.data.userId,
+                username: userInfoResponse.data.username,
+                email: userInfoResponse.data.email || '',
+                role: userInfoResponse.data.role || 'USER'
+              };
+                              
+                startTransition(() => {
+                  setUser(userData);
+                });
+            } else {
+              // 如果获取用户信息失败，使用基本信息
+              const userData = {
+                id: user.userId || 0,
+                username: user.username,
+                email: '',
+                role: 'USER'
+              };
+
+              startTransition(() => {
+                setUser(userData);
+              });
+            }
+          } catch (userInfoError) {
+
+            // 如果获取用户信息失败，使用基本信息
+            const userData = {
+              id: user.userId || 0,
+              username: user.username,
+              email: '',
+              role: 'USER'
+            };
+            
+            startTransition(() => {
+              setUser(userData);
+            });
+          }
           
-          console.log('Navigating to /scripts after successful login');
-          navigate('/scripts');
+
+          startTransition(() => {
+            navigate('/scripts');
+          });
           return { success: true, message: '登录成功' };
         } else {
-          console.error('Login failed - Missing tokens or user data');
           return { success: false, message: '登录失败：服务器响应数据不完整' };
         }
       } else {
-        console.error('Login failed - Invalid response structure:', response.data);
         return { success: false, message: response.data?.message || '登录失败：服务器响应格式错误' };
       }
     } catch (error: any) {
-      console.error('Login error:', error);
-      console.error('Error response:', error.response);
-      console.error('Error response data:', error.response?.data);
       
       let errorMessage = '登录失败，请重试';
       if (error.response?.data?.message) {
@@ -234,24 +374,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const register = useCallback(async (username: string, password: string, email: string) => {
     try {
-      console.log('Attempting registration with:', { username, email });
       const response = await api.post<ApiResponse<{ userId: number; username: string }>>('/auth/register', {
         username,
         password,
         email
       });
       
-      console.log('Registration response:', response);
-      console.log('Response data:', response.data);
-      
       // 检查响应状态码和成功标志 - 现在response是完整的axios响应对象
       if (response.data?.success && response.data?.code === 201) {
-        console.log('Registration successful');
         
         // 延迟导航，让用户看到成功消息
         setTimeout(() => {
-          console.log('Navigating to login page');
-          navigate('/login', { replace: true });
+          startTransition(() => {
+            navigate('/login', { replace: true });
+          });
         }, 2000);
         
         return { 
@@ -259,14 +395,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           message: response.data.message || '注册成功' 
         };
       }
-      
-      console.error('Registration failed - Invalid response:', response);
       return { 
         success: false, 
         message: response.data?.message || '注册失败' 
       };
     } catch (error: any) {
-      console.error('Registration error:', error);
       return { 
         success: false, 
         message: error.response?.data?.message || error.message || '注册失败，请重试' 
@@ -278,13 +411,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     delete api.defaults.headers.common.Authorization;
-    console.log('Cleared Authorization header after logout');
-    setUser(null);
-    navigate('/');
+    startTransition(() => {
+      setUser(null);
+      navigate('/');
+    });
   }, [navigate]);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, refreshUserInfo }}>
       {children}
     </AuthContext.Provider>
   );

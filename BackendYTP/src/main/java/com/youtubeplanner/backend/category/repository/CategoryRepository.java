@@ -12,10 +12,10 @@ import org.springframework.stereotype.Repository;
 public interface CategoryRepository extends JpaRepository<Category, Long> {
     boolean existsByUserIdAndCategoryName(Long userId, String categoryName);
 
-    @Query(value = "SELECT c FROM Category c " +
+    @Query("SELECT c FROM Category c " +
            "WHERE c.userId = :userId " +
            "AND (:search IS NULL OR :search = '' OR " +
-           "   LOWER(CAST(c.categoryName AS text)) LIKE LOWER(CONCAT('%', CAST(:search AS text), '%')))")
+           "LOWER(c.categoryName) LIKE LOWER(CONCAT('%', :search, '%')))")
     Page<Category> findByUserIdAndSearch(
             @Param("userId") Long userId,
             @Param("search") String search,

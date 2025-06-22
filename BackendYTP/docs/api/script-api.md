@@ -17,7 +17,7 @@ GET /api/v1/scripts
 | page | integer | 否 | 页码，从 1 开始，默认值：1 |
 | limit | integer | 否 | 每页记录数，默认值：10 |
 | search | string | 否 | 搜索关键词，会匹配标题和描述 |
-| sort_by | string | 否 | 排序字段，可选值：created_at, updated_at |
+| sort_by | string | 否 | 排序字段，可选值：created_at, updated_at, title, difficulty, release_date |
 | order | string | 否 | 排序方向，可选值：asc, desc |
 | channel_id | integer | 否 | 按频道 ID 过滤 |
 | category_id | integer | 否 | 按分类 ID 过滤 |

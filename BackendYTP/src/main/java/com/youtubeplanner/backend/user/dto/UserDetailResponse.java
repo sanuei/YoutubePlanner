@@ -30,5 +30,7 @@ public class UserDetailResponse {
     private LocalDateTime updatedAt;
     private String avatarUrl;
     private String displayName;
+    private String role;
     private UserStats stats;
+    private ApiConfigResponse apiConfig;
 } 
