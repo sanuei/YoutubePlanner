@@ -33,7 +33,6 @@ import {
   Psychology as PsychologyIcon,
   AutoAwesome as AutoAwesomeIcon,
   Save as SaveIcon,
-  ArrowBack as ArrowBackIcon,
   AccountTree as AccountTreeIcon,
 
 } from '@mui/icons-material';
@@ -82,14 +81,15 @@ const FitViewHandler: React.FC<{ needsFitView: boolean; setNeedsFitView: (value:
 
   useEffect(() => {
     if (needsFitView) {
-      setTimeout(() => {
+      // 使用 requestAnimationFrame 确保在下一帧执行，避免卡顿
+      requestAnimationFrame(() => {
         fitView({ 
-          padding: 0.2,
-          duration: 800,
+          padding: 0.15,
+          duration: 300, // 减少动画时间，提高响应速度
           includeHiddenNodes: false
         });
         setNeedsFitView(false);
-      }, 100);
+      });
     }
   }, [needsFitView, fitView, setNeedsFitView]);
 
@@ -117,12 +117,15 @@ const MindMapNode: React.FC<NodeProps<MindMapNodeData>> = ({ data, id, selected 
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && e.ctrlKey) {
+      // Ctrl+Enter 保存并退出编辑
       handleSave();
     } else if (e.key === 'Escape') {
+      // Escape 取消编辑
       setEditText(data.label);
       setIsEditing(false);
     }
+    // Enter 键单独按下时允许换行（默认行为）
   };
 
   return (
@@ -133,26 +136,44 @@ const MindMapNode: React.FC<NodeProps<MindMapNodeData>> = ({ data, id, selected 
         color: 'white',
         borderRadius: '12px',
         minWidth: '120px',
-        maxWidth: '280px',
+        maxWidth: '400px', // 进一步增加最大宽度
+        minHeight: '40px',
         border: selected ? '3px solid #333' : '2px solid transparent',
         boxShadow: selected ? '0 4px 12px rgba(0,0,0,0.3)' : '0 2px 8px rgba(0,0,0,0.15)',
         cursor: isEditing ? 'text' : 'pointer',
         transition: 'all 0.2s ease',
         position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        wordBreak: 'break-word', // 允许长词换行
+        overflowWrap: 'break-word', // 更好的换行支持
         '&:hover': {
           transform: isEditing ? 'none' : 'scale(1.02)',
           boxShadow: '0 6px 16px rgba(0,0,0,0.25)',
         }
       }}
       onClick={(e) => {
-        e.stopPropagation();
-        // 检查点击是否来自按钮区域
+        // 不阻止事件传播，让ReactFlow处理节点选择
         const target = e.target as HTMLElement;
         const isButtonClick = target.closest('button') || target.closest('[role="button"]');
         const isHandleClick = target.closest('.react-flow__handle');
-        console.log('Node clicked:', id, 'isButtonClick:', isButtonClick, 'isHandleClick:', isHandleClick, 'isEditing:', isEditing);
+        console.log('Node clicked:', id, 'isButtonClick:', isButtonClick, 'isHandleClick:', isHandleClick, 'isEditing:', isEditing, 'selected:', selected);
+        
+        // 如果点击的是按钮或连接点，阻止事件传播
+        if (isButtonClick || isHandleClick) {
+          e.stopPropagation();
+        }
+      }}
+      onDoubleClick={(e) => {
+        e.stopPropagation();
+        const target = e.target as HTMLElement;
+        const isButtonClick = target.closest('button') || target.closest('[role="button"]');
+        const isHandleClick = target.closest('.react-flow__handle');
+        
+        // 双击进入编辑模式（除非点击的是按钮或连接点）
         if (!isButtonClick && !isHandleClick && !isEditing) {
-          console.log('Setting editing mode for node:', id);
+          console.log('Double click - Setting editing mode for node:', id);
           setIsEditing(true);
         }
       }}
@@ -168,6 +189,7 @@ const MindMapNode: React.FC<NodeProps<MindMapNodeData>> = ({ data, id, selected 
           onKeyDown={handleKeyDown}
           onBlur={handleSave}
           autoFocus
+          multiline
           variant="standard"
           InputProps={{
             disableUnderline: true,
@@ -176,6 +198,7 @@ const MindMapNode: React.FC<NodeProps<MindMapNodeData>> = ({ data, id, selected 
               fontSize: '0.9rem',
               fontWeight: 'bold',
               textAlign: 'center',
+              lineHeight: 1.3,
             }
           }}
           sx={{
@@ -184,15 +207,25 @@ const MindMapNode: React.FC<NodeProps<MindMapNodeData>> = ({ data, id, selected 
               textAlign: 'center',
               color: 'white !important',
               padding: 0,
+              resize: 'none',
+              overflow: 'hidden',
+            },
+            '& textarea': {
+              textAlign: 'center',
+              color: 'white !important',
+              padding: 0,
+              resize: 'none',
+              overflow: 'hidden',
+              lineHeight: 1.3,
             }
           }}
         />
       ) : (
         <Typography
           variant="body2"
-          onClick={(e) => {
+          onDoubleClick={(e) => {
             e.stopPropagation();
-            console.log('Typography clicked, entering edit mode for node:', id);
+            console.log('Typography double clicked, entering edit mode for node:', id);
             setIsEditing(true);
           }}
           sx={{
@@ -202,8 +235,10 @@ const MindMapNode: React.FC<NodeProps<MindMapNodeData>> = ({ data, id, selected 
             fontWeight: 'bold',
             lineHeight: 1.3,
             wordBreak: 'break-word',
+            whiteSpace: 'pre-wrap', // 保留换行符和空格
             minHeight: '20px',
             cursor: 'pointer',
+            width: '100%',
             '&:hover': {
               backgroundColor: 'rgba(255, 255, 255, 0.1)',
               borderRadius: '4px',
@@ -295,6 +330,8 @@ const MindMapEditor: React.FC = () => {
   const [promptMode, setPromptMode] = useState<'simple' | 'standard' | 'advanced'>('standard');
   const [needsFitView, setNeedsFitView] = useState(false);
   const scriptTextAreaRef = useRef<HTMLTextAreaElement>(null);
+  const lastLayoutNodesCount = useRef<number>(0);
+  const lastLayoutEdgesCount = useRef<number>(0);
 
   // 颜色配置
   const nodeColors = useMemo(() => [
@@ -449,25 +486,107 @@ const MindMapEditor: React.FC = () => {
     enqueueSnackbar('已添加新节点', { variant: 'success' });
   }, [nodeColors, setNodes, setEdges, enqueueSnackbar, handleNodeEdit, handleNodeDelete]);
 
+  // 计算节点实际尺寸的函数
+  const calculateNodeSize = useCallback((label: string) => {
+    // 基础尺寸
+    const minWidth = 120;
+    const minHeight = 40;
+    const maxWidth = 400;
+    const padding = 32; // 左右各16px
+    
+    // 更精确的字符宽度计算
+    const getTextWidth = (text: string) => {
+      let width = 0;
+      for (let i = 0; i < text.length; i++) {
+        const char = text.charAt(i);
+        // 中文字符、全角符号等宽度较大
+        if (char.match(/[\u4e00-\u9fff\u3400-\u4dbf\uff00-\uffef]/)) {
+          width += 16; // 中文字符宽度
+        } else {
+          width += 9; // 英文字符宽度
+        }
+      }
+      return width;
+    };
+    
+    const lineHeight = 22; // 稍微增加行高
+    
+    // 分割成行来计算
+    const lines = label.split('\n');
+    let maxLineWidth = 0;
+    let totalLines = 0;
+    
+    lines.forEach(line => {
+      if (line.trim() === '') {
+        // 空行也要计算
+        totalLines += 1;
+        return;
+      }
+      
+      const lineWidth = getTextWidth(line);
+      
+      if (lineWidth + padding <= maxWidth) {
+        // 单行就能显示
+        maxLineWidth = Math.max(maxLineWidth, lineWidth);
+        totalLines += 1;
+      } else {
+        // 需要换行
+        maxLineWidth = maxWidth - padding;
+        // 估算需要多少行
+        const availableWidth = maxWidth - padding;
+        let currentLineWidth = 0;
+        let linesForThisContent = 1;
+        
+        for (let i = 0; i < line.length; i++) {
+          const char = line.charAt(i);
+          const charWidth = char.match(/[\u4e00-\u9fff\u3400-\u4dbf\uff00-\uffef]/) ? 16 : 9;
+          
+          if (currentLineWidth + charWidth > availableWidth) {
+            linesForThisContent++;
+            currentLineWidth = charWidth;
+          } else {
+            currentLineWidth += charWidth;
+          }
+        }
+        
+        totalLines += linesForThisContent;
+      }
+    });
+    
+    // 计算最终尺寸
+    const width = Math.max(minWidth, Math.min(maxLineWidth + padding, maxWidth));
+    const height = Math.max(minHeight, totalLines * lineHeight + 24); // 上下各12px padding
+    
+    return { width, height };
+  }, []);
+
   // 自动布局函数
   const getLayoutedElements = useCallback((nodes: Node[], edges: Edge[], direction = 'LR') => {
+    // 如果节点数量很少，直接返回避免不必要的计算
+    if (nodes.length <= 1) {
+      return { nodes, edges };
+    }
+
     const dagreGraph = new dagre.graphlib.Graph();
     dagreGraph.setDefaultEdgeLabel(() => ({}));
-    
-    const nodeWidth = 180;  // 减小节点宽度
-    const nodeHeight = 60;  // 减小节点高度
     
     const isHorizontal = direction === 'LR';
     dagreGraph.setGraph({ 
       rankdir: direction,
-      nodesep: isHorizontal ? 30 : 25,     // 进一步减小节点间距
-      ranksep: isHorizontal ? 60 : 50,     // 进一步减小层级间距  
-      marginx: 15,                         // 进一步减小边距
-      marginy: 15,                         // 进一步减小边距
+      nodesep: isHorizontal ? 50 : 40,     // 进一步增加节点间距
+      ranksep: isHorizontal ? 100 : 80,    // 进一步增加层级间距  
+      marginx: 30,                         // 增加边距
+      marginy: 30,                         // 增加边距
     });
 
+    // 为每个节点计算实际尺寸
+    const nodeSizes = new Map<string, { width: number; height: number }>();
+    
     nodes.forEach((node) => {
-      dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
+      const nodeData = node.data as MindMapNodeData;
+      const size = calculateNodeSize(nodeData.label);
+      nodeSizes.set(node.id, size);
+      dagreGraph.setNode(node.id, { width: size.width, height: size.height });
     });
 
     edges.forEach((edge) => {
@@ -478,17 +597,18 @@ const MindMapEditor: React.FC = () => {
 
     const layoutedNodes = nodes.map((node) => {
       const nodeWithPosition = dagreGraph.node(node.id);
+      const size = nodeSizes.get(node.id) || { width: 220, height: 80 };
       return {
         ...node,
         position: {
-          x: nodeWithPosition.x - nodeWidth / 2,
-          y: nodeWithPosition.y - nodeHeight / 2,
+          x: nodeWithPosition.x - size.width / 2,
+          y: nodeWithPosition.y - size.height / 2,
         },
       };
     });
 
     return { nodes: layoutedNodes, edges };
-  }, []);
+  }, [calculateNodeSize]);
 
 
 
@@ -647,16 +767,16 @@ const MindMapEditor: React.FC = () => {
     setNodes(layoutedNodes);
     setEdges(layoutedEdges);
     
-    // 延迟调用 fitView 确保节点已渲染
-    setTimeout(() => {
-      try {
-        // 这里我们无法直接使用 useReactFlow，所以我们需要在 ReactFlow 组件内部处理
-        // 通过设置一个标志来触发 fitView
-        setNeedsFitView(true);
-      } catch (error) {
-        console.warn('fitView failed:', error);
-      }
-    }, 100);
+    // 使用 requestAnimationFrame 确保在节点渲染后调用 fitView
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        try {
+          setNeedsFitView(true);
+        } catch (error) {
+          console.warn('fitView failed:', error);
+        }
+      });
+    });
   }, [setNodes, setEdges]);
 
   // 监听节点变化，自动应用水平布局
@@ -664,14 +784,23 @@ const MindMapEditor: React.FC = () => {
     // 跳过初始加载和只有根节点的情况
     if (nodes.length <= 1) return;
     
-    // 延迟应用布局，避免在快速操作时频繁触发
+    // 检查是否真的需要重新布局（避免不必要的重新计算）
+    if (lastLayoutNodesCount.current === nodes.length && lastLayoutEdgesCount.current === edges.length) {
+      return;
+    }
+    
+    // 使用更短的延迟时间，并使用防抖机制避免频繁触发
     const timeoutId = setTimeout(() => {
       const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(nodes, edges, 'LR');
       applyAutoLayoutWithFitView(layoutedNodes, layoutedEdges);
-    }, 300);
+      
+      // 更新记录的节点和边数量
+      lastLayoutNodesCount.current = nodes.length;
+      lastLayoutEdgesCount.current = edges.length;
+    }, 150); // 减少延迟时间
 
     return () => clearTimeout(timeoutId);
-  }, [nodes.length, edges.length, nodes, edges, getLayoutedElements, applyAutoLayoutWithFitView]); // 只在节点或边的数量变化时触发
+  }, [nodes.length, edges.length, nodes, edges, getLayoutedElements, applyAutoLayoutWithFitView]); // 重新添加必要的依赖项
 
   // 生成思维导图内容摘要
   const generateMindMapSummary = () => {
@@ -1165,18 +1294,6 @@ const MindMapEditor: React.FC = () => {
         mb: 3 
       }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <IconButton 
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              console.log('Navigating to /scripts');
-              navigate('/scripts');
-            }} 
-            size="small"
-            sx={{ zIndex: 1000 }}
-          >
-            <ArrowBackIcon />
-          </IconButton>
           <AccountTreeIcon sx={{ color: 'primary.main' }} />
           <Typography variant="h5" fontWeight="500">
             思维导图编辑器
@@ -1248,7 +1365,7 @@ const MindMapEditor: React.FC = () => {
 
       <Box sx={{ display: 'flex', gap: 3, flex: 1, minHeight: 0 }}>
         {/* 左侧工具面板 */}
-        <Paper sx={{ width: 300, p: 2, height: 'fit-content' }}>
+        <Paper sx={{ width: 300, p: 2, height: '100%', overflow: 'auto' }}>
           <Typography variant="h6" gutterBottom>
             <PsychologyIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
             工具面板
@@ -1260,10 +1377,12 @@ const MindMapEditor: React.FC = () => {
                 <strong>操作说明：</strong>
               </Typography>
               <Typography variant="body2" component="div">
-                • <strong>编辑节点</strong>：点击节点文字区域进入编辑模式<br/>
-                • <strong>保存编辑</strong>：按 Enter 键或点击其他地方<br/>
-                • <strong>中心节点</strong>：编辑中心节点会同步更新标题<br/>
                 • <strong>选中节点</strong>：单击节点显示操作按钮<br/>
+                • <strong>编辑节点</strong>：双击节点或文字区域进入编辑模式<br/>
+                • <strong>换行输入</strong>：编辑时按 Enter 键换行<br/>
+                • <strong>保存编辑</strong>：按 Ctrl+Enter 键或点击其他地方<br/>
+                • <strong>取消编辑</strong>：按 Escape 键取消修改<br/>
+                • <strong>中心节点</strong>：编辑中心节点会同步更新标题<br/>
                 • <strong>绿色+按钮</strong>：添加子分支<br/>
                 • <strong>红色×按钮</strong>：删除节点（中心节点不可删除）<br/>
                 • <strong>拖拽节点</strong>：调整位置
@@ -1368,7 +1487,7 @@ const MindMapEditor: React.FC = () => {
         </Paper>
 
         {/* 右侧思维导图画布 */}
-        <Paper sx={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
+        <Paper sx={{ flex: 1, position: 'relative', overflow: 'hidden', height: '100%' }}>
           <Typography variant="h6" sx={{ position: 'absolute', top: 16, left: 16, zIndex: 10 }}>
             思维导图画布
           </Typography>
@@ -1380,11 +1499,26 @@ const MindMapEditor: React.FC = () => {
             onEdgesChange={onEdgesChange}
             nodeTypes={nodeTypes}
             fitView
-            fitViewOptions={{ padding: 0.2 }}
+            fitViewOptions={{ padding: 0.15, duration: 300 }}
             style={{ width: '100%', height: '100%' }}
+            proOptions={{ hideAttribution: true }}
+            nodesDraggable={true}
+            nodesConnectable={false}
+            elementsSelectable={true}
+            zoomOnScroll={true}
+            zoomOnPinch={true}
+            panOnScroll={false}
+            panOnDrag={true}
+            selectNodesOnDrag={true}
+            deleteKeyCode="Delete"
+            multiSelectionKeyCode="Meta"
+            onPaneClick={() => {
+              // 点击空白区域时取消所有选择
+              setNodes((nds) => nds.map((node) => ({ ...node, selected: false })));
+            }}
           >
             <FitViewHandler needsFitView={needsFitView} setNeedsFitView={setNeedsFitView} />
-            <Controls />
+            <Controls showInteractive={false} />
             <Background variant={BackgroundVariant.Dots} gap={20} size={1} />
           </ReactFlow>
         </Paper>

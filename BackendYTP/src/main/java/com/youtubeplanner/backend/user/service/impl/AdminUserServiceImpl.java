@@ -31,6 +31,12 @@ public class AdminUserServiceImpl implements AdminUserService {
             sortBy = sortBy == null ? "createdAt" : sortBy;
             order = order == null ? "desc" : order;
 
+            // 验证排序字段，避免在null字段上排序
+            if ("role".equals(sortBy)) {
+                log.warn("检测到role字段排序请求，由于存在null值，改为按createdAt排序");
+                sortBy = "createdAt";
+            }
+
             // 创建分页和排序
             Sort sort = Sort.by(Sort.Direction.fromString(order), sortBy);
             PageRequest pageRequest = PageRequest.of(page - 1, limit, sort);
@@ -178,12 +184,22 @@ public class AdminUserServiceImpl implements AdminUserService {
                 .totalCategories(0) // 需要从数据库获取
                 .build();
 
+        // 处理role为null的情况
+        String roleName = null;
+        if (user.getRole() != null) {
+            roleName = user.getRole().name();
+        } else {
+            // 如果角色为null，设置默认角色为USER
+            roleName = "USER";
+            log.warn("用户{}的角色为null，使用默认角色USER", user.getUsername());
+        }
+
         return AdminUserListResponse.builder()
                 .userId(user.getUserId())
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .displayName(user.getDisplayName())
-                .role(user.getRole().name())
+                .role(roleName)
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
                 .stats(stats)

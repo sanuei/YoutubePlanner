@@ -1,95 +1,84 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSnackbar } from 'notistack';
+import {
+  Box,
+  Container,
+  Typography,
+  Card,
+  CardContent,
+  Grid,
+  Avatar,
+  Button,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  IconButton,
+  Chip,
+  Divider,
+  ListItem,
+  ListItemText,
+  ListItemIcon,
+  Paper,
+  Tabs,
+  Tab,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  InputAdornment,
+  Alert,
+  Pagination,
+  Stack,
+  Skeleton,
+  CardHeader,
+  Badge
+} from '@mui/material';
+import {
+  Edit as EditIcon,
+  Save as SaveIcon,
+  Lock as LockIcon,
+  Api as ApiIcon,
+  Description as DescriptionIcon,
+  YouTube as YouTubeIcon,
+  Category as CategoryIcon,
+  Visibility as VisibilityIcon,
+  VisibilityOff as VisibilityOffIcon,
+  Person as PersonIcon,
+  Email as EmailIcon,
+  DataObject as DataObjectIcon,
+  CalendarToday as CalendarIcon
+} from '@mui/icons-material';
 import { usersApi, User, Script, Channel, Category, scriptsApi, channelsApi, categoriesApi, ApiConfigRequest } from '../services/api';
 
-// 图标组件
-const UserIcon = () => (
-  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-  </svg>
-);
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
 
-const EmailIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
-  </svg>
-);
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
 
-const EditIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-  </svg>
-);
-
-const SaveIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-  </svg>
-);
-
-const LockIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-  </svg>
-);
-
-const ApiIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-  </svg>
-);
-
-const DescriptionIcon = () => (
-  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-  </svg>
-);
-
-const YouTubeIcon = () => (
-  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-  </svg>
-);
-
-const CategoryIcon = () => (
-  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-  </svg>
-);
-
-const CloseIcon = () => (
-  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-  </svg>
-);
-
-const EyeIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-  </svg>
-);
-
-const EyeOffIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
-  </svg>
-);
-
-const ChevronLeftIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-  </svg>
-);
-
-const ChevronRightIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-  </svg>
-);
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ p: 3 }}>
+          {children}
+        </Box>
+      )}
+    </div>
+  );
+}
 
 const ITEMS_PER_PAGE = 5;
-const EMOJIS = ['😀', '😎', '🤖', '👨‍💻', '👩‍💻', '🎮', '🎯', '🎨', '🎭', '🎪', '🎢', '🎡', '🎠', '🎬', '🎥', '📺', '🎙️', '🎤', '🎧', '🎼'];
 
 const UserManagement: React.FC = () => {
   const { enqueueSnackbar } = useSnackbar();
@@ -100,35 +89,37 @@ const UserManagement: React.FC = () => {
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
   const [apiConfigDialogOpen, setApiConfigDialogOpen] = useState(false);
   const [showApiKey, setShowApiKey] = useState(false);
+  const [tabValue, setTabValue] = useState(0);
+  
   const [formData, setFormData] = useState({
     email: '',
     display_name: '',
   });
+  
   const [passwordData, setPasswordData] = useState({
     current_password: '',
     new_password: '',
     confirm_password: '',
   });
+  
   const [apiConfigData, setApiConfigData] = useState<ApiConfigRequest>({
     apiProvider: 'openai',
     apiKey: '',
     apiBaseUrl: 'https://api.openai.com/v1',
     apiModel: 'gpt-3.5-turbo',
   });
+  
   const [statsData, setStatsData] = useState({
     scripts: [] as Script[],
     channels: [] as Channel[],
     categories: [] as Category[],
   });
+  
   const [currentPage, setCurrentPage] = useState({
     scripts: 1,
     channels: 1,
     categories: 1,
   });
-
-  const getRandomEmoji = () => {
-    return EMOJIS[Math.floor(Math.random() * EMOJIS.length)];
-  };
 
   const fetchUserData = useCallback(async () => {
     try {
@@ -292,502 +283,775 @@ const UserManagement: React.FC = () => {
     return Math.ceil(statsData[type].length / ITEMS_PER_PAGE);
   };
 
-  const handlePageChange = (type: 'scripts' | 'channels' | 'categories', direction: 'prev' | 'next') => {
-    setCurrentPage(prev => {
-      const current = prev[type];
-      const total = getTotalPages(type);
-      const newPage = direction === 'prev' ? current - 1 : current + 1;
-      
-      if (newPage < 1 || newPage > total) {
-        return prev;
-      }
-      
-      return {
+  const handlePageChange = (type: 'scripts' | 'channels' | 'categories', page: number) => {
+    setCurrentPage(prev => ({
         ...prev,
-        [type]: newPage,
+      [type]: page,
+    }));
       };
-    });
+
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setTabValue(newValue);
   };
+
+
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
-      </div>
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Box sx={{ textAlign: 'center', mb: 6 }}>
+          <Skeleton variant="text" width={300} height={80} sx={{ mx: 'auto' }} />
+          <Skeleton variant="text" width={400} height={30} sx={{ mx: 'auto', mt: 2 }} />
+        </Box>
+
+        <Grid container spacing={4}>
+          <Grid size={{ xs: 12, lg: 4 }}>
+            <Skeleton variant="rectangular" height={500} sx={{ borderRadius: 3 }} />
+          </Grid>
+          <Grid size={{ xs: 12, lg: 8 }}>
+            <Skeleton variant="rectangular" height={500} sx={{ borderRadius: 3 }} />
+          </Grid>
+        </Grid>
+      </Container>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
-        <div className="bg-red-50 border border-red-200 rounded-2xl p-6 max-w-md">
-          <div className="text-red-800">{error}</div>
-        </div>
-      </div>
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Alert severity="error" sx={{ borderRadius: 2 }}>
+          {error}
+        </Alert>
+      </Container>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* 页面头部 */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              我的信息
-            </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              管理您的个人资料和系统设置
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* 主要内容 */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* 用户资料卡片 */}
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-200 p-8 mb-8">
-          <div className="grid lg:grid-cols-3 gap-8 items-center">
-            {/* 头像和基本信息 */}
-            <div className="text-center">
-              <div className="w-32 h-32 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white text-4xl font-bold mx-auto mb-4 shadow-lg">
-                {getRandomEmoji()}
-              </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+      {/* 主要内容网格 */}
+      <Grid container spacing={4}>
+        {/* 用户资料卡片 - 左侧 */}
+        <Grid size={{ xs: 12, lg: 4 }}>
+          <Card 
+            sx={{ 
+              height: 'fit-content', 
+              borderRadius: 3,
+              position: 'sticky',
+              top: 24
+            }}
+          >
+            <CardHeader
+              title="个人资料"
+              subheader={`注册时间: ${user?.created_at ? new Date(user.created_at).toLocaleDateString() : '未知'}`}
+              action={
+                <IconButton onClick={() => setEditMode(true)}>
+                  <EditIcon />
+                </IconButton>
+              }
+            />
+            <CardContent>
+              {/* 用户头像和基本信息 */}
+              <Box sx={{ textAlign: 'center', mb: 4 }}>
+                <Badge
+                  overlap="circular"
+                  anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                  badgeContent={
+                    <Box 
+                      sx={{ 
+                        width: 24, 
+                        height: 24, 
+                        bgcolor: 'success.main', 
+                        borderRadius: '50%',
+                        border: '2px solid white'
+                      }} 
+                    />
+                  }
+                >
+                  <Avatar
+                    sx={{
+                      width: 100,
+                      height: 100,
+                      mx: 'auto',
+                      mb: 2,
+                      bgcolor: 'primary.main',
+                      fontSize: '2.5rem',
+                      boxShadow: 3
+                    }}
+                  >
+                    {user?.display_name?.[0] || user?.username?.[0] || '😊'}
+                  </Avatar>
+                </Badge>
+                
+                <Typography variant="h5" fontWeight="bold" gutterBottom>
                 {user?.display_name || user?.username}
-              </h2>
-              <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                活跃用户
-              </div>
-            </div>
+                </Typography>
+                
+                <Stack direction="row" spacing={1} sx={{ justifyContent: 'center', mb: 2 }}>
+                  <Chip 
+                    label="活跃用户" 
+                    color="success" 
+                    variant="outlined"
+                    size="small"
+                  />
+                  {user?.role === 'ADMIN' && (
+                    <Chip 
+                      label="管理员" 
+                      color="warning" 
+                      variant="filled"
+                      size="small"
+                    />
+                  )}
+                </Stack>
+              </Box>
 
-            {/* 用户信息 */}
-            <div className="lg:col-span-1">
-              {editMode ? (
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">显示名称</label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <UserIcon />
-                      </div>
-                      <input
-                        type="text"
-                        name="display_name"
-                        value={formData.display_name}
-                        onChange={handleInputChange}
-                        className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
-                        placeholder="请输入显示名称"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">邮箱地址</label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <EmailIcon />
-                      </div>
-                      <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
-                        placeholder="请输入邮箱地址"
-                      />
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center">
-                      <UserIcon />
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">用户名</p>
-                      <p className="text-lg font-semibold text-gray-900">{user?.username}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center">
-                      <EmailIcon />
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">邮箱地址</p>
-                      <p className="text-lg font-semibold text-gray-900">{user?.email}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center">
-                      <UserIcon />
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">显示名称</p>
-                      <p className="text-lg font-semibold text-gray-900">{user?.display_name || '未设置'}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
+              <Divider sx={{ my: 3 }} />
+
+              {/* 详细信息 */}
+              <Stack spacing={3}>
+                <Box>
+                  <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                    基本信息
+                  </Typography>
+                  <Stack spacing={2}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <PersonIcon color="action" fontSize="small" />
+                      <Box sx={{ flex: 1 }}>
+                        <Typography variant="body2" color="text.secondary">
+                          用户名
+                        </Typography>
+                        <Typography variant="body1" fontWeight="medium">
+                          {user?.username}
+                        </Typography>
+                      </Box>
+                    </Box>
+
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <EmailIcon color="action" fontSize="small" />
+                      <Box sx={{ flex: 1 }}>
+                        <Typography variant="body2" color="text.secondary">
+                          邮箱地址
+                        </Typography>
+                        <Typography variant="body1" fontWeight="medium">
+                          {user?.email}
+                        </Typography>
+                      </Box>
+                    </Box>
+
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <CalendarIcon color="action" fontSize="small" />
+                      <Box sx={{ flex: 1 }}>
+                        <Typography variant="body2" color="text.secondary">
+                          注册时间
+                        </Typography>
+                        <Typography variant="body1" fontWeight="medium">
+                          {user?.created_at ? new Date(user.created_at).toLocaleDateString() : '未知'}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </Stack>
+                </Box>
+
+                <Divider />
+
+                {/* API配置状态 */}
+                <Box>
+                  <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                    API配置状态
+                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                    <ApiIcon color="action" fontSize="small" />
+                    <Box sx={{ flex: 1 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        API密钥
+                      </Typography>
+                      <Typography variant="body1" fontWeight="medium">
+                        {user?.apiConfig?.hasApiKey ? '已配置' : '未配置'}
+                      </Typography>
+                    </Box>
+                    <Chip 
+                      label={user?.apiConfig?.hasApiKey ? '已配置' : '未配置'}
+                      color={user?.apiConfig?.hasApiKey ? 'success' : 'warning'}
+                      variant="outlined"
+                      size="small"
+                    />
+                  </Box>
+                </Box>
+              </Stack>
+
+              <Divider sx={{ my: 3 }} />
 
             {/* 操作按钮 */}
-            <div className="space-y-3">
-              {editMode ? (
-                <>
-                  <button
-                    onClick={handleSave}
-                    className="w-full flex items-center justify-center px-6 py-3 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-colors font-medium"
-                  >
-                    <SaveIcon />
-                    <span className="ml-2">保存更改</span>
-                  </button>
-                  <button
-                    onClick={() => setEditMode(false)}
-                    className="w-full flex items-center justify-center px-6 py-3 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium"
-                  >
-                    取消
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button
+              <Stack spacing={2}>
+                <Button
+                  variant="contained"
+                  startIcon={<EditIcon />}
                     onClick={() => setEditMode(true)}
-                    className="w-full flex items-center justify-center px-6 py-3 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-colors font-medium"
-                  >
-                    <EditIcon />
-                    <span className="ml-2">编辑资料</span>
-                  </button>
-                  <button
+                  fullWidth
+                  size="large"
+                >
+                  编辑资料
+                </Button>
+                
+                <Grid container spacing={2}>
+                  <Grid size={6}>
+                    <Button
+                      variant="outlined"
+                      startIcon={<LockIcon />}
                     onClick={() => setPasswordDialogOpen(true)}
-                    className="w-full flex items-center justify-center px-6 py-3 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium"
-                  >
-                    <LockIcon />
-                    <span className="ml-2">修改密码</span>
-                  </button>
-                  <button
+                      fullWidth
+                      size="small"
+                    >
+                      修改密码
+                    </Button>
+                  </Grid>
+                  <Grid size={6}>
+                    <Button
+                      variant="outlined"
+                      startIcon={<ApiIcon />}
                     onClick={() => {
                       fetchApiConfig();
                       setApiConfigDialogOpen(true);
                     }}
-                    className="w-full flex items-center justify-center px-6 py-3 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium"
-                  >
-                    <ApiIcon />
-                    <span className="ml-2">API配置</span>
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
+                      fullWidth
+                      size="small"
+                    >
+                      API配置
+                    </Button>
+                  </Grid>
+                </Grid>
+              </Stack>
+            </CardContent>
+          </Card>
+        </Grid>
 
-        {/* 数据统计 */}
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 text-center mb-8">数据统计</h2>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              { 
-                key: 'scripts', 
-                title: '脚本管理', 
-                icon: <DescriptionIcon />, 
-                color: 'bg-blue-500',
-                data: statsData.scripts 
-              },
-              { 
-                key: 'channels', 
-                title: '频道管理', 
-                icon: <YouTubeIcon />, 
-                color: 'bg-red-500',
-                data: statsData.channels 
-              },
-              { 
-                key: 'categories', 
-                title: '分类管理', 
-                icon: <CategoryIcon />, 
-                color: 'bg-green-500',
-                data: statsData.categories 
-              },
-            ].map((stat) => (
-              <div
-                key={stat.key}
-                className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-all duration-200"
-              >
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center space-x-3">
-                    <div className={`w-12 h-12 ${stat.color} rounded-xl flex items-center justify-center text-white`}>
-                      {stat.icon}
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900">{stat.title}</h3>
-                      <p className="text-3xl font-bold text-gray-900">{stat.data.length}</p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="border-t border-gray-100 pt-4">
-                  <div className="space-y-2 max-h-48 overflow-y-auto">
-                    {getCurrentPageData(stat.key as 'scripts' | 'channels' | 'categories').map((item: any) => (
-                      <div key={item.script_id || item.channel_id || item.category_id} className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-50 transition-colors">
-                        <div className={`w-2 h-2 ${stat.color} rounded-full`}></div>
-                        <span className="text-sm text-gray-700 truncate">
-                          {item.title || item.channel_name || item.category_name}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                  
-                  {getTotalPages(stat.key as 'scripts' | 'channels' | 'categories') > 1 && (
-                    <div className="flex items-center justify-center space-x-2 mt-4 pt-4 border-t border-gray-100">
-                                             <button 
-                         onClick={() => handlePageChange(stat.key as 'scripts' | 'channels' | 'categories', 'prev')}
-                         disabled={currentPage[stat.key as 'scripts' | 'channels' | 'categories'] === 1}
-                         className="p-2 rounded-lg border border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
-                         title="上一页"
-                         aria-label="上一页"
-                       >
-                         <ChevronLeftIcon />
-                       </button>
-                       <span className="text-sm text-gray-600">
-                         {currentPage[stat.key as 'scripts' | 'channels' | 'categories']} / {getTotalPages(stat.key as 'scripts' | 'channels' | 'categories')}
-                       </span>
-                       <button 
-                         onClick={() => handlePageChange(stat.key as 'scripts' | 'channels' | 'categories', 'next')}
-                         disabled={currentPage[stat.key as 'scripts' | 'channels' | 'categories'] === getTotalPages(stat.key as 'scripts' | 'channels' | 'categories')}
-                         className="p-2 rounded-lg border border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
-                         title="下一页"
-                         aria-label="下一页"
-                       >
-                         <ChevronRightIcon />
-                       </button>
-                    </div>
+        {/* 数据管理区域 - 右侧 */}
+        <Grid size={{ xs: 12, lg: 8 }}>
+          <Card sx={{ borderRadius: 3, height: 'fit-content' }}>
+            <CardHeader
+              title="数据管理"
+              subheader="查看和管理您的内容数据"
+              action={
+                <Chip 
+                  label="数据统计" 
+                  color="primary" 
+                  variant="outlined"
+                />
+              }
+            />
+            <CardContent sx={{ pt: 0 }}>
+              <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                <Tabs 
+                  value={tabValue} 
+                  onChange={handleTabChange}
+                  variant="scrollable"
+                  scrollButtons="auto"
+                >
+                  <Tab 
+                    icon={<DescriptionIcon />}
+                    iconPosition="start"
+                    label={
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        脚本管理
+                        <Chip 
+                          label={statsData.scripts.length}
+                          size="small"
+                          color="primary"
+                          variant="outlined"
+                        />
+                      </Box>
+                    }
+                  />
+                  <Tab 
+                    icon={<YouTubeIcon />}
+                    iconPosition="start"
+                    label={
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        频道管理
+                        <Chip 
+                          label={statsData.channels.length}
+                          size="small"
+                          color="error"
+                          variant="outlined"
+                        />
+                      </Box>
+                    }
+                  />
+                  <Tab 
+                    icon={<CategoryIcon />}
+                    iconPosition="start"
+                    label={
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        分类管理
+                        <Chip 
+                          label={statsData.categories.length}
+                          size="small"
+                          color="success"
+                          variant="outlined"
+                        />
+                      </Box>
+                    }
+                  />
+                </Tabs>
+              </Box>
+
+              <TabPanel value={tabValue} index={0}>
+                <DataPanel
+                  title="脚本管理"
+                  data={getCurrentPageData('scripts')}
+                  totalPages={getTotalPages('scripts')}
+                  currentPage={currentPage.scripts}
+                  onPageChange={(page) => handlePageChange('scripts', page)}
+                  renderItem={(item: Script) => (
+                    <ListItem 
+                      key={item.script_id}
+                      sx={{ 
+                        border: 1, 
+                        borderColor: 'divider', 
+                        borderRadius: 2, 
+                        mb: 1,
+                        '&:hover': { bgcolor: 'action.hover' }
+                      }}
+                    >
+                      <ListItemIcon>
+                        <Badge badgeContent={item.chapters_count || 0} color="primary">
+                          <DescriptionIcon color="primary" />
+                        </Badge>
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={
+                          <Typography variant="subtitle1" fontWeight="medium">
+                            {item.title}
+                          </Typography>
+                        }
+                        secondary={
+                          <Box sx={{ mt: 1 }}>
+                            <Stack direction="row" spacing={1} flexWrap="wrap">
+                              <Chip 
+                                label={`${item.chapters_count || 0} 章节`}
+                                size="small"
+                                variant="outlined"
+                              />
+                              <Chip 
+                                label={item.status || '草稿'}
+                                size="small"
+                                color={item.status === '完成' ? 'success' : 'warning'}
+                                variant="outlined"
+                              />
+                              <Chip 
+                                label={`难度 ${item.difficulty || 1}`}
+                                size="small"
+                                color="primary"
+                                variant="outlined"
+                              />
+                            </Stack>
+                          </Box>
+                        }
+                      />
+                    </ListItem>
                   )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+                />
+              </TabPanel>
+
+              <TabPanel value={tabValue} index={1}>
+                <DataPanel
+                  title="频道管理"
+                  data={getCurrentPageData('channels')}
+                  totalPages={getTotalPages('channels')}
+                  currentPage={currentPage.channels}
+                  onPageChange={(page) => handlePageChange('channels', page)}
+                  renderItem={(item: Channel) => (
+                    <ListItem 
+                      key={item.channel_id}
+                      sx={{ 
+                        border: 1, 
+                        borderColor: 'divider', 
+                        borderRadius: 2, 
+                        mb: 1,
+                        '&:hover': { bgcolor: 'action.hover' }
+                      }}
+                    >
+                      <ListItemIcon>
+                        <Badge badgeContent={item.scripts_count || 0} color="error">
+                          <YouTubeIcon color="error" />
+                        </Badge>
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={
+                          <Typography variant="subtitle1" fontWeight="medium">
+                            {item.channel_name}
+                          </Typography>
+                        }
+                        secondary={
+                          <Box sx={{ mt: 1 }}>
+                            <Stack direction="row" spacing={1} flexWrap="wrap">
+                              <Chip 
+                                label={`${item.scripts_count || 0} 脚本`}
+                                size="small"
+                                color="error"
+                                variant="outlined"
+                              />
+                              <Chip 
+                                label={new Date(item.created_at).toLocaleDateString()}
+                                size="small"
+                                variant="outlined"
+                                icon={<CalendarIcon />}
+                              />
+                            </Stack>
+                          </Box>
+                        }
+                      />
+                    </ListItem>
+                  )}
+                />
+              </TabPanel>
+
+              <TabPanel value={tabValue} index={2}>
+                <DataPanel
+                  title="分类管理"
+                  data={getCurrentPageData('categories')}
+                  totalPages={getTotalPages('categories')}
+                  currentPage={currentPage.categories}
+                  onPageChange={(page) => handlePageChange('categories', page)}
+                  renderItem={(item: Category) => (
+                    <ListItem 
+                      key={item.category_id}
+                      sx={{ 
+                        border: 1, 
+                        borderColor: 'divider', 
+                        borderRadius: 2, 
+                        mb: 1,
+                        '&:hover': { bgcolor: 'action.hover' }
+                      }}
+                    >
+                      <ListItemIcon>
+                        <CategoryIcon color="success" />
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={
+                          <Typography variant="subtitle1" fontWeight="medium">
+                            {item.category_name}
+                          </Typography>
+                        }
+                        secondary={
+                          <Box sx={{ mt: 1 }}>
+                            <Chip 
+                              label={new Date(item.created_at).toLocaleDateString()}
+                              size="small"
+                              variant="outlined"
+                              icon={<CalendarIcon />}
+                            />
+                          </Box>
+                        }
+                      />
+                    </ListItem>
+                  )}
+                />
+              </TabPanel>
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+
+      {/* 编辑资料对话框 */}
+      <Dialog 
+        open={editMode} 
+        onClose={() => setEditMode(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: 3 } }}
+      >
+        <DialogTitle sx={{ pb: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <EditIcon color="primary" />
+            编辑个人资料
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <Stack spacing={3} sx={{ pt: 2 }}>
+            <TextField
+              name="display_name"
+              label="显示名称"
+              value={formData.display_name}
+              onChange={handleInputChange}
+              fullWidth
+              variant="outlined"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <PersonIcon />
+                  </InputAdornment>
+                ),
+              }}
+            />
+            <TextField
+              name="email"
+              label="邮箱地址"
+              type="email"
+              value={formData.email}
+              onChange={handleInputChange}
+              fullWidth
+              variant="outlined"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <EmailIcon />
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Stack>
+        </DialogContent>
+        <DialogActions sx={{ p: 3 }}>
+          <Button onClick={() => setEditMode(false)}>
+            取消
+          </Button>
+          <Button 
+            onClick={handleSave} 
+            variant="contained"
+            startIcon={<SaveIcon />}
+          >
+            保存更改
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* 修改密码对话框 */}
-      {passwordDialogOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-3xl max-w-md w-full p-8">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
-                  <LockIcon />
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900">修改密码</h3>
-              </div>
-                             <button
-                 onClick={() => setPasswordDialogOpen(false)}
-                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                 title="关闭对话框"
-                 aria-label="关闭对话框"
-               >
-                 <CloseIcon />
-               </button>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">当前密码</label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <LockIcon />
-                  </div>
-                  <input
-                    type="password"
+      <Dialog 
+        open={passwordDialogOpen} 
+        onClose={() => setPasswordDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: 3 } }}
+      >
+        <DialogTitle sx={{ pb: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <LockIcon color="primary" />
+            修改密码
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <Stack spacing={3} sx={{ pt: 2 }}>
+            <TextField
                     name="current_password"
+              label="当前密码"
+              type="password"
                     value={passwordData.current_password}
                     onChange={handlePasswordChange}
-                    className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
-                    placeholder="请输入当前密码"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">新密码</label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              fullWidth
+              variant="outlined"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
                     <LockIcon />
-                  </div>
-                  <input
-                    type="password"
+                  </InputAdornment>
+                ),
+              }}
+            />
+            <TextField
                     name="new_password"
+              label="新密码"
+              type="password"
                     value={passwordData.new_password}
                     onChange={handlePasswordChange}
-                    className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
-                    placeholder="请输入新密码"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">确认新密码</label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              fullWidth
+              variant="outlined"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
                     <LockIcon />
-                  </div>
-                  <input
-                    type="password"
+                  </InputAdornment>
+                ),
+              }}
+            />
+            <TextField
                     name="confirm_password"
+              label="确认新密码"
+              type="password"
                     value={passwordData.confirm_password}
                     onChange={handlePasswordChange}
-                    className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
-                    placeholder="请再次输入新密码"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="flex space-x-3 mt-8">
-              <button
-                onClick={() => setPasswordDialogOpen(false)}
-                className="flex-1 px-6 py-3 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium"
-              >
-                取消
-              </button>
-              <button
+              fullWidth
+              variant="outlined"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <LockIcon />
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Stack>
+        </DialogContent>
+        <DialogActions sx={{ p: 3 }}>
+          <Button onClick={() => setPasswordDialogOpen(false)}>
+            取消
+          </Button>
+          <Button 
                 onClick={handleChangePassword}
-                className="flex-1 px-6 py-3 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-colors font-medium"
+            variant="contained"
               >
                 确认修改
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* API配置对话框 */}
-      {apiConfigDialogOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-8 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
-                  <ApiIcon />
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900">大模型API配置</h3>
-              </div>
-                             <button
-                 onClick={() => setApiConfigDialogOpen(false)}
-                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                 title="关闭对话框"
-                 aria-label="关闭对话框"
-               >
-                 <CloseIcon />
-               </button>
-            </div>
+      <Dialog 
+        open={apiConfigDialogOpen} 
+        onClose={() => setApiConfigDialogOpen(false)}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: 3 } }}
+      >
+        <DialogTitle sx={{ pb: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <ApiIcon color="primary" />
+            大模型API配置
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <Stack spacing={3} sx={{ pt: 2 }}>
+            <FormControl fullWidth>
+              <InputLabel>API提供商</InputLabel>
+              <Select
+                value={apiConfigData.apiProvider}
+                onChange={(e) => handleApiProviderChange(e.target.value)}
+                label="API提供商"
+              >
+                <MenuItem value="openai">OpenAI</MenuItem>
+                <MenuItem value="claude">Claude</MenuItem>
+                <MenuItem value="custom">第三方API</MenuItem>
+              </Select>
+            </FormControl>
 
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">API提供商</label>
-                <div className="flex bg-gray-100 rounded-xl p-1">
-                  {[
-                    { value: 'openai', label: 'OpenAI' },
-                    { value: 'claude', label: 'Claude' },
-                    { value: 'custom', label: '第三方API' }
-                  ].map((option) => (
-                    <button
-                      key={option.value}
-                      onClick={() => handleApiProviderChange(option.value)}
-                      className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                        apiConfigData.apiProvider === option.value
-                          ? 'bg-white text-orange-600 shadow-sm'
-                          : 'text-gray-600 hover:text-gray-900'
-                      }`}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">API密钥</label>
-                <div className="relative">
-                  <input
-                    type={showApiKey ? 'text' : 'password'}
+            <TextField
                     name="apiKey"
+              label="API密钥"
+              type={showApiKey ? 'text' : 'password'}
                     value={apiConfigData.apiKey}
                     onChange={handleApiConfigChange}
-                    className="block w-full pr-10 pl-3 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+              fullWidth
                     placeholder={user?.apiConfig?.hasApiKey ? '已配置API密钥' : '请输入您的API密钥'}
-                  />
-                  <button
-                    type="button"
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
                     onClick={() => setShowApiKey(!showApiKey)}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  >
-                    {showApiKey ? <EyeOffIcon /> : <EyeIcon />}
-                  </button>
-                </div>
-              </div>
+                      edge="end"
+                    >
+                      {showApiKey ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">API基础URL</label>
-                <input
-                  type="text"
+            <TextField
                   name="apiBaseUrl"
+              label="API基础URL"
                   value={apiConfigData.apiBaseUrl}
                   onChange={handleApiConfigChange}
-                  className="block w-full px-3 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+              fullWidth
                   placeholder="https://api.openai.com/v1"
                 />
-                {apiConfigData.apiProvider === 'custom' && (
-                  <p className="text-sm text-gray-500 mt-1">
-                    对于DeerAPI，请使用: https://api.deerapi.com/v1
-                  </p>
-                )}
-              </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">模型名称</label>
-                <input
-                  type="text"
+            <TextField
                   name="apiModel"
+              label="模型名称"
                   value={apiConfigData.apiModel}
                   onChange={handleApiConfigChange}
-                  className="block w-full px-3 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+              fullWidth
                   placeholder="gpt-3.5-turbo"
                 />
-              </div>
 
-              <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-                <h4 className="font-medium text-blue-900 mb-2">配置说明：</h4>
-                <div className="text-sm text-blue-800 space-y-1">
-                  <p>• <strong>OpenAI:</strong> 官方API，URL: https://api.openai.com/v1</p>
-                  <p>• <strong>Claude:</strong> Anthropic官方API</p>
-                  <p>• <strong>第三方API:</strong> 如DeerAPI等，URL: https://api.deerapi.com/v1</p>
-                  <p className="mt-2"><strong>DeerAPI配置示例：</strong></p>
-                  <p>• API密钥：从DeerAPI获取的密钥</p>
-                  <p>• 基础URL：https://api.deerapi.com/v1</p>
-                  <p>• 模型：deepseek-chat, gpt-4, claude-3等</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex space-x-3 mt-8">
-              <button
-                onClick={() => setApiConfigDialogOpen(false)}
-                className="flex-1 px-6 py-3 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors font-medium"
-              >
-                取消
-              </button>
-              <button
+            <Paper sx={{ p: 3, bgcolor: 'info.light', color: 'info.contrastText' }}>
+              <Typography variant="subtitle2" gutterBottom>
+                配置说明：
+              </Typography>
+              <Typography variant="body2" component="div">
+                <Box component="ul" sx={{ pl: 2, m: 0 }}>
+                  <li><strong>OpenAI:</strong> 官方API，URL: https://api.openai.com/v1</li>
+                  <li><strong>Claude:</strong> Anthropic官方API</li>
+                  <li><strong>第三方API:</strong> 如DeerAPI等，URL: https://api.deerapi.com/v1</li>
+                </Box>
+              </Typography>
+            </Paper>
+          </Stack>
+        </DialogContent>
+        <DialogActions sx={{ p: 3 }}>
+          <Button onClick={() => setApiConfigDialogOpen(false)}>
+            取消
+          </Button>
+          <Button 
                 onClick={handleSaveApiConfig}
-                className="flex-1 px-6 py-3 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-colors font-medium"
+            variant="contained"
+            startIcon={<SaveIcon />}
               >
                 保存配置
-              </button>
-            </div>
-          </div>
-        </div>
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Container>
+  );
+};
+
+// 数据面板组件
+interface DataPanelProps {
+  title: string;
+  data: any[];
+  totalPages: number;
+  currentPage: number;
+  onPageChange: (page: number) => void;
+  renderItem: (item: any) => React.ReactNode;
+}
+
+const DataPanel: React.FC<DataPanelProps> = ({
+  title,
+  data,
+  totalPages,
+  currentPage,
+  onPageChange,
+  renderItem,
+}) => {
+  return (
+    <Box>
+      {data.length === 0 ? (
+        <Box sx={{ textAlign: 'center', py: 6 }}>
+          <DataObjectIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
+          <Typography variant="h6" color="text.secondary" gutterBottom>
+            暂无{title}数据
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            开始创建您的第一个内容吧
+          </Typography>
+        </Box>
+      ) : (
+        <>
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="subtitle2" color="text.secondary">
+              共 {data.length} 项数据
+            </Typography>
+          </Box>
+          
+          <Stack spacing={1}>
+            {data.map(renderItem)}
+          </Stack>
+          
+          {totalPages > 1 && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+              <Pagination
+                count={totalPages}
+                page={currentPage}
+                onChange={(_, page) => onPageChange(page)}
+                color="primary"
+                size="large"
+                showFirstButton
+                showLastButton
+              />
+            </Box>
+          )}
+        </>
       )}
-    </div>
+    </Box>
   );
 };
 

@@ -22,8 +22,6 @@ import {
   YouTube as YouTubeIcon,
   Category as CategoryIcon,
   Description as DescriptionIcon,
-  ChevronLeft as ChevronLeftIcon,
-  ChevronRight as ChevronRightIcon,
   Logout as LogoutIcon,
   Menu as MenuIcon,
   AccountTree as AccountTreeIcon,
@@ -34,8 +32,8 @@ import { useAuth } from '../contexts/AuthContext';
 import LogoComponent from './LogoComponent';
 
 const drawerWidth = 240;
-const collapsedWidth = 65;
-const transitionDuration = 200;
+const collapsedWidth = 72;
+const transitionDuration = 300;
 
 const baseMenuItems = [
   { text: '影片脚本管理', icon: <DescriptionIcon />, path: '/scripts' },
@@ -121,8 +119,9 @@ const Layout: React.FC = () => {
   const { logout, user } = useAuth();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [isDrawerCollapsed, setIsDrawerCollapsed] = useState(false);
-  const [showText, setShowText] = useState(true);
+  const [isDrawerCollapsed, setIsDrawerCollapsed] = useState(true); // 默认折叠
+  const [showText, setShowText] = useState(false); // 默认不显示文字
+  const [hoverTimer, setHoverTimer] = useState<NodeJS.Timeout | null>(null);
 
   // 动态生成菜单项
   const menuItems = React.useMemo(() => {
@@ -134,21 +133,48 @@ const Layout: React.FC = () => {
     return items;
   }, [user?.role]);
 
+  // 清理定时器
+  React.useEffect(() => {
+    return () => {
+      if (hoverTimer) {
+        clearTimeout(hoverTimer);
+      }
+    };
+  }, [hoverTimer]);
+
   const handleDrawerToggle = () => {
     if (isMobile) {
       setMobileOpen(!mobileOpen);
-    } else {
-      setIsDrawerCollapsed(!isDrawerCollapsed);
-      if (!isDrawerCollapsed) {
-        setShowText(false);
+    }
+  };
+
+  const handleMouseEnter = () => {
+    if (!isMobile) {
+      // 清除可能存在的折叠定时器
+      if (hoverTimer) {
+        clearTimeout(hoverTimer);
+        setHoverTimer(null);
       }
+      // 立即展开
+      setIsDrawerCollapsed(false);
+      setTimeout(() => setShowText(true), 50); // 稍微延迟显示文字，等待展开动画
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (!isMobile) {
+      // 立即隐藏文字
+      setShowText(false);
+      // 延迟折叠，避免鼠标快速移动时的闪烁
+      const timer = setTimeout(() => {
+        setIsDrawerCollapsed(true);
+      }, 100);
+      setHoverTimer(timer);
     }
   };
 
   const handleTransitionEnd = () => {
-    if (!isDrawerCollapsed) {
-      setShowText(true);
-    }
+    // 移除原有的文字显示逻辑，现在由鼠标事件控制
   };
 
   const handleNavigation = (path: string) => {
@@ -171,7 +197,11 @@ const Layout: React.FC = () => {
   };
 
   const drawer = (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+    <div 
+      style={{ height: '100%', display: 'flex', flexDirection: 'column', position: 'relative' }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       {/* 桌面端Logo区域 */}
       {!isMobile && (
         <>
@@ -181,38 +211,37 @@ const Layout: React.FC = () => {
               justifyContent: 'center',
               alignItems: 'center',
               px: 1,
-              minHeight: '56px !important'
+              minHeight: '56px !important',
+              position: 'relative'
             }}
           >
-            {/* Logo 区域 - 始终居中显示 */}
-            <LogoComponent
-              size="medium"
-              showText={!isDrawerCollapsed}
-              color="#ff6b35"
-              onClick={() => safeNavigate('/')}
-            />
+            {/* Logo 区域 - 根据折叠状态调整显示 */}
+            {isDrawerCollapsed ? (
+              <Box 
+                sx={{ 
+                  display: 'flex', 
+                  justifyContent: 'center', 
+                  alignItems: 'center',
+                  cursor: 'pointer',
+                  '&:hover': { opacity: 0.8 }
+                }}
+                onClick={() => safeNavigate('/')}
+              >
+                <LogoComponent
+                  size="small"
+                  showText={false}
+                  color="#ff6b35"
+                />
+              </Box>
+            ) : (
+              <LogoComponent
+                size="medium"
+                showText={true}
+                color="#ff6b35"
+                onClick={() => safeNavigate('/')}
+              />
+            )}
           </Toolbar>
-          
-          {/* 折叠按钮 - 整个导航栏上下居中 */}
-          <IconButton 
-            onClick={handleDrawerToggle} 
-            size="small"
-            sx={{ 
-              position: 'absolute',
-              right: 8,
-              top: '50%',
-              transform: 'translateY(-50%)',
-              zIndex: 1,
-              backgroundColor: 'background.paper',
-              border: '1px solid',
-              borderColor: 'divider',
-              '&:hover': {
-                backgroundColor: 'action.hover',
-              }
-            }}
-          >
-            {isDrawerCollapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
-          </IconButton>
           <Divider />
         </>
       )}
@@ -230,6 +259,7 @@ const Layout: React.FC = () => {
           />
         ))}
       </List>
+      
       <Box sx={{ flexGrow: 1 }} />
       <Divider />
       <List>

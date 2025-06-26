@@ -1,56 +1,49 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSnackbar } from 'notistack';
+import {
+  Box,
+  Container,
+  Typography,
+  Card,
+  CardContent,
+  Grid,
+  Avatar,
+  Button,
+  TextField,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Chip,
+  Paper,
+  InputAdornment,
+  Alert,
+  Pagination,
+  Stack,
+  Skeleton,
+  Badge,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  CircularProgress,
+  ButtonGroup
+} from '@mui/material';
+import {
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  Search as SearchIcon,
+  Person as PersonIcon,
+  AdminPanelSettings as AdminIcon,
+  Email as EmailIcon,
+  CalendarToday as CalendarIcon,
+  Description as DescriptionIcon,
+  Warning as WarningIcon,
+  TrendingUp as TrendingUpIcon,
+  People as PeopleIcon
+} from '@mui/icons-material';
 import { adminUsersApi, AdminUser, AdminUpdateUserRequest } from '../services/api';
 import { format } from 'date-fns';
-
-// 图标组件
-const UserIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-  </svg>
-);
-
-const AdminIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-  </svg>
-);
-
-const SearchIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-  </svg>
-);
-
-const EditIcon = () => (
-  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-  </svg>
-);
-
-const DeleteIcon = () => (
-  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-  </svg>
-);
-
-const CloseIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-  </svg>
-);
-
-const ChevronLeftIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-  </svg>
-);
-
-const ChevronRightIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-  </svg>
-);
 
 const AdminUserManagement: React.FC = () => {
   const { enqueueSnackbar } = useSnackbar();
@@ -63,7 +56,7 @@ const AdminUserManagement: React.FC = () => {
 
   // 分页和筛选状态
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize] = useState(12);
+  const [pageSize] = useState(8);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
@@ -91,15 +84,60 @@ const AdminUserManagement: React.FC = () => {
   const fetchUsers = useCallback(async () => {
     try {
       setLoading(true);
-      const params = {
+      
+      // 构建API参数，确保参数格式正确
+      const params: any = {
         page: currentPage,
         limit: pageSize,
-        search: debouncedSearchTerm,
-        sortBy,
-        order,
       };
+      
+      // 只有非空搜索词时才添加搜索参数
+      if (debouncedSearchTerm && debouncedSearchTerm.trim()) {
+        params.search = debouncedSearchTerm.trim();
+      }
+      
+      // 添加排序参数
+      if (sortBy) {
+        params.sortBy = sortBy;
+        params.order = order;
+      }
 
-      const response = await adminUsersApi.getAllUsers(params);
+      console.log('Fetching users with params:', params); // 调试日志
+      
+      let response;
+      try {
+        response = await adminUsersApi.getAllUsers(params);
+      } catch (apiError: any) {
+        console.error('Initial API call failed:', apiError);
+        
+        // 如果请求失败，尝试最简化的请求
+        if (apiError.response?.status === 400) {
+          console.warn('API call failed, trying minimal parameters');
+          const minimalParams = {
+            page: 1,
+            limit: 10
+          };
+          try {
+            response = await adminUsersApi.getAllUsers(minimalParams);
+            console.log('Minimal request succeeded, adjusting current request');
+            // 如果最简请求成功，使用当前页码重试
+            if (response.success) {
+              const retryParams = {
+                page: currentPage,
+                limit: pageSize
+              };
+              response = await adminUsersApi.getAllUsers(retryParams);
+            }
+          } catch (minimalError) {
+            console.error('Even minimal request failed:', minimalError);
+            throw apiError; // 抛出原始错误
+          }
+        } else {
+          throw apiError;
+        }
+      }
+      
+      console.log('API response:', response); // 调试日志
       
       if (response.success && response.data) {
         const items = response.data.items || [];
@@ -109,13 +147,37 @@ const AdminUserManagement: React.FC = () => {
           const paginationData = response.data.pagination;
           setTotalCount(paginationData.total || 0);
           setTotalPages(paginationData.pages || 1);
+        } else {
+          // 如果没有分页信息，设置默认值
+          setTotalCount(items.length);
+          setTotalPages(1);
         }
       } else {
+        console.error('API returned error:', response);
         enqueueSnackbar(response.message || '获取用户列表失败', { variant: 'error' });
+        setUsers([]);
+        setTotalCount(0);
+        setTotalPages(1);
       }
     } catch (error: any) {
       console.error('Error fetching users:', error);
-      enqueueSnackbar(error.message || '获取用户列表失败', { variant: 'error' });
+      
+      // 提供更详细的错误信息
+      let errorMessage = '获取用户列表失败';
+      if (error.response?.status === 400) {
+        errorMessage = '请求参数错误，请检查搜索条件';
+      } else if (error.response?.status === 403) {
+        errorMessage = '权限不足，无法访问用户管理';
+      } else if (error.response?.status === 500) {
+        errorMessage = '服务器内部错误，请稍后重试';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      enqueueSnackbar(errorMessage, { variant: 'error' });
+      setUsers([]); // 清空用户列表
+      setTotalCount(0);
+      setTotalPages(1);
     } finally {
       setLoading(false);
     }
@@ -125,12 +187,12 @@ const AdminUserManagement: React.FC = () => {
     fetchUsers();
   }, [fetchUsers]);
 
-  const handlePageChange = (page: number) => {
+  const handlePageChange = (event: React.ChangeEvent<unknown>, page: number) => {
     setCurrentPage(page);
   };
 
-  const handleSearchChange = (value: string) => {
-    setSearchTerm(value);
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(event.target.value);
   };
 
   const handleEditUser = (user: AdminUser) => {
@@ -196,393 +258,490 @@ const AdminUserManagement: React.FC = () => {
     setCurrentPage(1);
   };
 
-  // 分页组件
-  const Pagination = () => {
-    if (totalPages <= 1) {
-      return null;
-    }
+  // 获取统计卡片数据
+  const getStatsCards = () => {
+    // 注意：这里的统计是基于当前页面的用户，实际应用中可能需要从API获取全局统计
+    const adminCount = users.filter(user => user.role === 'ADMIN').length;
+    const userCount = users.filter(user => user.role === 'USER').length;
+    const unknownRoleCount = users.filter(user => !user.role || (user.role !== 'ADMIN' && user.role !== 'USER')).length;
+    const totalScripts = users.reduce((sum, user) => sum + (user.stats?.total_scripts || 0), 0);
 
-    const pages = [];
-    const maxVisiblePages = 5;
-    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-
-    if (endPage - startPage + 1 < maxVisiblePages) {
-      startPage = Math.max(1, endPage - maxVisiblePages + 1);
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(i);
-    }
-
-    return (
-      <div className="flex items-center justify-center space-x-2 mt-8">
-                 <button
-           onClick={() => handlePageChange(currentPage - 1)}
-           disabled={currentPage === 1}
-           className="p-2 rounded-lg border border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
-           title="上一页"
-           aria-label="上一页"
-         >
-           <ChevronLeftIcon />
-         </button>
-        
-        {startPage > 1 && (
-          <>
-            <button
-              onClick={() => handlePageChange(1)}
-              className="px-3 py-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
-            >
-              1
-            </button>
-            {startPage > 2 && <span className="px-2">...</span>}
-          </>
-        )}
-        
-        {pages.map(page => (
-          <button
-            key={page}
-            onClick={() => handlePageChange(page)}
-            className={`px-3 py-2 rounded-lg border transition-colors ${
-              page === currentPage
-                ? 'bg-orange-500 text-white border-orange-500'
-                : 'border-gray-200 hover:bg-gray-50'
-            }`}
-          >
-            {page}
-          </button>
-        ))}
-        
-        {endPage < totalPages && (
-          <>
-            {endPage < totalPages - 1 && <span className="px-2">...</span>}
-            <button
-              onClick={() => handlePageChange(totalPages)}
-              className="px-3 py-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
-            >
-              {totalPages}
-            </button>
-          </>
-        )}
-        
-                 <button
-           onClick={() => handlePageChange(currentPage + 1)}
-           disabled={currentPage === totalPages}
-           className="p-2 rounded-lg border border-gray-200 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
-           title="下一页"
-           aria-label="下一页"
-         >
-           <ChevronRightIcon />
-         </button>
-      </div>
-    );
+    return [
+      {
+        title: '总用户数',
+        value: totalCount, // 使用API返回的总数
+        icon: <PeopleIcon />,
+        color: 'primary',
+        bgcolor: 'primary.light'
+      },
+      {
+        title: '当前页管理员',
+        value: adminCount, // 当前页面的管理员数量
+        icon: <AdminIcon />,
+        color: 'error',
+        bgcolor: 'error.light'
+      },
+      {
+        title: '当前页普通用户',
+        value: userCount, // 当前页面的普通用户数量
+        icon: <PersonIcon />,
+        color: 'success',
+        bgcolor: 'success.light'
+      },
+      {
+        title: '当前页脚本数',
+        value: totalScripts, // 当前页面用户的脚本总数
+        icon: <DescriptionIcon />,
+        color: 'warning',
+        bgcolor: 'warning.light'
+      },
+      ...(unknownRoleCount > 0 ? [{
+        title: '角色异常用户',
+        value: unknownRoleCount,
+        icon: <WarningIcon />,
+        color: 'error',
+        bgcolor: 'error.light'
+      }] : [])
+    ];
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* 页面头部 */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              用户管理
-            </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              管理系统用户，查看用户信息和统计数据
-            </p>
-          </div>
-        </div>
-      </div>
+  if (loading && users.length === 0) {
+    return (
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        {/* 统计卡片骨架屏 */}
+        <Grid container spacing={3} sx={{ mb: 4 }}>
+          {[1, 2, 3, 4].map((item) => (
+            <Grid key={item} size={{ xs: 12, sm: 6, md: 3 }}>
+              <Skeleton variant="rectangular" height={120} sx={{ borderRadius: 2 }} />
+            </Grid>
+          ))}
+        </Grid>
 
-      {/* 主要内容 */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* 搜索和筛选 */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8">
-          <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-            <div className="relative flex-1 max-w-md">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <SearchIcon />
-              </div>
-              <input
-                type="text"
+        {/* 搜索区域骨架屏 */}
+        <Skeleton variant="rectangular" height={80} sx={{ borderRadius: 2, mb: 4 }} />
+
+                 {/* 用户卡片骨架屏 */}
+         <Grid container spacing={3}>
+           {[1, 2, 3, 4, 5, 6, 7, 8].map((item) => (
+             <Grid key={item} size={{ xs: 12, sm: 6, md: 3 }}>
+              <Skeleton variant="rectangular" height={300} sx={{ borderRadius: 3 }} />
+            </Grid>
+          ))}
+        </Grid>
+      </Container>
+    );
+  }
+
+  return (
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      {/* 统计卡片网格 */}
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        {getStatsCards().map((stat, index) => (
+          <Grid key={index} size={{ xs: 12, sm: 6, md: 3 }}>
+            <Card 
+              sx={{ 
+                height: '100%',
+                borderRadius: 3,
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  transform: 'translateY(-4px)',
+                  boxShadow: 6
+                }
+              }}
+            >
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                  <Box 
+                    sx={{ 
+                      p: 1.5, 
+                      borderRadius: 2, 
+                      bgcolor: stat.bgcolor,
+                      color: 'white'
+                    }}
+                  >
+                    {stat.icon}
+                  </Box>
+                  <Chip 
+                    label={<TrendingUpIcon fontSize="small" />}
+                    size="small"
+                    color="success"
+                    variant="outlined"
+                  />
+                </Box>
+                <Typography variant="h4" fontWeight="bold" gutterBottom>
+                  {stat.value}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {stat.title}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+
+            {/* 搜索和筛选区域 */}
+      <Card sx={{ borderRadius: 3, mb: 4 }}>
+        <CardContent sx={{ py: 2 }}>
+          <Grid container spacing={2} alignItems="center">
+            <Grid size={{ xs: 12, md: 6 }}>
+              <TextField
+                fullWidth
+                size="small"
                 placeholder="搜索用户名或邮箱..."
                 value={searchTerm}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                onChange={handleSearchChange}
+                variant="outlined"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  ),
+                  endAdornment: loading && searchTerm ? (
+                    <InputAdornment position="end">
+                      <CircularProgress size={16} />
+                    </InputAdornment>
+                  ) : null,
+                }}
               />
-              {loading && searchTerm && (
-                <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-orange-500"></div>
-                </div>
-              )}
-            </div>
+            </Grid>
             
-            <div className="flex items-center space-x-2">
-              <div className="flex bg-gray-100 rounded-xl p-1">
-                {[
-                  { value: 'createdAt', label: '创建时间' },
-                  { value: 'updatedAt', label: '最后修改' },
-                  { value: 'username', label: '用户名' },
-                  { value: 'role', label: '角色' }
-                ].map((option) => (
-                  <button
-                    key={option.value}
-                    onClick={() => handleSortChange(option.value)}
-                    className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                      sortBy === option.value
-                        ? 'bg-white text-orange-600 shadow-sm'
-                        : 'text-gray-600 hover:text-gray-900'
-                    }`}
+            <Grid size={{ xs: 12, md: 6 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, justifyContent: 'flex-end' }}>
+                <FormControl size="small" sx={{ minWidth: 100 }}>
+                  <InputLabel>排序</InputLabel>
+                  <Select
+                    value={sortBy}
+                    label="排序"
+                    onChange={(e) => handleSortChange(e.target.value as string)}
                   >
-                    {option.label}
-                    {sortBy === option.value && (
-                      <span className="ml-1">
-                        {order === 'desc' ? '↓' : '↑'}
-                      </span>
-                    )}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-          
-          <div className="mt-4 text-sm text-gray-500 text-right">
-            共 {totalCount || 0} 个用户
-          </div>
-        </div>
+                    <MenuItem value="createdAt">创建时间</MenuItem>
+                    <MenuItem value="updatedAt">最后修改</MenuItem>
+                    <MenuItem value="username">用户名</MenuItem>
+                    <MenuItem value="role">角色</MenuItem>
+                  </Select>
+                </FormControl>
 
-        {/* 加载状态 */}
-        {loading && users.length === 0 && (
-          <div className="flex justify-center items-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
-          </div>
-        )}
-
-        {/* 用户卡片网格 */}
-        {!loading && users.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {users.map((user) => (
-              <div
-                key={user.userId}
-                className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-all duration-200 hover:-translate-y-1"
-              >
-                {/* 用户头像和基本信息 */}
-                <div className="flex items-center space-x-3 mb-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white font-medium">
-                    {user.displayName ? user.displayName.charAt(0).toUpperCase() : user.username.charAt(0).toUpperCase()}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-lg font-semibold text-gray-900 truncate">
-                      {user.displayName || user.username}
-                    </h3>
-                    <p className="text-sm text-gray-500 truncate">@{user.username}</p>
-                  </div>
-                </div>
-
-                {/* 角色标签 */}
-                <div className="mb-4">
-                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                    user.role === 'ADMIN' 
-                      ? 'bg-red-100 text-red-800' 
-                      : 'bg-blue-100 text-blue-800'
-                  }`}>
-                    {user.role === 'ADMIN' ? <AdminIcon /> : <UserIcon />}
-                    <span className="ml-1">{user.role === 'ADMIN' ? '管理员' : '普通用户'}</span>
-                  </span>
-                </div>
-
-                {/* 用户信息 */}
-                <div className="space-y-2 mb-4">
-                  <div className="flex items-center text-sm text-gray-600">
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
-                    </svg>
-                    <span className="truncate">{user.email}</span>
-                  </div>
-                  <div className="flex items-center text-sm text-gray-600">
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span>{format(new Date(user.createdAt), 'yyyy-MM-dd')}</span>
-                  </div>
-                </div>
-
-                {/* 统计信息 */}
-                <div className="grid grid-cols-3 gap-2 mb-4">
-                  <div className="text-center p-2 bg-gray-50 rounded-lg">
-                    <div className="text-lg font-semibold text-gray-900">{user.stats?.total_scripts || 0}</div>
-                    <div className="text-xs text-gray-500">脚本</div>
-                  </div>
-                  <div className="text-center p-2 bg-gray-50 rounded-lg">
-                    <div className="text-lg font-semibold text-gray-900">{user.stats?.total_channels || 0}</div>
-                    <div className="text-xs text-gray-500">频道</div>
-                  </div>
-                  <div className="text-center p-2 bg-gray-50 rounded-lg">
-                    <div className="text-lg font-semibold text-gray-900">{user.stats?.total_categories || 0}</div>
-                    <div className="text-xs text-gray-500">分类</div>
-                  </div>
-                </div>
-
-                {/* 操作按钮 */}
-                <div className="flex space-x-2">
-                  <button
-                    onClick={() => handleEditUser(user)}
-                    className="flex-1 flex items-center justify-center px-3 py-2 bg-orange-50 text-orange-600 rounded-lg hover:bg-orange-100 transition-colors"
+                <ButtonGroup size="small" variant="outlined">
+                  <Button
+                    onClick={() => setOrder('desc')}
+                    variant={order === 'desc' ? 'contained' : 'outlined'}
+                    sx={{ px: 1.5 }}
                   >
-                    <EditIcon />
-                    <span className="ml-1 text-sm">编辑</span>
-                  </button>
-                  <button
-                    onClick={() => handleDeleteUser(user)}
-                    className="flex-1 flex items-center justify-center px-3 py-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors"
+                    降序
+                  </Button>
+                  <Button
+                    onClick={() => setOrder('asc')}
+                    variant={order === 'asc' ? 'contained' : 'outlined'}
+                    sx={{ px: 1.5 }}
                   >
-                    <DeleteIcon />
-                    <span className="ml-1 text-sm">删除</span>
-                  </button>
-                </div>
-              </div>
+                    升序
+                  </Button>
+                </ButtonGroup>
+
+                <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
+                  {loading ? '加载中...' : `共 ${totalCount || 0} 个用户`}
+                </Typography>
+                {loading && (
+                  <CircularProgress size={16} />
+                )}
+              </Box>
+            </Grid>
+          </Grid>
+        </CardContent>
+      </Card>
+
+      {/* 用户卡片网格 */}
+      {users.length > 0 ? (
+        <>
+                     <Grid container spacing={3}>
+             {users.map((user) => (
+               <Grid key={user.userId} size={{ xs: 12, sm: 6, md: 3 }}>
+                <Card 
+                  sx={{ 
+                    height: '100%',
+                    borderRadius: 3,
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      transform: 'translateY(-4px)',
+                      boxShadow: 6
+                    }
+                  }}
+                >
+                  <CardContent>
+                    {/* 用户头像和基本信息 */}
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                      <Badge
+                        overlap="circular"
+                        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                        badgeContent={
+                          user.role === 'ADMIN' ? (
+                            <AdminIcon sx={{ fontSize: 16, color: 'error.main' }} />
+                          ) : user.role === 'USER' ? (
+                            <PersonIcon sx={{ fontSize: 16, color: 'success.main' }} />
+                          ) : (
+                            <PersonIcon sx={{ fontSize: 16, color: 'grey.main' }} />
+                          )
+                        }
+                      >
+                        <Avatar
+                          sx={{
+                            width: 56,
+                            height: 56,
+                            bgcolor: 'primary.main',
+                            fontSize: '1.5rem',
+                            fontWeight: 'bold'
+                          }}
+                        >
+                          {user.displayName ? user.displayName.charAt(0).toUpperCase() : user.username.charAt(0).toUpperCase()}
+                        </Avatar>
+                      </Badge>
+                      <Box sx={{ ml: 2, flex: 1, minWidth: 0 }}>
+                        <Typography variant="h6" fontWeight="bold" noWrap>
+                          {user.displayName || user.username}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary" noWrap>
+                          @{user.username}
+                        </Typography>
+                      </Box>
+                    </Box>
+
+                    {/* 角色标签 */}
+                    <Box sx={{ mb: 3 }}>
+                      <Chip
+                        icon={user.role === 'ADMIN' ? <AdminIcon /> : <PersonIcon />}
+                        label={user.role === 'ADMIN' ? '管理员' : user.role === 'USER' ? '普通用户' : '未知角色'}
+                        color={user.role === 'ADMIN' ? 'error' : user.role === 'USER' ? 'primary' : 'default'}
+                        variant="outlined"
+                        size="small"
+                      />
+                    </Box>
+
+                    {/* 用户信息 */}
+                    <Stack spacing={1} sx={{ mb: 3 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <EmailIcon color="action" fontSize="small" />
+                        <Typography variant="body2" color="text.secondary" noWrap>
+                          {user.email}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <CalendarIcon color="action" fontSize="small" />
+                        <Typography variant="body2" color="text.secondary">
+                          {format(new Date(user.createdAt), 'yyyy-MM-dd')}
+                        </Typography>
+                      </Box>
+                    </Stack>
+
+                    {/* 统计信息 */}
+                    <Grid container spacing={1} sx={{ mb: 3 }}>
+                      <Grid size={4}>
+                        <Paper sx={{ p: 1, textAlign: 'center', bgcolor: 'grey.50' }}>
+                          <Typography variant="h6" fontWeight="bold">
+                            {user.stats?.total_scripts || 0}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            脚本
+                          </Typography>
+                        </Paper>
+                      </Grid>
+                      <Grid size={4}>
+                        <Paper sx={{ p: 1, textAlign: 'center', bgcolor: 'grey.50' }}>
+                          <Typography variant="h6" fontWeight="bold">
+                            {user.stats?.total_channels || 0}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            频道
+                          </Typography>
+                        </Paper>
+                      </Grid>
+                      <Grid size={4}>
+                        <Paper sx={{ p: 1, textAlign: 'center', bgcolor: 'grey.50' }}>
+                          <Typography variant="h6" fontWeight="bold">
+                            {user.stats?.total_categories || 0}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            分类
+                          </Typography>
+                        </Paper>
+                      </Grid>
+                    </Grid>
+
+                    {/* 操作按钮 */}
+                    <Stack direction="row" spacing={1}>
+                      <Button
+                        variant="outlined"
+                        color="primary"
+                        size="small"
+                        startIcon={<EditIcon />}
+                        onClick={() => handleEditUser(user)}
+                        fullWidth
+                      >
+                        编辑
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        color="error"
+                        size="small"
+                        startIcon={<DeleteIcon />}
+                        onClick={() => handleDeleteUser(user)}
+                        fullWidth
+                      >
+                        删除
+                      </Button>
+                    </Stack>
+                  </CardContent>
+                </Card>
+              </Grid>
             ))}
-          </div>
-        )}
+          </Grid>
 
-        {/* 空状态 */}
-        {!loading && users.length === 0 && (
-          <div className="text-center py-20">
-            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <UserIcon />
-            </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">暂无用户</h3>
-            <p className="text-gray-500">系统中还没有用户数据</p>
-          </div>
-        )}
+                     {/* 分页 */}
+           {totalPages > 1 && (
+             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 4, gap: 2 }}>
+               <Pagination
+                 count={totalPages} // 恢复完整分页功能
+                 page={currentPage}
+                 onChange={handlePageChange}
+                 color="primary"
+                 size="large"
+                 showFirstButton
+                 showLastButton
+               />
 
-        {/* 分页 */}
-        <Pagination />
-      </div>
+             </Box>
+           )}
+        </>
+             ) : (
+         /* 空状态 */
+         <Box sx={{ textAlign: 'center', py: 8 }}>
+           <PeopleIcon sx={{ fontSize: 64, color: 'text.disabled', mb: 2 }} />
+           <Typography variant="h6" color="text.secondary" gutterBottom>
+             暂无用户数据
+           </Typography>
+           <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+             {debouncedSearchTerm ? '没有找到匹配的用户' : '系统中还没有用户数据'}
+           </Typography>
+           
+
+           
+           <Button 
+             variant="outlined" 
+             onClick={fetchUsers}
+             disabled={loading}
+           >
+             重新加载
+           </Button>
+         </Box>
+       )}
 
       {/* 编辑用户对话框 */}
-      {editDialogOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-semibold text-gray-900">编辑用户信息</h3>
-              <button
-                onClick={() => setEditDialogOpen(false)}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                title="关闭对话框"
-                aria-label="关闭对话框"
-              >
-                <CloseIcon />
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">邮箱地址</label>
-                                <input
+      <Dialog 
+        open={editDialogOpen} 
+        onClose={() => setEditDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: 3 } }}
+      >
+        <DialogTitle sx={{ pb: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <EditIcon color="primary" />
+            编辑用户信息
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <Stack spacing={3} sx={{ pt: 2 }}>
+            <TextField
+              label="邮箱地址"
               type="email"
               value={editFormData.email}
               onChange={(e) => setEditFormData(prev => ({ ...prev, email: e.target.value }))}
-                  className="w-full px-3 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
-                  placeholder="请输入邮箱地址"
-                  title="邮箱地址"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">显示名称</label>
-                <input
-                  type="text"
+              fullWidth
+              variant="outlined"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <EmailIcon />
+                  </InputAdornment>
+                ),
+              }}
+            />
+            
+            <TextField
+              label="显示名称"
               value={editFormData.displayName}
               onChange={(e) => setEditFormData(prev => ({ ...prev, displayName: e.target.value }))}
-                  className="w-full px-3 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
-                  placeholder="请输入显示名称"
-                  title="显示名称"
-                />
-              </div>
+              fullWidth
+              variant="outlined"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <PersonIcon />
+                  </InputAdornment>
+                ),
+              }}
+            />
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">用户角色</label>
-                <select
+            <FormControl fullWidth>
+              <InputLabel>用户角色</InputLabel>
+              <Select
                 value={editFormData.role}
                 onChange={(e) => setEditFormData(prev => ({ ...prev, role: e.target.value }))}
-                  className="w-full px-3 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
-                  title="用户角色"
-                >
-                  <option value="USER">普通用户</option>
-                  <option value="ADMIN">管理员</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="flex space-x-3 mt-6">
-              <button
-                onClick={() => setEditDialogOpen(false)}
-                className="flex-1 px-4 py-3 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors"
+                label="用户角色"
               >
-                取消
-              </button>
-              <button
-                onClick={handleSaveEdit}
-                className="flex-1 px-4 py-3 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-colors"
-              >
-                保存
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+                <MenuItem value="USER">普通用户</MenuItem>
+                <MenuItem value="ADMIN">管理员</MenuItem>
+              </Select>
+            </FormControl>
+          </Stack>
+        </DialogContent>
+        <DialogActions sx={{ p: 3 }}>
+          <Button onClick={() => setEditDialogOpen(false)}>
+            取消
+          </Button>
+          <Button onClick={handleSaveEdit} variant="contained">
+            保存
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* 删除确认对话框 */}
-      {deleteDialogOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-semibold text-gray-900">确认删除</h3>
-              <button
-                onClick={() => setDeleteDialogOpen(false)}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                title="关闭对话框"
-                aria-label="关闭对话框"
-              >
-                <CloseIcon />
-              </button>
-            </div>
-
-            <div className="mb-6">
-              <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-4">
-                <div className="flex items-center">
-                  <svg className="w-5 h-5 text-red-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z" />
-                  </svg>
-                  <span className="text-red-800 font-medium">
-                    您确定要删除用户 "{currentUser?.username}" 吗？
-                  </span>
-                </div>
-              </div>
-              <p className="text-gray-600 text-sm">
-                删除用户将会同时删除该用户的所有数据，包括脚本、频道和分类等。此操作不可撤销。
-              </p>
-            </div>
-
-            <div className="flex space-x-3">
-              <button
-                onClick={() => setDeleteDialogOpen(false)}
-                className="flex-1 px-4 py-3 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors"
-              >
-                取消
-              </button>
-              <button
-                onClick={confirmDeleteUser}
-                className="flex-1 px-4 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-colors"
-              >
-                确认删除
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+      <Dialog 
+        open={deleteDialogOpen} 
+        onClose={() => setDeleteDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: 3 } }}
+      >
+        <DialogTitle sx={{ pb: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <WarningIcon color="error" />
+            确认删除用户
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <Alert severity="error" sx={{ mb: 3 }}>
+            您确定要删除用户 "{currentUser?.username}" 吗？
+          </Alert>
+          <Typography variant="body2" color="text.secondary">
+            删除用户将会同时删除该用户的所有数据，包括脚本、频道和分类等。此操作不可撤销。
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ p: 3 }}>
+          <Button onClick={() => setDeleteDialogOpen(false)}>
+            取消
+          </Button>
+          <Button 
+            onClick={confirmDeleteUser} 
+            variant="contained"
+            color="error"
+          >
+            确认删除
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Container>
   );
 };
 

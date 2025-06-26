@@ -703,8 +703,8 @@ const ScriptEdit: React.FC = () => {
              boxShadow: 'none'
            }
          }}>
-           <CardContent sx={{ p: 3, pl: 6 }}>
-             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3, ml: -2 }}>
+           <CardContent sx={{ p: 2.5, pl: 6, pb: 2 }}>
+             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2, ml: -2 }}>
                <Box sx={{ display: 'flex', alignItems: 'center' }}>
                  <ArticleIcon sx={{ mr: 1, color: 'text.secondary' }} />
                  <Typography variant="h6" sx={{ fontWeight: 500 }}>
@@ -728,26 +728,23 @@ const ScriptEdit: React.FC = () => {
                </Button>
              </Box>
 
-             <Stack spacing={3}>
+             <Stack spacing={1}>
                {formData.chapters?.map((chapter, index) => (
                  <Box key={index}>
-                   {index > 0 && <Divider sx={{ my: 2 }} />}
-                   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2, ml: -2 }}>
-                     <Typography variant="subtitle1" sx={{ fontWeight: 500, color: 'text.primary' }}>
+                   {index > 0 && <Divider sx={{ my: 1 }} />}
+                   
+                   {/* 章节标题行 - 将"第X章"和标题输入框放在一行 */}
+                   <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, mb: 1, ml: -2 }}>
+                     <Typography variant="subtitle1" sx={{ 
+                       fontWeight: 500, 
+                       color: 'text.primary',
+                       minWidth: '60px',
+                       mt: 0.5,
+                       flexShrink: 0
+                     }}>
                        第 {chapter.chapter_number} 章
                      </Typography>
-                     {formData.chapters && formData.chapters.length > 1 && (
-                       <IconButton
-                         color="error"
-                         onClick={() => removeChapter(index)}
-                         size="medium"
-                       >
-                         <RemoveCircleIcon />
-                       </IconButton>
-                     )}
-                   </Box>
-                   
-                   <Stack spacing={2}>
+                     
                      <TextField
                        placeholder="章节标题"
                        value={chapter.title}
@@ -768,6 +765,7 @@ const ScriptEdit: React.FC = () => {
                              padding: 0,
                              resize: 'none',
                              lineHeight: 1.4,
+                             overflow: 'hidden',
                              '&::placeholder': {
                                color: '#d0d0d0',
                                opacity: 1,
@@ -776,35 +774,48 @@ const ScriptEdit: React.FC = () => {
                          }
                        }}
                      />
-                     <TextField
-                       placeholder="开始编写章节内容..."
-                       value={chapter.content}
-                       onChange={(e) => {
-                         const newChapters = [...(formData.chapters || [])];
-                         newChapters[index].content = e.target.value;
-                         setFormData(prev => ({ ...prev, chapters: newChapters }));
-                       }}
-                       variant="standard"
-                       fullWidth
-                       multiline
-                       minRows={6}
-                       InputProps={{
-                         disableUnderline: true,
-                         sx: {
-                           fontSize: '1rem',
-                           lineHeight: 1.6,
-                           '& textarea': {
-                             padding: 0,
-                             resize: 'none',
-                             '&::placeholder': {
-                               color: '#d0d0d0',
-                               opacity: 1,
-                             }
+                     
+                     {formData.chapters && formData.chapters.length > 1 && (
+                       <IconButton
+                         color="error"
+                         onClick={() => removeChapter(index)}
+                         size="small"
+                         sx={{ mt: -0.5, flexShrink: 0 }}
+                       >
+                         <RemoveCircleIcon />
+                       </IconButton>
+                     )}
+                   </Box>
+                   
+                   {/* 章节内容 */}
+                   <TextField
+                     placeholder="开始编写章节内容..."
+                     value={chapter.content}
+                     onChange={(e) => {
+                       const newChapters = [...(formData.chapters || [])];
+                       newChapters[index].content = e.target.value;
+                       setFormData(prev => ({ ...prev, chapters: newChapters }));
+                     }}
+                     variant="standard"
+                     fullWidth
+                     multiline
+                     InputProps={{
+                       disableUnderline: true,
+                       sx: {
+                         fontSize: '1rem',
+                         lineHeight: 1.5,
+                         '& textarea': {
+                           padding: 0,
+                           resize: 'none',
+                           overflow: 'hidden',
+                           '&::placeholder': {
+                             color: '#d0d0d0',
+                             opacity: 1,
                            }
                          }
-                       }}
-                     />
-                   </Stack>
+                       }
+                     }}
+                   />
                  </Box>
                ))}
              </Stack>

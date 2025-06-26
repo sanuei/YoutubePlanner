@@ -1,59 +1,67 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSnackbar } from 'notistack';
+import {
+  Box,
+  Typography,
+  Card,
+  CardContent,
+  Grid,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Chip,
+  Paper,
+  InputAdornment,
+  Stack,
+  Skeleton,
+  IconButton,
+  Fab,
+  Avatar,
+  alpha,
+  useTheme,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  useMediaQuery,
+  Collapse,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Checkbox,
+  Pagination
+} from '@mui/material';
+import {
+  Add as AddIcon,
+  Delete as DeleteIcon,
+  Edit as EditIcon,
+  YouTube as YouTubeIcon,
+  Search as SearchIcon,
+  FilterList as FilterIcon,
+  ExpandLess as ExpandLessIcon,
+  Sort as SortIcon
+} from '@mui/icons-material';
 import { channelsApi, categoriesApi, Channel, Category } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
-
-// 图标组件
-const ChannelIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4V2a1 1 0 011-1h8a1 1 0 011 1v2h4a1 1 0 011 1v1a1 1 0 01-1 1v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7a1 1 0 01-1-1V5a1 1 0 011-1h4zM9 3v1h6V3H9z" />
-  </svg>
-);
-
-const AddIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-  </svg>
-);
-
-const SearchIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-  </svg>
-);
-
-const DeleteIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-  </svg>
-);
-
-const EditIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-  </svg>
-);
-
-const CloseIcon = () => (
-  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-  </svg>
-);
-
-const CategoryIcon = () => (
-  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-  </svg>
-);
+import { format } from 'date-fns';
 
 const ChannelList: React.FC = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [channels, setChannels] = useState<Channel[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
-  const [search, setSearch] = useState('');
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [showFilters, setShowFilters] = useState(false);
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [sortBy] = useState('created_at');
-  const [order] = useState<'asc' | 'desc'>('desc');
+  const [sortBy, setSortBy] = useState('created_at');
+  const [order, setOrder] = useState<'asc' | 'desc'>('desc');
   const [openDialog, setOpenDialog] = useState(false);
   const [editChannel, setEditChannel] = useState<Channel | null>(null);
   const [channelName, setChannelName] = useState('');
@@ -61,13 +69,27 @@ const ChannelList: React.FC = () => {
   const { enqueueSnackbar } = useSnackbar();
   const { user } = useAuth();
 
+  // 分页状态
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10,
+    total: 0,
+    pages: 1,
+  });
+
+  // 筛选状态
+  const [filters, setFilters] = useState({
+    search: '',
+    category_id: '',
+  });
+
   // 搜索防抖
   useEffect(() => {
     const timer = setTimeout(() => {
-      setDebouncedSearch(search);
+      setDebouncedSearch(filters.search);
     }, 300);
     return () => clearTimeout(timer);
-  }, [search]);
+  }, [filters.search]);
 
   const fetchChannels = useCallback(async () => {
     try {
@@ -76,10 +98,19 @@ const ChannelList: React.FC = () => {
         search: debouncedSearch,
         sort_by: sortBy,
         order,
+        page: pagination.page,
+        limit: pagination.limit,
       });
       
       if (response.success) {
         setChannels(response.data.items);
+        if (response.data.pagination) {
+          setPagination(prev => ({
+            ...prev,
+            total: response.data.pagination.total || 0,
+            pages: Math.ceil((response.data.pagination.total || 0) / pagination.limit),
+          }));
+        }
       } else {
         enqueueSnackbar(response.message || '获取频道列表失败', { variant: 'error' });
         setChannels([]);
@@ -90,8 +121,9 @@ const ChannelList: React.FC = () => {
       setChannels([]);
     } finally {
       setLoading(false);
+      setInitialLoading(false);
     }
-  }, [debouncedSearch, sortBy, order, enqueueSnackbar]);
+  }, [debouncedSearch, sortBy, order, pagination.page, pagination.limit, enqueueSnackbar]);
 
   const fetchCategories = useCallback(async () => {
     try {
@@ -111,6 +143,18 @@ const ChannelList: React.FC = () => {
     fetchChannels();
     fetchCategories();
   }, [fetchChannels, fetchCategories]);
+
+  const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
+    setPagination(prev => ({ ...prev, page: value }));
+  };
+
+  const handleFilterChange = (field: string, value: string) => {
+    setFilters(prev => {
+      const newFilters = { ...prev, [field]: value };
+      return newFilters;
+    });
+    setPagination(prev => ({ ...prev, page: 1 })); // 重置页码
+  };
 
   const handleCreateChannel = async () => {
     if (!channelName.trim()) {
@@ -149,7 +193,7 @@ const ChannelList: React.FC = () => {
     }
   };
 
-  const handleDeleteChannels = async () => {
+  const handleBatchDelete = async () => {
     if (!window.confirm('确定要删除选中的频道吗？')) return;
     
     try {
@@ -174,7 +218,7 @@ const ChannelList: React.FC = () => {
     setOpenDialog(true);
   };
 
-  const handleChannelSelect = (channelId: number) => {
+  const handleRowSelect = (channelId: number) => {
     setSelectedChannels(prev => 
       prev.includes(channelId) 
         ? prev.filter(id => id !== channelId)
@@ -189,221 +233,477 @@ const ChannelList: React.FC = () => {
     );
   };
 
-  if (loading) {
+  // 频道卡片组件（移动端）
+  const ChannelCard = ({ channel }: { channel: Channel }) => {
+    const channelCategories = getChannelCategories(channel.channel_id);
+    const isSelected = selectedChannels.includes(channel.channel_id);
+
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500"></div>
-      </div>
+      <Card 
+        elevation={0}
+        sx={{ 
+          mb: 2,
+          border: `1px solid ${alpha(theme.palette.grey[200], 0.8)}`,
+          borderRadius: 1.5,
+          position: 'relative',
+          ...(isSelected && {
+            borderColor: theme.palette.primary.main,
+            boxShadow: `0 0 0 1px ${alpha(theme.palette.primary.main, 0.3)}`
+          })
+        }}
+      >
+        <CardContent sx={{ p: 2 }}>
+          <Stack direction="row" spacing={2} alignItems="flex-start">
+            <Checkbox
+              checked={isSelected}
+              onChange={() => handleRowSelect(channel.channel_id)}
+            />
+            
+            <Avatar sx={{ bgcolor: 'error.main' }}>
+              <YouTubeIcon />
+            </Avatar>
+            
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Typography 
+                variant="subtitle1" 
+                fontWeight={600}
+                sx={{ 
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                {channel.channel_name}
+              </Typography>
+              
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                {channel.scripts_count || 0} 个脚本 • {channelCategories.length} 个分类
+              </Typography>
+              
+              {channelCategories.length > 0 && (
+                <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
+                  {channelCategories.slice(0, 2).map((category) => (
+                    <Chip
+                      key={category.category_id}
+                      label={category.category_name}
+                      size="small"
+                      variant="outlined"
+                      sx={{ fontSize: '0.7rem', height: 20 }}
+                    />
+                  ))}
+                  {channelCategories.length > 2 && (
+                    <Chip
+                      label={`+${channelCategories.length - 2}`}
+                      size="small"
+                      variant="filled"
+                      sx={{ fontSize: '0.7rem', height: 20 }}
+                    />
+                  )}
+                </Stack>
+              )}
+            </Box>
+            
+            <IconButton
+              size="small"
+              onClick={() => handleOpenDialog(channel)}
+            >
+              <EditIcon />
+            </IconButton>
+          </Stack>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  if (initialLoading) {
+    return (
+      <Box sx={{ p: 3 }}>
+        <Skeleton variant="text" width={200} height={40} />
+        <Skeleton variant="rectangular" height={56} sx={{ mt: 2, mb: 3 }} />
+        <Grid container spacing={3}>
+          {Array.from(new Array(6)).map((_, index) => (
+            <Grid key={index} size={{ xs: 12, sm: 6, md: 4 }}>
+              <Skeleton variant="rectangular" height={200} sx={{ borderRadius: 2 }} />
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <Box sx={{ p: 3 }}>
       {/* 页面头部 */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-            <div className="mb-6 lg:mb-0">
-              <h1 className="text-4xl font-bold text-gray-900 mb-4">
-                频道管理
-              </h1>
-              <p className="text-xl text-gray-600">
-                管理您的YouTube频道，统一管理内容创作
-              </p>
-            </div>
-            
-            {selectedChannels.length > 0 && (
-              <div className="flex items-center space-x-4">
-                <button
-                  onClick={handleDeleteChannels}
-                  className="flex items-center px-4 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 transition-colors"
-                >
-                  <DeleteIcon />
-                  <span className="ml-2">删除 ({selectedChannels.length})</span>
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: isMobile ? 'flex-start' : 'center', 
+        mb: 3,
+        flexDirection: isMobile ? 'column' : 'row',
+        gap: isMobile ? 2 : 0
+      }}>
+        <Typography variant={isMobile ? 'h6' : 'h5'} fontWeight="500">
+          频道管理
+        </Typography>
+        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+          {isMobile && (
+            <Button
+              variant="outlined"
+              startIcon={showFilters ? <ExpandLessIcon /> : <FilterIcon />}
+              onClick={() => setShowFilters(!showFilters)}
+              size="small"
+            >
+              筛选
+            </Button>
+          )}
+          {selectedChannels.length > 0 && (
+            <Button
+              variant="outlined"
+              color="error"
+              startIcon={<DeleteIcon />}
+              onClick={handleBatchDelete}
+              size={isMobile ? 'small' : 'medium'}
+            >
+              删除 ({selectedChannels.length})
+            </Button>
+          )}
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => handleOpenDialog()}
+            size={isMobile ? 'small' : 'medium'}
+            sx={{ 
+              color: 'white',
+              '&:hover': {
+                color: 'white'
+              }
+            }}
+          >
+            {isMobile ? '创建' : '创建频道'}
+          </Button>
+        </Box>
+      </Box>
 
-      {/* 主要内容 */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* 搜索和操作栏 */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-8">
-          <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-            <div className="relative flex-1 max-w-md">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <SearchIcon />
-              </div>
-              <input
-                type="text"
+      {/* 筛选和搜索区域 */}
+      <Collapse in={!isMobile || showFilters}>
+        <Paper sx={{ p: 2, mb: 3 }}>
+          <Grid container spacing={2} alignItems="center">
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <TextField
+                fullWidth
+                size="small"
                 placeholder="搜索频道..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="block w-full pl-10 pr-3 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                value={filters.search}
+                onChange={(e) => handleFilterChange('search', e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  ),
+                }}
               />
-            </div>
-            
-            <button
-              onClick={() => handleOpenDialog()}
-              className="flex items-center px-6 py-3 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-colors"
-            >
-              <AddIcon />
-              <span className="ml-2">创建频道</span>
-            </button>
-          </div>
-          
-          <div className="mt-4 text-sm text-gray-500 text-right">
-            共 {channels.length} 个频道
-          </div>
-        </div>
-
-        {/* 频道网格 */}
-        {channels.length === 0 ? (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-12 text-center">
-            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <ChannelIcon />
-            </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">暂无频道</h3>
-            <p className="text-gray-500 mb-6">创建您的第一个频道来开始管理内容</p>
-            <button
-              onClick={() => handleOpenDialog()}
-              className="inline-flex items-center px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
-            >
-              <AddIcon />
-              <span className="ml-2">创建频道</span>
-            </button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {channels.map((channel) => {
-              const channelCategories = getChannelCategories(channel.channel_id);
-              return (
-                <div
-                  key={channel.channel_id}
-                  className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-all duration-200 hover:-translate-y-1 cursor-pointer"
-                  onClick={() => handleOpenDialog(channel)}
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <FormControl fullWidth size="small">
+                <InputLabel>分类</InputLabel>
+                <Select
+                  value={filters.category_id}
+                  label="分类"
+                  onChange={(e) => handleFilterChange('category_id', e.target.value)}
                 >
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center space-x-3">
-                      <input
-                        type="checkbox"
-                        checked={selectedChannels.includes(channel.channel_id)}
-                        onChange={(e) => {
-                          e.stopPropagation();
-                          handleChannelSelect(channel.channel_id);
-                        }}
-                        onClick={(e) => e.stopPropagation()}
-                        className="w-4 h-4 text-orange-600 bg-gray-100 border-gray-300 rounded focus:ring-orange-500"
-                        aria-label={`选择频道 ${channel.channel_name}`}
-                      />
-                      <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white">
-                        <ChannelIcon />
-                      </div>
-                    </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleOpenDialog(channel);
-                      }}
-                      className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
-                      aria-label={`编辑频道 ${channel.channel_name}`}
+                  <MenuItem value="">全部</MenuItem>
+                  {categories.map((category) => (
+                    <MenuItem key={category.category_id} value={category.category_id.toString()}>
+                      {category.category_name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <Stack direction="row" spacing={1} alignItems="center">
+                <FormControl size="small">
+                  <InputLabel>排序</InputLabel>
+                  <Select
+                    value={sortBy}
+                    label="排序"
+                    onChange={(e) => setSortBy(e.target.value)}
+                    sx={{ minWidth: 120 }}
+                  >
+                    <MenuItem value="created_at">创建时间</MenuItem>
+                    <MenuItem value="updated_at">最后修改</MenuItem>
+                    <MenuItem value="channel_name">频道名称</MenuItem>
+                  </Select>
+                </FormControl>
+                <IconButton onClick={() => setOrder(order === 'asc' ? 'desc' : 'asc')}>
+                  <SortIcon sx={{ transform: order === 'desc' ? 'rotate(180deg)' : '' }} />
+                </IconButton>
+              </Stack>
+            </Grid>
+            {selectedChannels.length > 0 && (
+              <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <Typography variant="body2" color="text.secondary">
+                    已选择 {selectedChannels.length} 项
+                  </Typography>
+                  <Button
+                    size="small"
+                    color="error"
+                    startIcon={<DeleteIcon />}
+                    onClick={handleBatchDelete}
+                  >
+                    删除
+                  </Button>
+                </Stack>
+              </Grid>
+            )}
+          </Grid>
+        </Paper>
+      </Collapse>
+
+      {/* 频道列表 */}
+      {channels.length === 0 && !loading ? (
+        <Paper sx={{ p: 4, textAlign: 'center' }}>
+          <Typography variant="h6" color="text.secondary" gutterBottom>
+            暂无频道数据
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            您还没有创建任何频道，点击下方按钮开始创建
+          </Typography>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => handleOpenDialog()}
+            sx={{ 
+              color: 'white',
+              '&:hover': {
+                color: 'white'
+              }
+            }}
+          >
+            创建第一个频道
+          </Button>
+        </Paper>
+      ) : isMobile ? (
+        // 移动端卡片视图
+        <Box>
+          {channels.map((channel) => (
+            <ChannelCard key={channel.channel_id} channel={channel} />
+          ))}
+        </Box>
+      ) : (
+        // 桌面端表格视图
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell padding="checkbox" sx={{ width: '48px' }}>
+                  <Checkbox
+                    checked={selectedChannels.length === channels.length && channels.length > 0}
+                    indeterminate={selectedChannels.length > 0 && selectedChannels.length < channels.length}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedChannels(channels.map(c => c.channel_id));
+                      } else {
+                        setSelectedChannels([]);
+                      }
+                    }}
+                  />
+                </TableCell>
+                <TableCell sx={{ width: '40%' }}>频道名称</TableCell>
+                <TableCell sx={{ width: '15%' }}>脚本数量</TableCell>
+                <TableCell sx={{ width: '15%' }}>分类数量</TableCell>
+                <TableCell sx={{ width: '20%' }}>创建时间</TableCell>
+                <TableCell align="center" sx={{ width: '10%' }}>操作</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {channels.map((channel) => {
+                const channelCategories = getChannelCategories(channel.channel_id);
+                return (
+                  <TableRow
+                    key={channel.channel_id}
+                    hover
+                    sx={{ cursor: 'pointer' }}
+                  >
+                    <TableCell 
+                      padding="checkbox" 
+                      onClick={(e) => e.stopPropagation()} 
+                      sx={{ width: '48px' }}
                     >
-                      <EditIcon />
-                    </button>
-                  </div>
+                      <Checkbox
+                        checked={selectedChannels.includes(channel.channel_id)}
+                        onChange={() => handleRowSelect(channel.channel_id)}
+                      />
+                    </TableCell>
+                    <TableCell sx={{ width: '40%' }}>
+                      <Stack direction="row" spacing={2} alignItems="center">
+                        <Avatar sx={{ bgcolor: 'error.main', width: 32, height: 32 }}>
+                          <YouTubeIcon sx={{ fontSize: 18 }} />
+                        </Avatar>
+                        <Typography variant="subtitle2" fontWeight={500}>
+                          {channel.channel_name}
+                        </Typography>
+                      </Stack>
+                    </TableCell>
+                    <TableCell sx={{ width: '15%' }}>
+                      <Chip 
+                        label={channel.scripts_count || 0} 
+                        size="small" 
+                        variant="outlined"
+                        color="primary"
+                      />
+                    </TableCell>
+                    <TableCell sx={{ width: '15%' }}>
+                      <Chip 
+                        label={channelCategories.length} 
+                        size="small" 
+                        variant="outlined"
+                        color="secondary"
+                      />
+                    </TableCell>
+                    <TableCell sx={{ width: '20%' }}>
+                      {channel.created_at
+                        ? format(new Date(channel.created_at), 'yyyy-MM-dd HH:mm')
+                        : '-'}
+                    </TableCell>
+                    <TableCell 
+                      align="center" 
+                      onClick={(e) => e.stopPropagation()} 
+                      sx={{ width: '10%' }}
+                    >
+                      <IconButton
+                        size="small"
+                        onClick={() => handleOpenDialog(channel)}
+                      >
+                        <EditIcon />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
 
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2 truncate">
-                    {channel.channel_name}
-                  </h3>
+      {/* 分页 */}
+      {pagination.pages > 1 && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+          <Pagination
+            count={pagination.pages}
+            page={pagination.page}
+            onChange={handlePageChange}
+            color="primary"
+          />
+        </Box>
+      )}
 
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                      {channelCategories.length} 个分类
-                    </span>
-                    {channel.scripts_count !== undefined && (
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                        {channel.scripts_count} 个脚本
-                      </span>
-                    )}
-                  </div>
-
-                  {channelCategories.length > 0 && (
-                    <div className="space-y-2">
-                      <h4 className="text-sm font-medium text-gray-700">相关分类：</h4>
-                      {channelCategories.slice(0, 3).map((category) => (
-                        <div
-                          key={category.category_id}
-                          className="flex items-center space-x-2 p-2 rounded-lg bg-gray-50"
-                        >
-                          <CategoryIcon />
-                          <span className="text-sm text-gray-600 truncate">{category.category_name}</span>
-                        </div>
-                      ))}
-                      {channelCategories.length > 3 && (
-                        <p className="text-xs text-gray-500 pl-6">
-                          还有 {channelCategories.length - 3} 个分类...
-                        </p>
-                      )}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
+      {/* 移动端浮动创建按钮 */}
+      {isMobile && (
+        <Fab
+          color="primary"
+          sx={{
+            position: 'fixed',
+            bottom: 16,
+            right: 16,
+          }}
+          onClick={() => handleOpenDialog()}
+        >
+          <AddIcon />
+        </Fab>
+      )}
 
       {/* 创建/编辑对话框 */}
-      {openDialog && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-semibold text-gray-900">
+      <Dialog 
+        open={openDialog} 
+        onClose={() => setOpenDialog(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{ 
+          elevation: 0,
+          sx: { 
+            borderRadius: 3,
+            border: `1px solid ${alpha(theme.palette.divider, 0.12)}`,
+            m: 2
+          } 
+        }}
+      >
+        <DialogTitle sx={{ pb: 2, pt: 3 }}>
+          <Stack direction="row" alignItems="center" spacing={2}>
+            <Avatar sx={{ bgcolor: 'primary.main', width: 40, height: 40 }}>
+              <YouTubeIcon />
+            </Avatar>
+            <Box>
+              <Typography variant="h6" component="div" fontWeight={600}>
                 {editChannel ? '编辑频道' : '创建频道'}
-              </h3>
-              <button
-                onClick={() => setOpenDialog(false)}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                aria-label="关闭对话框"
-              >
-                <CloseIcon />
-              </button>
-            </div>
-
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                频道名称
-              </label>
-              <input
-                type="text"
-                value={channelName}
-                onChange={(e) => setChannelName(e.target.value)}
-                placeholder="请输入频道名称"
-                className="w-full px-3 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
-                autoFocus
-              />
-            </div>
-
-            <div className="flex space-x-3">
-              <button
-                onClick={() => setOpenDialog(false)}
-                className="flex-1 px-4 py-3 border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors"
-              >
-                取消
-              </button>
-              <button
-                onClick={editChannel ? handleUpdateChannel : handleCreateChannel}
-                className="flex-1 px-4 py-3 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-colors"
-              >
-                {editChannel ? '更新' : '创建'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {editChannel ? '修改频道信息' : '创建新的YouTube频道'}
+              </Typography>
+            </Box>
+          </Stack>
+        </DialogTitle>
+        
+        <DialogContent sx={{ px: 3, py: 2 }}>
+          <Box sx={{ mt: 1 }}>
+            <TextField
+              autoFocus
+              label="频道名称"
+              value={channelName}
+              onChange={(e) => setChannelName(e.target.value)}
+              fullWidth
+              variant="outlined"
+              placeholder="请输入频道名称"
+              size="medium"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <YouTubeIcon color="action" />
+                  </InputAdornment>
+                ),
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  '& fieldset': {
+                    borderColor: alpha(theme.palette.grey[300], 0.8),
+                  },
+                  '&:hover fieldset': {
+                    borderColor: theme.palette.primary.main,
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: theme.palette.primary.main,
+                  },
+                }
+              }}
+            />
+          </Box>
+        </DialogContent>
+        
+        <DialogActions sx={{ px: 3, pb: 3, pt: 1, gap: 1 }}>
+          <Button 
+            onClick={() => setOpenDialog(false)}
+            color="inherit"
+            variant="outlined"
+            sx={{ minWidth: 80 }}
+          >
+            取消
+          </Button>
+          <Button 
+            onClick={editChannel ? handleUpdateChannel : handleCreateChannel} 
+            variant="contained"
+            sx={{ 
+              minWidth: 80,
+              boxShadow: 'none',
+              '&:hover': { boxShadow: 1 }
+            }}
+          >
+            {editChannel ? '更新' : '创建'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
   );
 };
 
