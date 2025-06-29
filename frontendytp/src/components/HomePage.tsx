@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, startTransition } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import LogoComponent from './LogoComponent';
@@ -71,7 +71,9 @@ const HomePage: React.FC = () => {
   };
 
   const safeNavigate = (path: string) => {
-    navigate(path);
+    startTransition(() => {
+      navigate(path);
+    });
   };
 
   // 核心功能数据

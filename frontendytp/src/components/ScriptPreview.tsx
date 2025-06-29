@@ -217,7 +217,10 @@ const ScriptPreview: React.FC = () => {
         <Button
           startIcon={<ArrowBackIcon />}
           onClick={() => navigate('/scripts')}
-          sx={{ textTransform: 'none' }}
+          sx={{ 
+            textTransform: 'none',
+            height: '36px'
+          }}
         >
           返回列表
             </Button>
@@ -229,6 +232,7 @@ const ScriptPreview: React.FC = () => {
                 color="primary"
                 sx={{ 
                   textTransform: 'none',
+                  height: '36px',
                   color: 'white',
                   '&:hover': {
                     color: 'white'
@@ -243,6 +247,7 @@ const ScriptPreview: React.FC = () => {
           onClick={() => navigate(`/scripts/${id}/edit`)}
           sx={{ 
             textTransform: 'none',
+            height: '36px',
             color: 'white',
             '&:hover': {
               color: 'white'
@@ -447,7 +452,9 @@ const ScriptPreview: React.FC = () => {
             章节列表
           </Typography>
               <Stack spacing={4}>
-            {script.chapters.map((chapter) => (
+            {[...script.chapters]
+              .sort((a, b) => a.chapter_number - b.chapter_number)
+              .map((chapter) => (
                   <Box key={chapter.chapter_number} sx={{ mb: 4 }}>
                     <Typography 
                       variant="h6" 

@@ -401,96 +401,133 @@ const ScriptEdit: React.FC = () => {
 
   return (
     <Box sx={{ 
-      minHeight: '100vh', 
-      backgroundColor: '#fafafa'
+      p: 3,
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      minHeight: '100vh',
+      bgcolor: '#f5f5f5'
     }}>
-      {/* 顶部导航栏 */}
+      {/* 顶部操作栏 */}
       <Box sx={{ 
-        backgroundColor: 'transparent', 
-        width: '100%'
+        width: '100%',
+        maxWidth: '210mm',
+        mb: 3.5,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 2
       }}>
-        <Box sx={{ maxWidth: 900, mx: 'auto', px: 3, py: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <IconButton onClick={() => navigate('/scripts')} size="small">
-                <ArrowBackIcon />
-              </IconButton>
-              <Typography variant="h6" fontWeight="500">
-                {isCreateMode ? '新建脚本' : '编辑脚本'}
-              </Typography>
-            </Box>
-            
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              {!isCreateMode && (
-                <>
-                  {saving && (
-                    <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
-                      自动保存中...
-                    </Typography>
-                  )}
-                  {lastSaved && !hasChanges && (
-                    <Chip
-                      icon={<CheckCircleIcon />}
-                      label={`已保存 ${lastSaved.toLocaleTimeString()}`}
-                      color="success"
-                      variant="outlined"
-                      size="small"
-                      sx={{ fontSize: '0.75rem' }}
-                    />
-                  )}
-                  {hasChanges && !saving && (
-                    <Chip
-                      label="未保存"
-                      color="warning"
-                      variant="outlined"
-                      size="small"
-                      sx={{ fontSize: '0.75rem' }}
-                    />
-                  )}
-                </>
-              )}
-              {!isCreateMode && (
-                <Button
-                  variant="outlined"
-                  startIcon={<VisibilityIcon />}
-                  onClick={() => navigate(`/scripts/${scriptId}/preview`)}
-                  size="medium"
-                  sx={{ textTransform: 'none' }}
-                >
-                  预览
-                </Button>
-              )}
-              <Button
-                variant="contained"
-                onClick={handleSubmit}
-                disabled={saving || !formData.title || (formData.chapters?.some(chapter => !chapter.content))}
-                startIcon={<SaveIcon />}
-                size="medium"
-                sx={{ 
-                  textTransform: 'none',
-                  color: 'white',
-                  '&.Mui-disabled': {
-                    color: 'rgba(255, 255, 255, 0.5)'
-                  }
-                }}
-              >
-                {isCreateMode ? '创建' : '保存'}
-              </Button>
-            </Box>
-          </Box>
+        {/* 操作按钮行 */}
+        <Box sx={{ 
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          width: '100%',
+          mt: 2
+        }}>
+                     <Button
+             startIcon={<ArrowBackIcon />}
+             onClick={() => navigate('/scripts')}
+             sx={{ 
+               textTransform: 'none',
+               height: '36px'
+             }}
+           >
+             返回列表
+           </Button>
+           
+           <Stack direction="row" spacing={2} alignItems="center">
+             {!isCreateMode && (
+               <>
+                 {saving && (
+                   <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                     自动保存中...
+                   </Typography>
+                 )}
+                 {lastSaved && !hasChanges && (
+                   <Chip
+                     icon={<CheckCircleIcon />}
+                     label={`已保存 ${lastSaved.toLocaleTimeString()}`}
+                     color="success"
+                     variant="outlined"
+                     size="small"
+                     sx={{ 
+                       fontSize: '0.75rem',
+                       height: '24px'
+                     }}
+                   />
+                 )}
+                 {hasChanges && !saving && (
+                   <Chip
+                     label="未保存"
+                     color="warning"
+                     variant="outlined"
+                     size="small"
+                     sx={{ 
+                       fontSize: '0.75rem',
+                       height: '24px'
+                     }}
+                   />
+                 )}
+                 <Button
+                   variant="contained"
+                   startIcon={<VisibilityIcon />}
+                   onClick={() => navigate(`/scripts/${scriptId}/preview`)}
+                   sx={{ 
+                     textTransform: 'none',
+                     height: '36px',
+                     color: 'white',
+                     '&:hover': {
+                       color: 'white'
+                     }
+                   }}
+                 >
+                   预览
+                 </Button>
+               </>
+             )}
+             <Button
+               variant="contained"
+               onClick={handleSubmit}
+               disabled={saving || !formData.title || (formData.chapters?.some(chapter => !chapter.content))}
+               startIcon={<SaveIcon />}
+               sx={{ 
+                 textTransform: 'none',
+                 height: '36px',
+                 color: 'white',
+                 '&:hover': {
+                   color: 'white'
+                 },
+                 '&.Mui-disabled': {
+                   color: 'rgba(255, 255, 255, 0.5)'
+                 }
+               }}
+             >
+               {isCreateMode ? '创建' : '保存'}
+             </Button>
+           </Stack>
         </Box>
       </Box>
 
-                    {/* 主内容区域 */}
-       <Box sx={{ maxWidth: 900, mx: 'auto', px: 3, py: 4, pb: 6 }}>
+      {/* 主内容区域 */}
+      <Box sx={{ 
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        flex: 1,
+        position: 'relative'
+      }}>
          {/* 基本信息卡片 - 包含标题、备选标题、属性和描述 */}
          <Card sx={{ 
+           width: '100%',
+           maxWidth: '210mm',
            mb: 4, 
            border: '1px solid #e0e0e0', 
-           boxShadow: 'none',
+           boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
            '&:hover': {
              transform: 'none',
-             boxShadow: 'none'
+             boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
            }
          }}>
            <CardContent sx={{ p: 4, pl: 6 }}>
@@ -694,13 +731,15 @@ const ScriptEdit: React.FC = () => {
            </CardContent>
          </Card>
 
-                 {/* 章节区域 */}
+         {/* 章节区域 */}
          <Card sx={{ 
+           width: '100%',
+           maxWidth: '210mm',
            border: '1px solid #e0e0e0', 
-           boxShadow: 'none',
+           boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
            '&:hover': {
              transform: 'none',
-             boxShadow: 'none'
+             boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
            }
          }}>
            <CardContent sx={{ p: 2.5, pl: 6, pb: 2 }}>

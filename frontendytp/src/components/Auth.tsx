@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, startTransition } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useSnackbar } from 'notistack';
@@ -45,6 +45,25 @@ const CheckIcon = () => (
 const XIcon = () => (
   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+  </svg>
+);
+
+// 新增图标组件
+const PlayIcon = () => (
+  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h8m-9 5a9 9 0 1118 0 9 9 0 01-18 0z" />
+  </svg>
+);
+
+const BrainIcon = () => (
+  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+  </svg>
+);
+
+const UsersIcon = () => (
+  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
   </svg>
 );
 
@@ -169,7 +188,9 @@ const Auth: React.FC = () => {
         if (!isLogin) {
           // 注册成功后切换到登录模式
           setIsLogin(true);
-          navigate('/login', { replace: true });
+          startTransition(() => {
+            navigate('/login', { replace: true });
+          });
           setFormData(prev => ({ ...prev, email: '', password: '', confirmPassword: '' }));
         }
       } else {
@@ -215,7 +236,9 @@ const Auth: React.FC = () => {
   const toggleMode = () => {
     const newMode = !isLogin;
     setIsLogin(newMode);
-    navigate(newMode ? '/login' : '/register', { replace: true });
+    startTransition(() => {
+      navigate(newMode ? '/login' : '/register', { replace: true });
+    });
     setErrors({});
     setFormData({
       username: '',
@@ -225,289 +248,352 @@ const Auth: React.FC = () => {
     });
   };
 
+  const handleHomeNavigation = () => {
+    startTransition(() => {
+      navigate('/');
+    });
+  };
+
   const passwordStrength = !isLogin ? getPasswordStrength(formData.password) : null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
-      {/* 背景装饰 */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary-500/10 rounded-full blur-3xl"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl"></div>
-      </div>
-
-      <div className="relative w-full max-w-md">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <div 
-            className="inline-flex items-center cursor-pointer hover:opacity-80 transition-opacity"
-            onClick={() => navigate('/')}
-          >
-            <LogoComponent size="large" showText={true} color="#f97316" />
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex">
+      {/* 左侧品牌展示区域 */}
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary-500 to-primary-600 relative overflow-hidden">
+        {/* 背景装饰 */}
+        <div className="absolute inset-0">
+          <div className="absolute top-20 left-20 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+          <div className="absolute bottom-32 right-16 w-48 h-48 bg-white/5 rounded-full blur-3xl"></div>
+          <div className="absolute top-1/2 left-1/3 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
+        </div>
+        
+        <div className="relative z-10 flex flex-col justify-center items-center text-white p-12 w-full">
+                     {/* Logo */}
+           <div className="mb-8 cursor-pointer" onClick={handleHomeNavigation}>
+             <LogoComponent size="large" showText={true} color="white" />
+           </div>
+          
+          {/* 主标题 */}
+          <h1 className="text-4xl font-bold text-center mb-6">
+            专业的 YouTube 内容管理平台
+          </h1>
+          
+          {/* 副标题 */}
+          <p className="text-xl text-center mb-12 text-white/90 max-w-md">
+            从创意到发布，一站式管理您的 YouTube 频道内容
+          </p>
+          
+          {/* 特性列表 */}
+          <div className="space-y-6 max-w-sm">
+            <div className="flex items-center space-x-4">
+              <div className="bg-white/20 p-3 rounded-full">
+                <BrainIcon />
+              </div>
+              <div>
+                <h3 className="font-semibold">思维导图规划</h3>
+                <p className="text-sm text-white/80">可视化内容规划，激发创作灵感</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center space-x-4">
+              <div className="bg-white/20 p-3 rounded-full">
+                <PlayIcon />
+              </div>
+              <div>
+                <h3 className="font-semibold">脚本编辑器</h3>
+                <p className="text-sm text-white/80">专业的脚本编辑和管理工具</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center space-x-4">
+              <div className="bg-white/20 p-3 rounded-full">
+                <UsersIcon />
+              </div>
+              <div>
+                <h3 className="font-semibold">频道管理</h3>
+                <p className="text-sm text-white/80">多频道统一管理，提升效率</p>
+              </div>
+            </div>
+          </div>
+          
+          {/* 统计数据 */}
+          <div className="flex space-x-8 mt-12 text-center">
+            <div>
+              <div className="text-2xl font-bold">1,000+</div>
+              <div className="text-sm text-white/80">思维导图</div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold">5,000+</div>
+              <div className="text-sm text-white/80">管理脚本</div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold">500+</div>
+              <div className="text-sm text-white/80">活跃用户</div>
+            </div>
           </div>
         </div>
+      </div>
 
-        {/* 主表单卡片 */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 p-8">
-          {/* 标题区域 */}
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              {isLogin ? '欢迎回来' : '创建账号'}
-            </h1>
-            <p className="text-gray-600">
-              {isLogin 
-                ? '登录以继续使用 YouTube Planner' 
-                : '加入 YouTube Planner 开始规划你的内容'
-              }
-            </p>
-          </div>
+      {/* 右侧表单区域 */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
+        <div className="w-full max-w-sm">
+          {/* 移动端 Logo */}
+                     <div className="lg:hidden text-center mb-8">
+             <div 
+               className="inline-flex items-center cursor-pointer hover:opacity-80 transition-opacity"
+               onClick={handleHomeNavigation}
+             >
+               <LogoComponent size="large" showText={true} color="#f97316" />
+             </div>
+           </div>
 
-          {/* 模式切换 */}
-          <div className="flex bg-gray-100 rounded-2xl p-1 mb-8">
-            <button
-              type="button"
-              onClick={() => !isLogin && toggleMode()}
-              className={`flex-1 py-3 px-4 rounded-xl font-medium transition-all ${
-                isLogin 
-                  ? 'bg-white text-gray-900 shadow-sm' 
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              登录
-            </button>
-            <button
-              type="button"
-              onClick={() => isLogin && toggleMode()}
-              className={`flex-1 py-3 px-4 rounded-xl font-medium transition-all ${
-                !isLogin 
-                  ? 'bg-white text-gray-900 shadow-sm' 
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              注册
-            </button>
-          </div>
-
-          {/* 表单 */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* 用户名 */}
-            <div>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <PersonIcon />
-                </div>
-                <input
-                  type="text"
-                  name="username"
-                  placeholder="用户名"
-                  value={formData.username}
-                  onChange={handleChange}
-                  className={`w-full pl-12 pr-4 py-4 bg-gray-50 border rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all ${
-                    errors.username ? 'border-red-500' : 'border-gray-200'
-                  }`}
-                  required
-                />
-              </div>
-              {errors.username && (
-                <p className="mt-2 text-sm text-red-600 flex items-center">
-                  <XIcon />
-                  <span className="ml-1">{errors.username}</span>
-                </p>
-              )}
+          {/* 表单卡片 */}
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6">
+            {/* 标题区域 */}
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                {isLogin ? '欢迎回来' : '创建账号'}
+              </h2>
+              <p className="text-gray-600 text-sm">
+                {isLogin 
+                  ? '登录以继续使用 YouTube Planner' 
+                  : '加入 YouTube Planner 开始规划你的内容'
+                }
+              </p>
             </div>
 
-            {/* 邮箱（仅注册时显示） */}
-            {!isLogin && (
+            {/* 模式切换 */}
+            <div className="flex bg-gray-100 rounded-xl p-1 mb-6">
+              <button
+                type="button"
+                onClick={() => !isLogin && toggleMode()}
+                className={`flex-1 py-2 px-3 rounded-lg font-medium transition-all text-sm ${
+                  isLogin 
+                    ? 'bg-white text-gray-900 shadow-sm' 
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                登录
+              </button>
+              <button
+                type="button"
+                onClick={() => isLogin && toggleMode()}
+                className={`flex-1 py-2 px-3 rounded-lg font-medium transition-all text-sm ${
+                  !isLogin 
+                    ? 'bg-white text-gray-900 shadow-sm' 
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                注册
+              </button>
+            </div>
+
+            {/* 表单 */}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* 用户名 */}
               <div>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <EmailIcon />
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <PersonIcon />
                   </div>
                   <input
-                    type="email"
-                    name="email"
-                    placeholder="电子邮箱"
-                    value={formData.email}
+                    type="text"
+                    name="username"
+                    placeholder="用户名"
+                    value={formData.username}
                     onChange={handleChange}
-                    className={`w-full pl-12 pr-4 py-4 bg-gray-50 border rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all ${
-                      errors.email ? 'border-red-500' : 'border-gray-200'
+                    className={`w-full pl-10 pr-3 py-3 bg-gray-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm ${
+                      errors.username ? 'border-red-500' : 'border-gray-200'
                     }`}
                     required
                   />
                 </div>
-                {errors.email && (
-                  <p className="mt-2 text-sm text-red-600 flex items-center">
+                {errors.username && (
+                  <p className="mt-1 text-xs text-red-600 flex items-center">
                     <XIcon />
-                    <span className="ml-1">{errors.email}</span>
+                    <span className="ml-1">{errors.username}</span>
                   </p>
                 )}
               </div>
-            )}
 
-            {/* 密码 */}
-            <div>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <LockIcon />
-                </div>
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  name="password"
-                  placeholder="密码"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className={`w-full pl-12 pr-12 py-4 bg-gray-50 border rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all ${
-                    errors.password ? 'border-red-500' : 'border-gray-200'
-                  }`}
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600"
-                >
-                  {showPassword ? <EyeOffIcon /> : <EyeIcon />}
-                </button>
-              </div>
-              {errors.password && (
-                <p className="mt-2 text-sm text-red-600 flex items-center">
-                  <XIcon />
-                  <span className="ml-1">{errors.password}</span>
-                </p>
-              )}
-              
-              {/* 密码强度指示器（仅注册时显示） */}
-              {!isLogin && formData.password && passwordStrength && (
-                <div className="mt-3 space-y-2">
-                  <div className="flex items-center space-x-2">
-                    <div className="flex-1 bg-gray-200 rounded-full h-2">
-                      <div 
-                        className={`h-2 rounded-full transition-all ${
-                          passwordStrength.score < 3 ? 'bg-red-500' :
-                          passwordStrength.score < 5 ? 'bg-yellow-500' : 'bg-green-500'
-                        }`}
-                        style={{ width: `${(passwordStrength.score / 5) * 100}%` }}
-                      ></div>
+              {/* 邮箱（仅注册时显示） */}
+              {!isLogin && (
+                <div>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <EmailIcon />
                     </div>
-                    <span className={`text-xs font-medium ${
-                      passwordStrength.score < 3 ? 'text-red-500' :
-                      passwordStrength.score < 5 ? 'text-yellow-500' : 'text-green-500'
-                    }`}>
-                      {passwordStrength.score < 3 ? '弱' :
-                       passwordStrength.score < 5 ? '中' : '强'}
-                    </span>
+                    <input
+                      type="email"
+                      name="email"
+                      placeholder="电子邮箱"
+                      value={formData.email}
+                      onChange={handleChange}
+                      className={`w-full pl-10 pr-3 py-3 bg-gray-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm ${
+                        errors.email ? 'border-red-500' : 'border-gray-200'
+                      }`}
+                      required
+                    />
                   </div>
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    {Object.entries({
-                      length: '8个字符以上',
-                      lowercase: '小写字母',
-                      uppercase: '大写字母',
-                      number: '数字',
-                      special: '特殊字符'
-                    }).map(([key, label]) => (
-                      <div key={key} className="flex items-center space-x-1">
-                        {passwordStrength.checks[key as keyof typeof passwordStrength.checks] ? (
-                          <CheckIcon />
-                        ) : (
-                          <XIcon />
-                        )}
-                        <span className={
-                          passwordStrength.checks[key as keyof typeof passwordStrength.checks] 
-                            ? 'text-green-600' 
-                            : 'text-gray-400'
-                        }>
-                          {label}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
+                  {errors.email && (
+                    <p className="mt-1 text-xs text-red-600 flex items-center">
+                      <XIcon />
+                      <span className="ml-1">{errors.email}</span>
+                    </p>
+                  )}
                 </div>
               )}
-            </div>
 
-            {/* 确认密码（仅注册时显示） */}
-            {!isLogin && (
+              {/* 密码 */}
               <div>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <LockIcon />
                   </div>
                   <input
                     type={showPassword ? 'text' : 'password'}
-                    name="confirmPassword"
-                    placeholder="确认密码"
-                    value={formData.confirmPassword}
+                    name="password"
+                    placeholder="密码"
+                    value={formData.password}
                     onChange={handleChange}
-                    className={`w-full pl-12 pr-4 py-4 bg-gray-50 border rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all ${
-                      errors.confirmPassword ? 'border-red-500' : 'border-gray-200'
+                    className={`w-full pl-10 pr-10 py-3 bg-gray-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm ${
+                      errors.password ? 'border-red-500' : 'border-gray-200'
                     }`}
                     required
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                  >
+                    {showPassword ? <EyeOffIcon /> : <EyeIcon />}
+                  </button>
                 </div>
-                {errors.confirmPassword && (
-                  <p className="mt-2 text-sm text-red-600 flex items-center">
+                {errors.password && (
+                  <p className="mt-1 text-xs text-red-600 flex items-center">
                     <XIcon />
-                    <span className="ml-1">{errors.confirmPassword}</span>
+                    <span className="ml-1">{errors.password}</span>
                   </p>
                 )}
+                
+                {/* 密码强度指示器（仅注册时显示） */}
+                {!isLogin && formData.password && passwordStrength && (
+                  <div className="mt-2 space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <div className="flex-1 bg-gray-200 rounded-full h-1.5">
+                        <div 
+                          className={`h-1.5 rounded-full transition-all ${
+                            passwordStrength.score < 3 ? 'bg-red-500' :
+                            passwordStrength.score < 5 ? 'bg-yellow-500' : 'bg-green-500'
+                          }`}
+                          style={{ width: `${(passwordStrength.score / 5) * 100}%` }}
+                        ></div>
+                      </div>
+                      <span className={`text-xs font-medium ${
+                        passwordStrength.score < 3 ? 'text-red-500' :
+                        passwordStrength.score < 5 ? 'text-yellow-500' : 'text-green-500'
+                      }`}>
+                        {passwordStrength.score < 3 ? '弱' :
+                         passwordStrength.score < 5 ? '中' : '强'}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-1 text-xs">
+                      {Object.entries({
+                        length: '8个字符以上',
+                        lowercase: '小写字母',
+                        uppercase: '大写字母',
+                        number: '数字',
+                        special: '特殊字符'
+                      }).map(([key, label]) => (
+                        <div key={key} className="flex items-center space-x-1">
+                          {passwordStrength.checks[key as keyof typeof passwordStrength.checks] ? (
+                            <CheckIcon />
+                          ) : (
+                            <XIcon />
+                          )}
+                          <span className={
+                            passwordStrength.checks[key as keyof typeof passwordStrength.checks] 
+                              ? 'text-green-600' 
+                              : 'text-gray-400'
+                          }>
+                            {label}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
 
-            {/* 提交按钮 */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-primary-500 text-white py-4 rounded-2xl font-medium hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? (
-                <div className="flex items-center justify-center">
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
-                  {isLogin ? '登录中...' : '注册中...'}
+              {/* 确认密码（仅注册时显示） */}
+              {!isLogin && (
+                <div>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <LockIcon />
+                    </div>
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      name="confirmPassword"
+                      placeholder="确认密码"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      className={`w-full pl-10 pr-3 py-3 bg-gray-50 border rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all text-sm ${
+                        errors.confirmPassword ? 'border-red-500' : 'border-gray-200'
+                      }`}
+                      required
+                    />
+                  </div>
+                  {errors.confirmPassword && (
+                    <p className="mt-1 text-xs text-red-600 flex items-center">
+                      <XIcon />
+                      <span className="ml-1">{errors.confirmPassword}</span>
+                    </p>
+                  )}
                 </div>
-              ) : (
-                isLogin ? '登录' : '注册'
               )}
-            </button>
-          </form>
 
-          {/* 底部链接 */}
-          <div className="mt-8 text-center">
-            <p className="text-gray-600 text-sm">
-              {isLogin ? '还没有账号？' : '已有账号？'}
+              {/* 提交按钮 */}
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-primary-500 text-white py-3 rounded-xl font-medium hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+              >
+                {loading ? (
+                  <div className="flex items-center justify-center">
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
+                    {isLogin ? '登录中...' : '注册中...'}
+                  </div>
+                ) : (
+                  isLogin ? '登录' : '注册'
+                )}
+              </button>
+            </form>
+
+            {/* 底部链接 */}
+            <div className="mt-6 text-center">
+              <p className="text-gray-600 text-xs">
+                {isLogin ? '还没有账号？' : '已有账号？'}
+                <button
+                  type="button"
+                  onClick={toggleMode}
+                  className="ml-1 text-primary-500 hover:text-primary-600 font-medium transition-colors"
+                >
+                  {isLogin ? '立即注册' : '立即登录'}
+                </button>
+              </p>
+            </div>
+
+            {/* 返回首页 */}
+            <div className="mt-4 text-center">
               <button
                 type="button"
-                onClick={toggleMode}
-                className="ml-1 text-primary-500 hover:text-primary-600 font-medium transition-colors"
+                onClick={handleHomeNavigation}
+                className="text-gray-500 hover:text-gray-700 text-xs transition-colors"
               >
-                {isLogin ? '立即注册' : '立即登录'}
+                ← 返回首页
               </button>
-            </p>
-          </div>
-
-          {/* 返回首页 */}
-          <div className="mt-6 text-center">
-            <button
-              type="button"
-              onClick={() => navigate('/')}
-              className="text-gray-500 hover:text-gray-700 text-sm transition-colors"
-            >
-              ← 返回首页
-            </button>
-          </div>
-        </div>
-
-        {/* 底部特性展示 */}
-        <div className="mt-8 grid grid-cols-3 gap-4 text-center">
-          <div className="text-gray-600">
-            <div className="text-lg font-semibold text-gray-900">1,000+</div>
-            <div className="text-sm">思维导图</div>
-          </div>
-          <div className="text-gray-600">
-            <div className="text-lg font-semibold text-gray-900">5,000+</div>
-            <div className="text-sm">管理脚本</div>
-          </div>
-          <div className="text-gray-600">
-            <div className="text-lg font-semibold text-gray-900">500+</div>
-            <div className="text-sm">活跃用户</div>
+            </div>
           </div>
         </div>
       </div>
