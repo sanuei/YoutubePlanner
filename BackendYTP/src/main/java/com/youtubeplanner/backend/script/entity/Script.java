@@ -48,6 +48,7 @@ public class Script {
     private Long categoryId;
 
     @OneToMany(mappedBy = "script", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("chapterNumber ASC")
     private List<ScriptChapter> chapters = new ArrayList<>();
 
     @CreationTimestamp

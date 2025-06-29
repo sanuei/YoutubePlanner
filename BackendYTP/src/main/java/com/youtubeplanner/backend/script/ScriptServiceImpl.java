@@ -219,6 +219,7 @@ public class ScriptServiceImpl implements ScriptService {
 
         if (script.getChapters() != null) {
             response.setChapters(script.getChapters().stream()
+                    .sorted((a, b) -> Integer.compare(a.getChapterNumber(), b.getChapterNumber()))
                     .map(chapter -> new ScriptResponse.ChapterResponse()
                             .setChapterId(chapter.getChapterId())
                             .setChapterNumber(chapter.getChapterNumber())

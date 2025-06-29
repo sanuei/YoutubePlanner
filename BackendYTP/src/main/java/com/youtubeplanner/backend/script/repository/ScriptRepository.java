@@ -4,9 +4,11 @@ import com.youtubeplanner.backend.script.entity.Script;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 
@@ -14,6 +16,14 @@ import java.time.LocalDate;
 public interface ScriptRepository extends JpaRepository<Script, Long> {
     boolean existsByUserIdAndChannelId(Long userId, Long channelId);
     boolean existsByUserIdAndCategoryId(Long userId, Long categoryId);
+    
+    // 按用户ID统计脚本数量
+    long countByUserId(Long userId);
+    
+    // 按用户ID删除脚本（级联删除章节）
+    @Modifying
+    @Transactional
+    void deleteByUserId(Long userId);
 
     @Query(value = "SELECT s FROM Script s " +
            "WHERE s.userId = :userId " +

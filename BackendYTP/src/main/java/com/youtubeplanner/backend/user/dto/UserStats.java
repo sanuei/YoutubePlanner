@@ -15,13 +15,19 @@
 
 package com.youtubeplanner.backend.user.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.Builder;
 
 @Data
 @Builder
 public class UserStats {
+    @JsonProperty("total_scripts")
     private Integer totalScripts;
+    
+    @JsonProperty("total_channels")
     private Integer totalChannels;
+    
+    @JsonProperty("total_categories")
     private Integer totalCategories;
 } 

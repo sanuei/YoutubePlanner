@@ -24,6 +24,9 @@ import com.youtubeplanner.backend.user.dto.ApiConfigResponse;
 import com.youtubeplanner.backend.user.entity.User;
 import com.youtubeplanner.backend.user.repository.UserRepository;
 import com.youtubeplanner.backend.user.service.UserService;
+import com.youtubeplanner.backend.script.repository.ScriptRepository;
+import com.youtubeplanner.backend.channel.ChannelRepository;
+import com.youtubeplanner.backend.category.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -34,14 +37,17 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ScriptRepository scriptRepository;
+    private final ChannelRepository channelRepository;
+    private final CategoryRepository categoryRepository;
 
     @Override
     public UserDetailResponse getCurrentUserInfo(User user) {
-        // TODO: 实现获取用户统计信息的逻辑
+        // 实现获取用户统计信息的逻辑
         UserStats stats = UserStats.builder()
-                .totalScripts(0)  // 需要从数据库获取
-                .totalChannels(0) // 需要从数据库获取
-                .totalCategories(0) // 需要从数据库获取
+                .totalScripts((int) scriptRepository.countByUserId(user.getUserId()))
+                .totalChannels((int) channelRepository.countByUserId(user.getUserId()))
+                .totalCategories((int) categoryRepository.countByUserId(user.getUserId()))
                 .build();
 
         return UserDetailResponse.builder()
