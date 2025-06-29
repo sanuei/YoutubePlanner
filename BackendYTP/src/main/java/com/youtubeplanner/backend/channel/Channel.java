@@ -32,8 +32,8 @@ import java.time.Instant;
 @Table(name = "channels", uniqueConstraints = {
     @UniqueConstraint(columnNames = {"user_id", "channel_name"}, name = "uq_user_channel_name")
 })
-@SQLDelete(sql = "UPDATE channels SET deleted = true WHERE channel_id = ?") // 软删除SQL
-@Where(clause = "deleted = false") // 查询时自动过滤已删除的记录
+@SQLDelete(sql = "UPDATE channels SET deleted = true WHERE channel_id = ?")
+@Where(clause = "deleted = false")
 @Data
 public class Channel {
     // 频道ID，主键，自增
@@ -64,4 +64,10 @@ public class Channel {
     // 软删除标记
     @Column(name = "deleted", nullable = false)
     private boolean deleted = false;
+
+    @PreRemove
+    private void preRemove() {
+        // 在实体被删除前将 deleted 设置为 true
+        this.deleted = true;
+    }
 } 

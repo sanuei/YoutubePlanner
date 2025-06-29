@@ -9,6 +9,10 @@ import com.youtubeplanner.backend.user.entity.User;
 import com.youtubeplanner.backend.user.entity.Role;
 import com.youtubeplanner.backend.user.repository.UserRepository;
 import com.youtubeplanner.backend.user.service.AdminUserService;
+import com.youtubeplanner.backend.script.repository.ScriptRepository;
+import com.youtubeplanner.backend.channel.ChannelRepository;
+import com.youtubeplanner.backend.category.repository.CategoryRepository;
+import com.youtubeplanner.backend.mindmap.repository.MindMapRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
@@ -20,6 +24,10 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class AdminUserServiceImpl implements AdminUserService {
     private final UserRepository userRepository;
+    private final ScriptRepository scriptRepository;
+    private final ChannelRepository channelRepository;
+    private final CategoryRepository categoryRepository;
+    private final MindMapRepository mindMapRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -134,7 +142,43 @@ public class AdminUserServiceImpl implements AdminUserService {
                 }
             }
 
-            userRepository.delete(user);
+            log.info("开始删除用户 {} (ID: {}) 及其所有相关数据", user.getUsername(), userId);
+
+            // 按照外键依赖关系的顺序删除数据
+            // 1. 删除脚本（会级联删除脚本章节）
+            long scriptCount = scriptRepository.countByUserId(userId);
+            if (scriptCount > 0) {
+                log.info("删除用户 {} 的 {} 个脚本", user.getUsername(), scriptCount);
+                scriptRepository.deleteByUserId(userId);
+            }
+
+            // 2. 删除思维导图
+            long mindMapCount = mindMapRepository.countByUserIdAndNotDeleted(userId);
+            if (mindMapCount > 0) {
+                log.info("删除用户 {} 的 {} 个思维导图", user.getUsername(), mindMapCount);
+                mindMapRepository.deleteByUserId(userId);
+            }
+
+            // 3. 删除频道（使用原生SQL直接删除，绕过Hibernate）
+            long channelCount = channelRepository.countByUserId(userId);
+            if (channelCount > 0) {
+                log.info("删除用户 {} 的 {} 个频道", user.getUsername(), channelCount);
+                channelRepository.deleteChannelsByUserIdNative(userId);
+            }
+
+            // 4. 删除分类
+            long categoryCount = categoryRepository.countByUserId(userId);
+            if (categoryCount > 0) {
+                log.info("删除用户 {} 的 {} 个分类", user.getUsername(), categoryCount);
+                categoryRepository.deleteByUserId(userId);
+            }
+
+            // 5. 最后删除用户（使用原生SQL直接删除，绕过Hibernate）
+            userRepository.deleteUserByIdNative(userId);
+            
+            log.info("成功删除用户 {} 及其所有相关数据：脚本{}个，思维导图{}个，频道{}个，分类{}个", 
+                    user.getUsername(), scriptCount, mindMapCount, channelCount, categoryCount);
+            
             return ApiResponse.success("用户删除成功", null);
         } catch (Exception e) {
             log.error("删除用户失败，用户ID: {}", userId, e);
@@ -177,11 +221,15 @@ public class AdminUserServiceImpl implements AdminUserService {
     }
 
     private AdminUserListResponse convertToAdminUserResponse(User user) {
-        // TODO: 实现获取用户统计信息的逻辑
+        // 实现获取用户统计信息的逻辑
+        int scriptCount = (int) scriptRepository.countByUserId(user.getUserId());
+        int channelCount = (int) channelRepository.countByUserId(user.getUserId());
+        int categoryCount = (int) categoryRepository.countByUserId(user.getUserId());
+        
         UserStats stats = UserStats.builder()
-                .totalScripts(0)  // 需要从数据库获取
-                .totalChannels(0) // 需要从数据库获取
-                .totalCategories(0) // 需要从数据库获取
+                .totalScripts(scriptCount)
+                .totalChannels(channelCount)
+                .totalCategories(categoryCount)
                 .build();
 
         // 处理role为null的情况
