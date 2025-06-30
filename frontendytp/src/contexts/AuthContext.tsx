@@ -70,7 +70,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // 获取当前路径
       const currentPath = window.location.pathname;
-      const isPublicRoute = currentPath === '/' || currentPath === '/login' || currentPath === '/register';
+      const isPublicRoute = currentPath === '/' || currentPath === '/login' || currentPath === '/register' || currentPath === '/changelog';
       
       if (token) {
         try {

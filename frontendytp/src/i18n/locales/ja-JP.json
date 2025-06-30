@@ -1,0 +1,153 @@
+{
+  "common": {
+    "confirm": "確認",
+    "cancel": "キャンセル",
+    "save": "保存",
+    "delete": "削除",
+    "edit": "編集",
+    "add": "追加",
+    "search": "検索",
+    "loading": "読み込み中...",
+    "error": "エラー",
+    "success": "成功",
+    "warning": "警告",
+    "info": "情報"
+  },
+  "navigation": {
+    "home": "ホーム",
+    "dashboard": "ダッシュボード",
+    "scripts": "スクリプト管理",
+    "channels": "チャンネル管理",
+    "categories": "カテゴリ管理",
+    "mindmap": "マインドマップ",
+    "users": "ユーザー管理",
+    "admin": "管理者",
+    "logout": "ログアウト",
+    "profile": "プロフィール"
+  },
+  "homepage": {
+    "title": "あらゆるクリエイティブタスクに対応するスマートAIアシスタント",
+    "subtitle": "AI文章生成、マインドマップ編集、スクリプト管理などの機能を統合し、YouTubeクリエイターの効率的な創作をサポートし、時間を節約します。",
+    "getStarted": "今すぐ始める",
+    "watchDemo": "機能デモ",
+    "enterApp": "アプリに入る",
+    "freeTrial": "無料トライアル",
+    "productIntro": "製品紹介",
+    "features": "機能特色",
+    "openSource": "オープンソース",
+    "changelog": "更新履歴",
+    "userRating": "ユーザー評価",
+    "trustedBy": "多くのクリエイターに信頼されています",
+    "platformSupport": "全プラットフォーム対応",
+    "whatIs": "YouTube Plannerとは？",
+    "description": "YouTube Plannerは、AI駆動のスマートコンテンツ作成管理システムです。スマート🧠自動化、データ駆動の洞察、シームレスな作成ワークフローを通じて、マーケティング戦略を向上させます🤝。",
+    "coreFeatures": {
+      "aiCreation": {
+        "title": "AIスマート創作",
+        "description": "OpenAI、Claudeなど複数のAIサービスを統合、3つの生成モードをサポート、ストリーミングリアルタイム出力",
+        "features": [
+          "複数AIサービス対応",
+          "3つの生成モード",
+          "ストリーミングリアルタイム出力",
+          "スマートコンテンツ解析"
+        ]
+      },
+      "mindMap": {
+        "title": "マインドマップ編集",
+        "description": "React Flowプロフェッショナルグラフィック編集エンジン、ドラッグ&ドロップノード編集、無限階層サポート",
+        "features": [
+          "React Flowエンジン",
+          "ドラッグ&ドロップ編集",
+          "自動レイアウトアルゴリズム",
+          "履歴バージョン管理"
+        ]
+      },
+      "teleprompter": {
+        "title": "スマートプロンプター",
+        "description": "プロフェッショナル動画録画プロンプター、自動スクロール、フォントサイズ調整可能、録画効率向上",
+        "features": [
+          "自動スクロールプロンプター",
+          "フォントサイズ調整",
+          "フルスクリーン録画モード",
+          "ワンクリック開始・停止"
+        ]
+      },
+      "scriptManagement": {
+        "title": "プロフェッショナルスクリプト管理",
+        "description": "Notionスタイルエディターインターフェース、マルチチャプター管理自動番号付け、10秒デバウンス自動保存",
+        "features": [
+          "Notionスタイルインターフェース",
+          "マルチチャプター管理",
+          "ステータス追跡",
+          "高度なフィルタリング検索"
+        ]
+      }
+    },
+    "stats": {
+      "mindMaps": "マインドマップ",
+      "scripts": "管理スクリプト",
+      "users": "アクティブユーザー",
+      "uptime": "稼働時間"
+    },
+    "readyToStart": "始める準備はできましたか？",
+    "readyDescription": "AI駆動のスマート創作を体験し、YouTubeコンテンツ作成をより簡単で効率的にしましょう",
+    "freeRegister": "無料登録",
+    "loginNow": "今すぐログイン"
+  },
+  "auth": {
+    "login": "ログイン",
+    "register": "登録",
+    "username": "ユーザー名",
+    "password": "パスワード",
+    "email": "メールアドレス",
+    "confirmPassword": "パスワード確認",
+    "rememberMe": "ログイン状態を保持",
+    "forgotPassword": "パスワードを忘れましたか？",
+    "noAccount": "アカウントをお持ちでないですか？",
+    "hasAccount": "すでにアカウントをお持ちですか？",
+    "loginSuccess": "ログイン成功",
+    "registerSuccess": "登録成功",
+    "loginFailed": "ログイン失敗",
+    "registerFailed": "登録失敗"
+  },
+  "script": {
+    "title": "スクリプトタイトル",
+    "content": "スクリプト内容",
+    "status": "ステータス",
+    "difficulty": "難易度",
+    "category": "カテゴリ",
+    "createTime": "作成時間",
+    "updateTime": "更新時間",
+    "draft": "下書き",
+    "writing": "執筆中",
+    "review": "レビュー",
+    "completed": "完了",
+    "createScript": "スクリプト作成",
+    "editScript": "スクリプト編集",
+    "deleteScript": "スクリプト削除",
+    "previewScript": "スクリプトプレビュー"
+  },
+  "mindmap": {
+    "title": "マインドマップタイトル",
+    "createMindMap": "マインドマップ作成",
+    "editMindMap": "マインドマップ編集",
+    "deleteMindMap": "マインドマップ削除",
+    "addNode": "ノード追加",
+    "deleteNode": "ノード削除",
+    "autoLayout": "自動レイアウト",
+    "horizontalLayout": "水平レイアウト",
+    "verticalLayout": "垂直レイアウト",
+    "saveSuccess": "保存成功",
+    "generateScript": "スクリプト生成"
+  },
+  "footer": {
+    "description": "YouTubeスマートコンテンツ作成管理システム、AI文章生成、マインドマップ編集、管理者システムなどの先進機能を統合。",
+    "product": "製品",
+    "developer": "開発者",
+    "sourceCode": "ソースコード",
+    "deployGuide": "デプロイガイド",
+    "feedback": "問題報告",
+    "contribute": "コード貢献",
+    "copyright": "© 2025 YouTube Planner. sonic_yannが全ての権利を保有します。"
+  }
+} 

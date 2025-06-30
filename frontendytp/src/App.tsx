@@ -11,8 +11,12 @@ import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 
+// 导入i18n配置
+import './i18n';
+
 // 懒加载页面组件
 const HomePage = lazy(() => import('./components/HomePage'));
+const Changelog = lazy(() => import('./components/Changelog'));
 const ChannelList = lazy(() => import('./components/ChannelList'));
 const UserManagement = lazy(() => import('./components/UserManagement'));
 const AdminUserManagement = lazy(() => import('./components/AdminUserManagement'));
@@ -61,41 +65,97 @@ const AppContent: React.FC = () => {
   return (
     <Suspense fallback={<LazyLoadingFallback />}>
       <Routes>
-        {/* 首页 - 不需要认证 */}
+        {/* 公开页面 - 精确匹配，优先级最高 */}
         <Route path="/" element={<HomePage />} />
+        <Route path="/changelog" element={<Changelog />} />
         <Route path="/login" element={<Auth />} />
         <Route path="/register" element={<Auth />} />
 
-        {/* 受保护页面统一用 layout 包裹 */}
+        {/* 受保护页面 - 需要认证 */}
         <Route
+          path="/dashboard"
           element={
             <ProtectedRoute>
               <Layout />
             </ProtectedRoute>
           }
         >
-          <Route path="dashboard" element={<Navigate to="/channels" replace />} />
-          <Route path="users" element={<UserManagement />} />
-          <Route path="channels" element={<ChannelList />} />
-          <Route path="categories" element={<CategoryManagement />} />
-          <Route path="scripts" element={<ScriptManagement />} />
-          <Route path="scripts/create" element={<ScriptEdit />} />
-          <Route path="scripts/:scriptId/edit" element={<ScriptEdit />} />
-          <Route path="scripts/:id/preview" element={<ScriptPreview />} />
-          <Route path="mindmap" element={<MindMapEditor />} />
-          <Route path="mindmap/create" element={<MindMapEditor />} />
-          <Route path="mindmap/edit/:mindMapId" element={<MindMapEditor />} />
-          <Route path="mindmap/history" element={<MindMapHistory />} />
-          
-          {/* 管理员专用路由 */}
-          <Route 
-            path="admin/users" 
-            element={
-              <AdminRoute>
-                <AdminUserManagement />
-              </AdminRoute>
-            } 
-          />
+          <Route index element={<Navigate to="/channels" replace />} />
+        </Route>
+
+        <Route
+          path="/users"
+          element={
+            <ProtectedRoute>
+              <Layout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<UserManagement />} />
+        </Route>
+
+        <Route
+          path="/channels"
+          element={
+            <ProtectedRoute>
+              <Layout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<ChannelList />} />
+        </Route>
+
+        <Route
+          path="/categories"
+          element={
+            <ProtectedRoute>
+              <Layout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<CategoryManagement />} />
+        </Route>
+
+        <Route
+          path="/scripts/*"
+          element={
+            <ProtectedRoute>
+              <Layout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<ScriptManagement />} />
+          <Route path="create" element={<ScriptEdit />} />
+          <Route path=":scriptId/edit" element={<ScriptEdit />} />
+          <Route path=":id/preview" element={<ScriptPreview />} />
+        </Route>
+
+        <Route
+          path="/mindmap/*"
+          element={
+            <ProtectedRoute>
+              <Layout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<MindMapEditor />} />
+          <Route path="create" element={<MindMapEditor />} />
+          <Route path="edit/:mindMapId" element={<MindMapEditor />} />
+          <Route path="history" element={<MindMapHistory />} />
+        </Route>
+
+        {/* 管理员专用路由 */}
+        <Route
+          path="/admin/users"
+          element={
+            <AdminRoute>
+              <ProtectedRoute>
+                <Layout />
+              </ProtectedRoute>
+            </AdminRoute>
+          }
+        >
+          <Route index element={<AdminUserManagement />} />
         </Route>
       </Routes>
     </Suspense>

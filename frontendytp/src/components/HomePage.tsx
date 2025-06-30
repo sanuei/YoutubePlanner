@@ -1,7 +1,9 @@
 import React, { useState, useEffect, startTransition } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
 import LogoComponent from './LogoComponent';
+import LanguageSwitcher from './LanguageSwitcher';
 
 // 图标组件
 const BrainIcon = () => (
@@ -55,6 +57,7 @@ const TeleprompterIcon = () => (
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -71,40 +74,46 @@ const HomePage: React.FC = () => {
   };
 
   const safeNavigate = (path: string) => {
+    console.log('Navigating to:', path);
     startTransition(() => {
       navigate(path);
     });
+  };
+
+  const navigateToChangelog = () => {
+    console.log('Attempting to navigate to /changelog');
+    safeNavigate('/changelog');
   };
 
   // 核心功能数据
   const coreFeatures = [
     {
       icon: <AIIcon />,
-      title: 'AI智能创作',
-      description: '集成OpenAI、Claude等多种AI服务，支持三种生成模式，流式实时输出',
+      title: t('homepage.coreFeatures.aiCreation.title'),
+      description: t('homepage.coreFeatures.aiCreation.description'),
       color: 'bg-blue-500',
-      features: ['多AI服务支持', '三种生成模式', '流式实时输出', '智能内容解析']
+      features: t('homepage.coreFeatures.aiCreation.features', { returnObjects: true }) as string[]
     },
     {
       icon: <BrainIcon />,
-      title: '思维导图编辑',
-      description: 'React Flow专业图形编辑引擎，拖拽式节点编辑，支持无限层级',
+      title: t('homepage.coreFeatures.mindMap.title'),
+      description: t('homepage.coreFeatures.mindMap.description'),
       color: 'bg-purple-500',
-      features: ['React Flow引擎', '拖拽式编辑', '自动布局算法', '历史版本管理']
+      features: t('homepage.coreFeatures.mindMap.features', { returnObjects: true }) as string[]
     },
     {
       icon: <TeleprompterIcon />,
-      title: '智能提词器',
-      description: '专业视频录制提词器，自动滚动，字体大小可调，提升录制效率',
+      title: t('homepage.coreFeatures.teleprompter.title'),
+      description: t('homepage.coreFeatures.teleprompter.description'),
       color: 'bg-orange-500',
-      features: ['自动滚动提词器', '字体大小调节', '全屏录制模式', '一键开始暂停']
+      features: t('homepage.coreFeatures.teleprompter.features', { returnObjects: true }) as string[]
     },
     {
       icon: <EditIcon />,
-      title: '专业脚本管理',
-      description: 'Notion风格编辑器界面，多章节管理自动编号，10秒防抖自动保存',
+      title: t('homepage.coreFeatures.scriptManagement.title'),
+      description: t('homepage.coreFeatures.scriptManagement.description'),
       color: 'bg-green-500',
-      features: ['Notion风格界面', '多章节管理', '状态跟踪', '高级筛选搜索']
+      features: t('homepage.coreFeatures.scriptManagement.features', { returnObjects: true }) as string[]
     },
    
   ];
@@ -194,10 +203,10 @@ const HomePage: React.FC = () => {
 
   // 统计数据
   const stats = [
-    { number: '1,000+', label: '思维导图' },
-    { number: '5,000+', label: '管理脚本' },
-    { number: '500+', label: '活跃用户' },
-    { number: '99.9%', label: '正常运行时间' },
+    { number: '1,000+', label: t('homepage.stats.mindMaps') },
+    { number: '5,000+', label: t('homepage.stats.scripts') },
+    { number: '500+', label: t('homepage.stats.users') },
+    { number: '99.9%', label: t('homepage.stats.uptime') },
   ];
 
   // 用户评价
@@ -242,13 +251,13 @@ const HomePage: React.FC = () => {
                 onClick={() => scrollToSection('about')}
                 className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
               >
-                产品介绍
+                {t('homepage.productIntro')}
               </button>
               <button
                 onClick={() => scrollToSection('features')}
                 className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
               >
-                功能特色
+                {t('homepage.features')}
               </button>
               <a
                 href="https://github.com/sanuei/YoutubePlanner"
@@ -256,28 +265,32 @@ const HomePage: React.FC = () => {
                 rel="noopener noreferrer"
                 className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
               >
-                开源项目
+                {t('homepage.openSource')}
               </a>
-              <button className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
-                帮助文档
+              <button
+                onClick={navigateToChangelog}
+                className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
+              >
+                {t('homepage.changelog')}
               </button>
             </div>
 
             {/* 右侧按钮 */}
             <div className="hidden md:flex items-center space-x-4">
+              <LanguageSwitcher />
               {user ? (
                 <button
                   onClick={() => safeNavigate('/scripts')}
                   className="bg-primary-500 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-primary-600 transition-colors"
                 >
-                  进入应用 →
+                  {t('homepage.enterApp')} →
                 </button>
               ) : (
                 <button
                   onClick={() => safeNavigate('/register')}
                   className="bg-primary-500 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-primary-600 transition-colors"
                 >
-                  免费试用 →
+                  {t('homepage.freeTrial')} →
                 </button>
               )}
             </div>
@@ -300,13 +313,13 @@ const HomePage: React.FC = () => {
                 onClick={() => scrollToSection('about')}
                 className="block w-full text-left text-gray-600 hover:text-gray-900 font-medium"
               >
-                产品介绍
+                {t('homepage.productIntro')}
               </button>
               <button
                 onClick={() => scrollToSection('features')}
                 className="block w-full text-left text-gray-600 hover:text-gray-900 font-medium"
               >
-                功能特色
+                {t('homepage.features')}
               </button>
               <a
                 href="https://github.com/sanuei/YoutubePlanner"
@@ -314,23 +327,30 @@ const HomePage: React.FC = () => {
                 rel="noopener noreferrer"
                 className="block text-gray-600 hover:text-gray-900 font-medium"
               >
-                开源项目
+                {t('homepage.openSource')}
               </a>
-              <div className="pt-4 border-t border-gray-100">
+              <button
+                onClick={navigateToChangelog}
+                className="block w-full text-left text-gray-600 hover:text-gray-900 font-medium"
+              >
+                {t('homepage.changelog')}
+              </button>
+              <div className="pt-4 border-t border-gray-100 space-y-3">
+                <LanguageSwitcher />
                 {user ? (
                   <button
                     onClick={() => safeNavigate('/scripts')}
                     className="w-full bg-primary-500 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-primary-600 transition-colors"
                   >
-                    进入应用 →
+                    {t('homepage.enterApp')} →
                   </button>
                 ) : (
-                                      <button
-                      onClick={() => safeNavigate('/register')}
-                      className="w-full bg-primary-500 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-primary-600 transition-colors"
-                    >
-                      免费试用 →
-                    </button>
+                  <button
+                    onClick={() => safeNavigate('/register')}
+                    className="w-full bg-primary-500 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-primary-600 transition-colors"
+                  >
+                    {t('homepage.freeTrial')} →
+                  </button>
                 )}
               </div>
             </div>
@@ -346,7 +366,7 @@ const HomePage: React.FC = () => {
             {/* 评分展示 */}
             <div className="flex items-center justify-center mb-8">
               <div className="flex items-center space-x-2 bg-gray-50 px-4 py-2 rounded-full">
-                <span className="text-sm text-gray-600">用户评分</span>
+                <span className="text-sm text-gray-600">{t('homepage.userRating')}</span>
                 <span className="font-semibold text-gray-900">GitHub</span>
                 <div className="flex items-center space-x-1">
                   {[1, 2, 3, 4, 5].map((star) => (
@@ -362,15 +382,10 @@ const HomePage: React.FC = () => {
               <div className={`space-y-8 ${isVisible ? 'animate-slide-in-left' : 'opacity-0'}`}>
                 <div className="space-y-6">
                   <h1 className="text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
-                    您的智能AI
-                    <br />
-                    助手，适用于
-                    <br />
-                    <span className="text-primary-500">每个创作任务</span>
+                    {t('homepage.title')}
                   </h1>
                   <p className="text-xl text-gray-600 leading-relaxed max-w-lg">
-                    集成AI文案生成、思维导图编辑、脚本管理等功能，
-                    帮助YouTube创作者高效创作，节省时间。
+                    {t('homepage.subtitle')}
                   </p>
                 </div>
 
@@ -380,7 +395,7 @@ const HomePage: React.FC = () => {
                       onClick={() => safeNavigate('/scripts')}
                       className="bg-gray-900 text-white px-8 py-4 rounded-lg font-medium hover:bg-gray-800 transition-all"
                     >
-                      进入应用
+                      {t('homepage.enterApp')}
                     </button>
                   ) : (
                     <>
@@ -388,13 +403,13 @@ const HomePage: React.FC = () => {
                         onClick={() => safeNavigate('/register')}
                         className="bg-gray-900 text-white px-8 py-4 rounded-lg font-medium hover:bg-gray-800 transition-all"
                       >
-                        立即开始
+                        {t('homepage.getStarted')}
                       </button>
                       <button
-                        onClick={() => window.open('https://youtubeplanner.duckdns.org/', '_blank')}
+                        onClick={() => window.open('https://youtu.be/lBBRBwim64o?si=o2PrudATqwxpgONF', '_blank')}
                         className="border border-gray-300 text-gray-700 px-8 py-4 rounded-lg font-medium hover:border-gray-400 transition-all"
                       >
-                        在线演示
+                        {t('homepage.watchDemo')}
                       </button>
                     </>
                   )}
@@ -402,8 +417,8 @@ const HomePage: React.FC = () => {
 
                 {/* 数据统计展示 */}
                 <div className="pt-8">
-                  <p className="text-sm text-gray-500 mb-4">已被众多创作者信赖</p>
-                  <p className="text-xs text-gray-400 mb-6">全平台覆盖支持</p>
+                  <p className="text-sm text-gray-500 mb-4">{t('homepage.trustedBy')}</p>
+                  <p className="text-xs text-gray-400 mb-6">{t('homepage.platformSupport')}</p>
                   <div className="grid grid-cols-4 gap-6 items-center opacity-60">
                     {stats.map((stat, index) => (
                       <div key={index} className="text-center">
@@ -430,16 +445,14 @@ const HomePage: React.FC = () => {
         </section>
 
         {/* 功能介绍区 */}
-        <section className="py-20 bg-gray-50">
+        <section id="features" className="py-20 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
               <h2 className="text-sm font-semibold text-primary-500 uppercase tracking-wide mb-4">
-                什么是 YouTube Planner？
+                {t('homepage.whatIs')}
               </h2>
               <h3 className="text-4xl font-bold text-gray-900 mb-6">
-                YouTube Planner 是一个AI驱动的智能内容创作管理系统，
-                通过智能 🧠 自动化、数据驱动洞察和无缝的
-                创作流程，提升营销策略 🤝。
+                {t('homepage.description')}
               </h3>
             </div>
 
@@ -1016,21 +1029,19 @@ const HomePage: React.FC = () => {
                   功能特色
                 </button>
                 <a
-                  href="https://youtubeplanner.duckdns.org/"
+                  href="https://youtu.be/lBBRBwim64o?si=o2PrudATqwxpgONF"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="block text-gray-400 hover:text-white transition-colors"
                 >
-                  在线演示
+                  功能演示
                 </a>
-                <a
-                  href="https://github.com/sanuei/YoutubePlanner/releases"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block text-gray-400 hover:text-white transition-colors"
+                <button
+                  onClick={navigateToChangelog}
+                  className="block w-full text-left text-gray-400 hover:text-white transition-colors"
                 >
                   更新日志
-                </a>
+                </button>
                 <a
                   href="https://github.com/sanuei/YoutubePlanner/blob/main/docs"
                   target="_blank"

@@ -280,7 +280,7 @@ const Auth: React.FC = () => {
           
           {/* 副标题 */}
           <p className="text-xl text-center mb-12 text-white/90 max-w-md">
-            从创意到发布，一站式管理您的 YouTube 频道内容
+            从创意到发布，一站式管理您的YouTube频道内容
           </p>
           
           {/* 特性列表 */}
